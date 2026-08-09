@@ -15,12 +15,12 @@ export default function SearchBar({ large = false, onSearch }: Props) {
   const [suggestions, setSuggestions] = useState<{ name: string }[]>([]);
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const base = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     if (query.length < 2) { setSuggestions([]); return; }
-    clearTimeout(timer.current);
+    clearTimeout(timer.current ?? undefined);
     timer.current = setTimeout(async () => {
       try {
         const r = await fetch(`${base}/api/ingredients/autocomplete?query=${encodeURIComponent(query)}`);
