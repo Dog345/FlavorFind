@@ -27,7 +27,7 @@ export default function SearchBar({ large = false, onSearch }: Props) {
         const d = await r.json();
         setSuggestions(Array.isArray(d) ? d.slice(0, 6) : []);
         setOpen(true);
-      } catch { setSuggestions([]); }
+      } catch (_e) { setSuggestions([]); }
     }, 300);
   }, [query, base]);
 
