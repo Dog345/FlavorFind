@@ -47,27 +47,15 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h4 className="font-semibold text-white text-sm mb-4 uppercase tracking-wider">Contact</h4>
-            <a href="https://api.whatsapp.com/send/?phone=254796605409"
-              className="flex items-center gap-3 text-gray-500 text-sm hover:text-green-400 transition-colors mb-3">
-              <i className="fab fa-whatsapp text-green-500"></i> 0796605409
+            <a href="https://api.whatsapp.com/send/?phone=254704291657"
+              className="flex items-center gap-3 text-gray-500 text-sm hover:text-green-400 transition-colors">
+              <i className="fab fa-whatsapp text-green-500"></i> 0704291657
             </a>
-            <div className="flex gap-3 mt-4">
-              {[
-                { icon: 'fa-github',    href: '#' },
-                { icon: 'fa-twitter',   href: '#' },
-                { icon: 'fa-instagram', href: '#' },
-              ].map(s => (
-                <a key={s.icon} href={s.href}
-                  className="w-9 h-9 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg flex items-center justify-center text-gray-500 hover:text-orange-500 hover:border-orange-500/50 transition-all">
-                  <i className={`fab ${s.icon} text-sm`}></i>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
 
         <div className="border-t border-[#1e1e1e] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-600 text-xs">&copy; 2024 FlavorFind. All Rights Reserved.</p>
+          <p className="text-gray-600 text-xs">&copy; {new Date().getFullYear()} FlavorFind. All Rights Reserved.</p>
           <p className="text-gray-700 text-xs">Discover · Cook · Enjoy</p>
         </div>
       </div>
