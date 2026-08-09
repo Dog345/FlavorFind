@@ -6,6 +6,7 @@ on:
     paths:
       - 'laravel-backend/**'
       - 'nextjs-frontend/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
