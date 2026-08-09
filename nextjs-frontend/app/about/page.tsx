@@ -1,6 +1,29 @@
 import Link from 'next/link';
 
-export default function AboutPage() {
+async function getHealth() {
+  try {
+    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/health`, { next: { revalidate: 300 } });
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+async function getCategories() {
+  try {
+    const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`, { next: { revalidate: 86400 } });
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+export default async function AboutPage() {
+  const [health, categories] = await Promise.all([getHealth(), getCategories()]);
+
+  const stats = [
+    { icon: 'fa-search',  value: health ? `${health.usage.capacity.toLocaleString()}+` : '—', label: 'Searches/Day' },
+    { icon: 'fa-globe',   value: categories ? `${categories.cuisines?.length ?? '—'}+`  : '—', label: 'Cuisines' },
+    { icon: 'fa-key',     value: health ? `${health.keys.active}/${health.keys.total}`  : '—', label: 'Keys Active' },
+    { icon: 'fa-bolt',    value: health ? `${health.usage.utilization}`                 : '—', label: 'Usage Today' },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
       {/* Hero */}
@@ -36,16 +59,11 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* Stats */}
+      {/* Live stats from API */}
       <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-3xl p-8 md:p-12 mb-16">
         <h2 className="section-title text-center mb-10 mx-auto" style={{ display: 'block' }}>By the Numbers</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: '1,050+', label: 'Searches/Day',   icon: 'fa-search' },
-            { value: '7',      label: 'API Keys',        icon: 'fa-key' },
-            { value: '25+',    label: 'Cuisines',        icon: 'fa-globe' },
-            { value: '6–24hr', label: 'Cache TTL',       icon: 'fa-bolt' },
-          ].map(s => (
+          {stats.map(s => (
             <div key={s.label}>
               <i className={`fas ${s.icon} text-orange-500 text-2xl mb-3 block`}></i>
               <p className="text-3xl font-extrabold text-white">{s.value}</p>
