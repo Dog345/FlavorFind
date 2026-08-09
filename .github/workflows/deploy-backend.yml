@@ -1,10 +1,11 @@
-name: Deploy Backend to DigitalOcean
+name: Deploy to DigitalOcean
 
 on:
   push:
     branches: [main]
     paths:
       - 'laravel-backend/**'
+      - 'nextjs-frontend/**'
 
 jobs:
   deploy:
@@ -17,23 +18,21 @@ jobs:
           username: ${{ secrets.DO_USER }}
           key: ${{ secrets.DO_SSH_KEY }}
           script: |
-            cd /var/www/flavorfind
-
-            # Pull latest code
             cd /var/www/flavorfind && git pull origin main
 
-            # Install/update dependencies
-            cd laravel-backend && COMPOSER_ALLOW_SUPERUSER=1 php8.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
-
-            # Run migrations
+            # --- Backend ---
+            cd /var/www/flavorfind/laravel-backend
+            COMPOSER_ALLOW_SUPERUSER=1 php8.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
             php8.4 artisan migrate --force
-
-            # Clear and rebuild caches
             php8.4 artisan config:cache
             php8.4 artisan route:cache
-
-            # Fix permissions
             chown -R www-data:www-data storage bootstrap/cache database/database.sqlite database/
             chmod -R 775 storage bootstrap/cache
+
+            # --- Frontend ---
+            cd /var/www/flavorfind/nextjs-frontend
+            npm install
+            npm run build
+            pm2 restart flavorfind-web
 
             echo "✅ Deployed successfully"
