@@ -68,7 +68,7 @@ export default function SearchBar({ large = false, onSearch }: Props) {
           {open && suggestions.length > 0 && (
             <div className="absolute top-full mt-2 w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl overflow-hidden z-50 shadow-2xl">
               {suggestions.map(s => (
-                <button key={s.name} onMouseDown={() => { setQuery(s.name); search(s.name); }}
+                <button key={s.name} onMouseDown={() => { setQuery(s.name); setOpen(false); inputRef.current?.focus(); }}
                   className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-orange-400 transition-colors flex items-center gap-2">
                   <i className="fas fa-leaf text-orange-500 text-xs"></i> {s.name}
                 </button>

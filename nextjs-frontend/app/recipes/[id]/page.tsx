@@ -109,7 +109,9 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               <div>
                 <h2 className="section-title mb-4">Ingredients</h2>
                 <ul className="space-y-2">
-                  {recipe.extendedIngredients.map((ing, i) => (
+                  {recipe.extendedIngredients
+                    .filter((ing) => !ing.original?.toLowerCase().includes('foodista'))
+                    .map((ing, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm py-2 border-b border-[#1e1e1e] last:border-0">
                       <span className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></span>
                       <span className="text-gray-300">{ing.original}</span>
@@ -117,14 +119,6 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                   ))}
                 </ul>
               </div>
-            )}
-
-            {recipe.sourceUrl && (
-              <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-                className="btn-ghost flex items-center justify-center gap-2 px-4 py-3 text-sm w-full">
-                <i className="fas fa-external-link-alt text-xs"></i>
-                View on {recipe.sourceName || 'Source'}
-              </a>
             )}
           </div>
 
@@ -147,12 +141,6 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl p-10 text-center">
                 <i className="fas fa-book-open text-4xl text-gray-600 mb-4 block"></i>
                 <p className="text-gray-500">No step-by-step instructions available.</p>
-                {recipe.sourceUrl && (
-                  <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer"
-                    className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm mt-4">
-                    View Full Recipe <i className="fas fa-arrow-right text-xs"></i>
-                  </a>
-                )}
               </div>
             )}
 
