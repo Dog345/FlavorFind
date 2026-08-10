@@ -1,0 +1,9 @@
+
+backend/.env
+filter_recipes.py
+filtered_recipes.json
+laravel-backend/app/Console/Commands/SeedIngredientCategories.php
+PHASE_2_PLAN.md
+backend/.env
+laravel-backend/app/Console/Commands/SeedHomeSections.php
+laravel-backend/app/Console/Commands/SeedRecipesFromJson.php
