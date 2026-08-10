@@ -16,9 +16,10 @@ interface Recipe {
 }
 
 async function getRecipe(id: string): Promise<Recipe> {
-  const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/recipes/${id}`, { cache: 'no-store' });
+  const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/recipes/db/${id}`, { cache: 'no-store' });
   if (!r.ok) notFound();
-  return r.json();
+  const data = await r.json();
+  return data.data || data;
 }
 
 export default async function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {

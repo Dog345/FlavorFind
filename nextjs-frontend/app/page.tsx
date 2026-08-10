@@ -1,5 +1,6 @@
 import SearchBar from '@/components/SearchBar';
 import RecipeCard from '@/components/RecipeCard';
+import RecipeImage from '@/components/RecipeImage';
 import Link from 'next/link';
 
 const CUISINE_IMAGES: Record<string, string> = {
@@ -129,7 +130,7 @@ export default async function HomePage() {
                 <Link key={recipe.id} href={`/recipes/${recipe.id}`}
                   className="recipe-card block group fade-in" style={{ animationDelay: `${(sectionIndex * 0.1) + (i * 0.05)}s` }}>
                   <div className="relative overflow-hidden rounded-lg" style={{ height: '180px' }}>
-                    <img src={recipe.image} alt={recipe.title}
+                    <RecipeImage src={recipe.image} alt={recipe.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     
