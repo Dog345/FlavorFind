@@ -36,7 +36,7 @@ return new class extends Migration
             // Add indexes for search performance
             $table->index('rating');
             $table->index('ready_minutes');
-            $table->fullText('title');
+            $table->index('title');
         });
     }
 
