@@ -10,9 +10,31 @@ interface Recipe {
   summary?: string; cuisines?: string[]; diets?: string[]; dishTypes?: string[];
   extendedIngredients?: Ingredient[];
   analyzedInstructions?: { steps: Step[] }[];
+  instructions?: string; // Database format: plain text instructions
+  ingredients?: { list: string[] }; // Database format: ingredients object
   nutrition?: { nutrients: { name: string; amount: number; unit: string }[] };
   sourceUrl?: string; sourceName?: string;
   veryHealthy?: boolean; veryPopular?: boolean;
+}
+
+function parseInstructions(recipe: Recipe): Step[] {
+  // Check for old format (analyzedInstructions)
+  if (recipe.analyzedInstructions?.[0]?.steps) {
+    return recipe.analyzedInstructions[0].steps;
+  }
+  
+  // Check for database format (instructions as string)
+  if (recipe.instructions && typeof recipe.instructions === 'string') {
+    // Split by double newlines or numbered patterns
+    const text = recipe.instructions.trim();
+    const parts = text.split(/\n\n+/).filter(p => p.trim());
+    return parts.map((part, idx) => ({
+      number: idx + 1,
+      step: part.trim()
+    }));
+  }
+  
+  return [];
 }
 
 async function getRecipe(id: string): Promise<Recipe> {
@@ -25,7 +47,7 @@ async function getRecipe(id: string): Promise<Recipe> {
 export default async function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const recipe = await getRecipe(id);
-  const steps = recipe.analyzedInstructions?.[0]?.steps ?? [];
+  const steps = parseInstructions(recipe);
   const nutrients = recipe.nutrition?.nutrients?.slice(0, 6) ?? [];
   const summary = recipe.summary?.replace(/<[^>]*>/g, '') ?? '';
 
@@ -106,21 +128,24 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               </div>
             )}
 
-            {recipe.extendedIngredients && recipe.extendedIngredients.length > 0 && (
+            {(recipe.extendedIngredients?.length || recipe.ingredients?.list?.length) ? (
               <div>
                 <h2 className="section-title mb-4">Ingredients</h2>
                 <ul className="space-y-2">
-                  {recipe.extendedIngredients
-                    .filter((ing) => !ing.original?.toLowerCase().includes('foodista'))
-                    .map((ing, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm py-2 border-b border-[#1e1e1e] last:border-0">
-                      <span className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></span>
-                      <span className="text-gray-300">{ing.original}</span>
-                    </li>
-                  ))}
+                  {(recipe.extendedIngredients || recipe.ingredients?.list || [])
+                    .map((ing, i) => {
+                      const ingText = typeof ing === 'string' ? ing : ing.original;
+                      return (
+                        <li key={i} className="flex items-start gap-3 text-sm py-2 border-b border-[#1e1e1e] last:border-0">
+                          <span className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></span>
+                          <span className="text-gray-300">{ingText}</span>
+                        </li>
+                      );
+                    })
+                  }
                 </ul>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Right column — Instructions */}
