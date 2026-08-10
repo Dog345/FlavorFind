@@ -65,4 +65,34 @@ class ApiService {
     final results = r.data['results'] as List? ?? [];
     return results.map((e) => Recipe.fromJson(e)).toList();
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DATABASE ENDPOINTS (Supabase via Laravel)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Get all home sections with recipes from database
+  static Future<List<Map<String, dynamic>>> getSections() async {
+    final r = await _dio.get('/api/sections');
+    return List<Map<String, dynamic>>.from(r.data['data'] ?? []);
+  }
+
+  /// Get all ingredient categories with ingredients from database
+  static Future<List<Map<String, dynamic>>> getIngredientCategories() async {
+    final r = await _dio.get('/api/ingredient-categories');
+    return List<Map<String, dynamic>>.from(r.data['data'] ?? []);
+  }
+
+  /// Search recipes by ingredients from database
+  static Future<List<Recipe>> searchByIngredientsDB(List<String> ingredients) async {
+    final r = await _dio.post('/api/recipes/search-by-ingredients', data: {
+      'ingredients': ingredients,
+    });
+    return (r.data['data'] as List? ?? []).map((e) => Recipe.fromJson(e)).toList();
+  }
+
+  /// Get recipe by ID from database
+  static Future<Recipe> recipeByIdDB(int id) async {
+    final r = await _dio.get('/api/recipes/db/$id');
+    return Recipe.fromJson(r.data['data']);
+  }
 }

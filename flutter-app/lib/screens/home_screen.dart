@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
-import '../core/home_data.dart';
 import '../models/recipe.dart';
 import '../services/api_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/dancing_chef_loader.dart';
-import '../widgets/home_cards.dart';
-import 'recipe_detail_screen.dart';
 import 'recipe_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,9 +17,34 @@ class _HomeScreenState extends State<HomeScreen> {
   final _controller = TextEditingController();
   bool _loading = false;
   bool _showResults = false;
+  bool _loadingSections = true;
   List<Recipe> _recipes = [];
-  // ignore: unused_field
-  bool _refreshing = false;
+  List<Map<String, dynamic>> _sections = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSections();
+  }
+
+  Future<void> _loadSections() async {
+    try {
+      final sections = await ApiService.getSections();
+      if (mounted) {
+        setState(() {
+          _sections = sections;
+          _loadingSections = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() { _loadingSections = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading sections: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -53,9 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _onRefresh() async {
-    setState(() { _refreshing = true; });
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) setState(() { _refreshing = false; });
+    await _loadSections();
   }
 
   // ── Hero Search Card ──────────────────────────────────────────────────────
@@ -123,44 +143,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  // ── Horizontal scroll section ─────────────────────────────────────────────
-
-  Widget _hSection({
-    required String title,
-    String? subtitle,
-    required List<Map<String, dynamic>> data,
-    required Widget Function(Map<String, dynamic>) cardBuilder,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionHeader(title: title, subtitle: subtitle),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: _sectionHeight(title),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: data.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, i) => cardBuilder(data[i]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  double _sectionHeight(String title) {
-    if (title.contains('Trending')) { return 200; }
-    if (title.contains('Chef') || title.contains('Date')) { return 180; }
-    if (title.contains('Seasonal') || title.contains('Dessert') ||
-        title.contains('Comfort') || title.contains('Kids')) { return 160; }
-    return 190;
   }
 
   // ── Results view ──────────────────────────────────────────────────────────
@@ -238,8 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const DancingChefLoader(message: 'Finding delicious recipes...');
+    if (_loading || _loadingSections) {
+      return const DancingChefLoader(message: 'Loading delicious recipes...');
     }
 
     return Scaffold(
@@ -258,126 +240,199 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Hero search
                       _heroCard(),
 
-                      // Section 1: Trending Now
-                      _hSection(
-                        title: '🔥 Trending Now',
-                        subtitle: 'Most popular this week',
-                        data: kTrendingNow,
-                        cardBuilder: (item) => TrendingCard(
-                          item: item,
-                          onPress: () => _search(item['ingredients'] as String),
+                      // Database-driven sections
+                      ..._sections.map((section) => _buildDatabaseSection(section)),
+
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildDatabaseSection(Map<String, dynamic> section) {
+    final recipes = (section['recipes'] as List?)
+        ?.map((r) => Recipe.fromJson(r as Map<String, dynamic>))
+        .toList() ?? [];
+
+    if (recipes.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  section['title'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _getSectionSubtitle(section['slug'] ?? ''),
+                  style: const TextStyle(color: kTextSecondary, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: recipes.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => _buildRecipeCard(recipes[i]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecipeCard(Recipe recipe) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RecipeDetailScreen(recipe: recipe),
+        ),
+      ),
+      child: Container(
+        width: 180,
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: kBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Stack(
+                children: [
+                  Image.network(
+                    recipe.image,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 120,
+                      color: kBorder,
+                      child: const Icon(Icons.restaurant, color: kTextSecondary, size: 40),
+                    ),
+                  ),
+                  if (recipe.readyInMinutes != null)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '⏱ ${recipe.readyInMinutes}m',
+                          style: const TextStyle(color: Colors.white, fontSize: 11),
                         ),
                       ),
-
-                      // Section 2: Quick Bites
-                      _hSection(
-                        title: '⚡ Quick Bites',
-                        subtitle: 'Ready in under 5 minutes',
-                        data: kQuickBites,
-                        cardBuilder: (item) => QuickBiteCard(
-                          item: item,
-                          onPress: () => _search(item['ingredients'] as String),
+                    ),
+                  if (recipe.rating != null && recipe.rating! > 0)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: kPrimary.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '⭐ ${recipe.rating!.toStringAsFixed(1)}',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
-
-                      // Section 3: World Cuisines (grid)
+                    ),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (recipe.cuisines != null && recipe.cuisines!.isNotEmpty)
+                      Row(
+                        children: [
+                          const Text('🌍', style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              recipe.cuisines!.first,
+                              style: const TextStyle(color: kPrimary, fontSize: 11),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (recipe.servings != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SectionHeader(
-                              title: '🌍 World Cuisines',
-                              subtitle: 'Explore global flavors',
-                              seeAll: false,
-                            ),
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Wrap(
-                                spacing: 4,
-                                runSpacing: 8,
-                                children: kWorldCuisines.map((item) => CuisineCircle(
-                                  item: item,
-                                  onPress: () => _search(item['ingredients'] as String),
-                                )).toList(),
-                              ),
-                            ),
-                          ],
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '👥 ${recipe.servings} servings',
+                          style: const TextStyle(color: kTextSecondary, fontSize: 10),
                         ),
                       ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                      // Section 4: Seasonal Spotlight
-                      _hSection(
-                        title: '🌱 Seasonal Spotlight',
-                        subtitle: "What's fresh right now",
-                        data: kSeasonalSpotlight,
-                        cardBuilder: (item) => SeasonalCard(
-                          item: item,
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
-
-                      // Section 5: Chef's Signature
-                      _hSection(
-                        title: "👨‍🍳 Chef's Signature",
-                        subtitle: 'Masterchef creations',
-                        data: kChefSignature,
-                        cardBuilder: (item) => ChefCard(
-                          item: item,
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
-
-                      // Section 6: Healthy Heroes
-                      _hSection(
-                        title: '🥗 Healthy Heroes',
-                        subtitle: 'Under 500 calories',
-                        data: kHealthyHeroes,
-                        cardBuilder: (item) => HealthCard(
-                          item: item,
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
-
-                      // Section 7: Dessert Paradise
-                      _hSection(
-                        title: '🍰 Dessert Paradise',
-                        subtitle: 'Sweet indulgence',
-                        data: kDessertParadise,
-                        cardBuilder: (item) => OverlayCard(
-                          item: item,
-                          labelKey: 'difficulty',
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
-
-                      // Section 8: Comfort Food
-                      _hSection(
-                        title: '😌 Comfort Food',
-                        subtitle: 'Warm your soul',
-                        data: kComfortFood,
-                        cardBuilder: (item) => OverlayCard(
-                          item: item,
-                          labelKey: 'mood',
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
-
-                      // Section 9: Date Night
-                      _hSection(
-                        title: '💕 Date Night',
-                        subtitle: 'Impress someone special',
-                        data: kDateNight,
-                        cardBuilder: (item) => OverlayCard(
-                          item: item,
-                          labelKey: 'occasion',
-                          width: 220,
-                          height: 160,
-                          overlayColor: kPrimary.withValues(alpha: 0.9),
-                          onPress: () => _search(item['ingredients'] as String),
-                        ),
-                      ),
+  String _getSectionSubtitle(String slug) {
+    final subtitles = {
+      'trending-now': 'Most popular recipes right now',
+      'quick-bites': 'Ready in 30 minutes or less',
+      'world-cuisines': 'Explore flavors from around the globe',
+      'healthy-heroes': 'Nutritious and delicious meals',
+      'dessert-paradise': 'Sweet treats for every occasion',
+      'comfort-food': 'Soul-warming classics',
+      'breakfast-club': 'Start your day right',
+      'vegan-vibes': 'Plant-based perfection',
+      'italian-classics': 'Authentic Italian favorites',
+    };
+    return subtitles[slug] ?? 'Delicious recipes curated for you';
+  }
 
                       // Section 10: Breakfast Club
                       _hSection(
