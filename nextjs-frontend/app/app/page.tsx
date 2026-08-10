@@ -92,7 +92,7 @@ export default function AppPage() {
     },
     {
       q: 'How big is the app?',
-      a: 'FlavorFind is ultra-lightweight at just 3.8MB! Perfect for devices with limited storage.',
+      a: 'FlavorFind is lightweight at just 19–23 MB depending on your device architecture. Split APKs mean you only download what your device needs.',
     },
   ];
 
@@ -128,7 +128,7 @@ export default function AppPage() {
           >
             <i className="fas fa-download"></i>
             Download Free APK
-            <span className="text-sm font-normal ml-2 opacity-90">(3.8 MB)</span>
+            <span className="text-sm font-normal ml-2 opacity-90">(19–23 MB)</span>
           </a>
 
           {/* App Preview - Big Phone Image */}
@@ -205,7 +205,7 @@ export default function AppPage() {
               <p className="text-gray-400">Cuisines</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-orange-500">3.8 MB</p>
+              <p className="text-3xl font-bold text-orange-500">19 MB</p>
               <p className="text-gray-400">App Size</p>
             </div>
             <div>
