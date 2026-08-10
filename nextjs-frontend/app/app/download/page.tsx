@@ -104,8 +104,8 @@ export default function DownloadPage() {
                     <i className="fas fa-check text-white text-sm"></i>
                   </div>
                   <div>
-                    <p className="font-bold">Lightweight (22 MB)</p>
-                    <p className="text-gray-500 text-sm">Optimized for ARM64 devices, lightning fast</p>
+                    <p className="font-bold">Lightweight (3.8 MB)</p>
+                    <p className="text-gray-500 text-sm">Minimal storage impact, maximum functionality</p>
                   </div>
                 </div>
 
@@ -128,7 +128,7 @@ export default function DownloadPage() {
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-105 text-lg flex items-center justify-center gap-3"
                 >
                   <i className={`fas ${downloading ? 'fa-spinner fa-spin' : 'fa-download'}`}></i>
-                  {downloading ? 'Downloading...' : 'Download APK (22 MB)'}
+                  {downloading ? 'Downloading...' : 'Download APK (3.8 MB)'}
                 </button>
 
                 {!isAndroid && (
