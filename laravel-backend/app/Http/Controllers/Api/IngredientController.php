@@ -13,8 +13,8 @@ class IngredientController extends Controller
 
     public function __construct()
     {
-        $this->supabaseUrl = env('SUPABASE_URL');
-        $this->supabaseKey = env('SUPABASE_SERVICE_KEY');
+        $this->supabaseUrl = config('services.supabase.url') ?? env('SUPABASE_URL');
+        $this->supabaseKey = config('services.supabase.key') ?? env('SUPABASE_SERVICE_KEY');
     }
 
     /**
