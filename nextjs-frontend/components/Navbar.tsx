@@ -58,10 +58,18 @@ export default function Navbar() {
                 className="p-2 rounded-lg text-gray-400 hover:text-orange-500 hover:bg-white/5 transition-colors">
                 <i className={`fas ${searchOpen ? 'fa-times' : 'fa-search'} text-sm`}></i>
               </button>
+              
+              {/* Download button - icon on mobile, full button on desktop */}
+              <Link href="/app/download"
+                className="md:hidden p-2 rounded-lg text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 transition-colors"
+                title="Download App">
+                <i className="fas fa-download text-sm"></i>
+              </Link>
               <Link href="/app/download"
                 className="hidden md:flex btn-primary items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
                 <i className="fas fa-download text-xs"></i> Get App
               </Link>
+              
               <Link href="/recipes"
                 className="hidden md:flex px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
                 <i className="fas fa-search text-xs"></i>
