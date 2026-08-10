@@ -59,17 +59,17 @@ export default function SearchBar({ large = false, onSearch }: Props) {
             onFocus={() => suggestions.length && setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             placeholder="Enter ingredients (e.g., chicken, rice, garlic...)"
-            className={`w-full pl-10 pr-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm transition-all ${
+            className={`w-full pl-10 pr-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all ${
               large
-                ? 'bg-black/40 backdrop-blur-sm text-white placeholder-gray-400 border border-white/20'
-                : 'bg-[#111] text-white placeholder-gray-500 border border-[#2a2a2a]'
+                ? 'bg-black/40 backdrop-blur-sm text-white placeholder-gray-400 border border-white/20 text-base md:text-lg md:py-5 md:pl-14 md:text-xl'
+                : 'bg-[#111] text-white placeholder-gray-500 border border-[#2a2a2a] text-sm'
             }`}
           />
           {open && suggestions.length > 0 && (
             <div className="absolute top-full mt-2 w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl overflow-hidden z-50 shadow-2xl">
               {suggestions.map(s => (
                 <button key={s.name} onMouseDown={() => { setQuery(s.name); setOpen(false); inputRef.current?.focus(); }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-orange-400 transition-colors flex items-center gap-2">
+                  className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-orange-400 transition-colors flex items-center gap-2 md:text-base md:py-4">
                   <i className="fas fa-leaf text-orange-500 text-xs"></i> {s.name}
                 </button>
               ))}
@@ -78,17 +78,19 @@ export default function SearchBar({ large = false, onSearch }: Props) {
         </div>
         <button
           onPointerDown={e => { e.preventDefault(); search(); }}
-          className="btn-primary px-6 py-3.5 text-sm whitespace-nowrap flex items-center justify-center gap-2">
+          className={`btn-primary px-6 py-3.5 text-sm whitespace-nowrap flex items-center justify-center gap-2 ${
+            large ? 'md:px-10 md:py-5 md:text-base md:text-lg' : ''
+          }`}>
           <i className="fas fa-fire text-xs"></i>
           {large ? 'Find Recipes' : 'Search'}
         </button>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className={`mt-3 flex flex-wrap gap-2 ${large ? 'md:gap-3' : ''}`}>
         {QUICK.map(v => (
           <button key={v} type="button"
             onPointerDown={e => { e.preventDefault(); addTag(v); }}
-            className="ingredient-tag capitalize">
+            className={`ingredient-tag capitalize ${large ? 'md:text-base md:px-4 md:py-2' : ''}`}>
             {v}
           </button>
         ))}

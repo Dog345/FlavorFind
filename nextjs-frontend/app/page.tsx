@@ -24,7 +24,7 @@ const CUISINE_IMAGES: Record<string, string> = {
 };
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80';
 
-async function getData() {
+async function getDataWrapper() {
   const base = process.env.NEXT_PUBLIC_API_URL;
   const [randomRes, featuredRes, categoriesRes, healthRes] = await Promise.allSettled([
     fetch(`${base}/api/recipes/random?number=8`,                          { next: { revalidate: 3600 } }),
@@ -42,7 +42,7 @@ async function getData() {
 }
 
 export default async function HomePage() {
-  const { recipes, featured, categories, health } = await getData();
+  const { recipes, featured, categories, health } = await getDataWrapper();
 
   const topCuisines: string[] = (categories.cuisines ?? []).slice(0, 10);
   const ctaCuisines: string[] = (categories.cuisines ?? []).slice(0, 3);
@@ -140,102 +140,21 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── Live random recipes ── */}
+      {/* ── Random Recipes (top section) ── */}
       {recipes.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 md:px-8 mb-20">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="section-title">✨ Discover Today</h2>
-              <p className="text-gray-500 text-sm mt-2">Fresh picks from our recipe database</p>
+              <h2 className="section-title">Recipes to Inspire</h2>
+              <p className="text-gray-500 text-sm mt-2">Handpicked random recipes to spark your cooking ideas</p>
             </div>
             <Link href="/recipes" className="text-orange-500 text-sm hover:underline flex items-center gap-1">
-              View all <i className="fas fa-arrow-right text-xs"></i>
+              Explore more <i className="fas fa-arrow-right text-xs"></i>
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {recipes.map((r: any, i: number) => (
-              <div key={r.id} className="fade-in" style={{ animationDelay: `${i * 0.06}s` }}>
-                <RecipeCard recipe={r} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── How it works ── */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 mb-20">
-        <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-3xl p-8 md:p-14">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="section-title mb-6">Smart Recipe Finder</h2>
-              <p className="text-gray-400 mb-8">Enter what's in your fridge and we'll match you with hundreds of recipes — reducing food waste and saving you time.</p>
-              <div className="space-y-5">
-                {[
-                  { icon: 'fa-search',   title: 'Enter Ingredients', desc: 'Type what you have — chicken, rice, garlic, anything.' },
-                  { icon: 'fa-magic',    title: 'AI Matches Recipes', desc: 'Our engine finds the best matches instantly.' },
-                  { icon: 'fa-utensils', title: 'Cook & Enjoy',       desc: 'Follow step-by-step instructions and enjoy your meal.' },
-                ].map(s => (
-                  <div key={s.title} className="flex gap-4 items-start">
-                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                      <i className={`fas ${s.icon} text-orange-500 text-sm`}></i>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white text-sm">{s.title}</h4>
-                      <p className="text-gray-500 text-xs mt-0.5">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Link href="/recipes" className="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm mt-8">
-                Start Cooking <i className="fas fa-arrow-right text-xs"></i>
-              </Link>
-            </div>
-            <div className="relative">
-              <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
-                alt="Cooking" className="rounded-2xl w-full object-cover shadow-2xl" style={{ height: '380px' }} />
-              <div className="absolute -bottom-4 -left-4 bg-[#111] border border-[#2a2a2a] rounded-2xl p-4 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                    <i className="fas fa-check text-green-400"></i>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-white">Recipe Found!</p>
-                    <p className="text-[10px] text-gray-500">Matched 8 ingredients</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Browse cuisines CTA (live from /api/categories) ── */}
-      {ctaCuisines.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 md:px-8 mb-20">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="section-title">Browse by Cuisine</h2>
-              <p className="text-gray-500 text-sm mt-2">{categories.cuisines?.length ?? 0} cuisines available</p>
-            </div>
-            <Link href="/categories" className="text-orange-500 text-sm hover:underline flex items-center gap-1">
-              All categories <i className="fas fa-arrow-right text-xs"></i>
-            </Link>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {ctaCuisines.map((c: string) => (
-              <Link key={c} href={`/categories?type=cuisine&value=${encodeURIComponent(c)}`}
-                className="relative overflow-hidden rounded-2xl group block" style={{ height: '200px' }}>
-                <img src={CUISINE_IMAGES[c] ?? DEFAULT_IMG} alt={c}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <h3 className="font-bold text-white text-lg">{c}</h3>
-                  <p className="text-gray-400 text-xs">{c} cuisine recipes</p>
-                </div>
-                <div className="absolute top-4 right-4 w-8 h-8 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i className="fas fa-arrow-right text-white text-xs"></i>
-                </div>
-              </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recipes.slice(0, 4).map((r: any) => (
+              <RecipeCard key={r.id} recipe={r} />
             ))}
           </div>
         </section>
