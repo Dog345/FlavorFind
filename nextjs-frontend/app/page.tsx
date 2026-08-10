@@ -79,17 +79,6 @@ export default async function HomePage() {
             <SearchBar large />
           </div>
 
-          {/* App Download CTA */}
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 fade-in" style={{ animationDelay: '0.35s' }}>
-            <div className="text-sm text-gray-400">💡 Also available as an app:</div>
-            <Link href="/app/download"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/80 to-orange-600/80 hover:from-orange-500 hover:to-orange-600 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 text-sm">
-              <i className="fas fa-mobile"></i>
-              Download iOS & Android
-              <i className="fas fa-arrow-right text-xs"></i>
-            </Link>
-          </div>
-
           {topCuisines.length > 0 && (
             <div className="mt-8 flex flex-wrap justify-center gap-2 fade-in" style={{ animationDelay: '0.4s' }}>
               {topCuisines.map(c => (
