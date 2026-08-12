@@ -50,20 +50,20 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _ui.value = HomeUiState(isLoading = true, error = null)
             try {
-                // Fetch all sections in parallel
-                val trendingDeferred      = async { repository.randomRecipes(number = 8) }
-                val quickBitesDeferred    = async { repository.byType("snack", number = 8) }
-                val seasonalDeferred      = async { repository.randomRecipes(number = 8, tags = "seasonal") }
-                val chefSignatureDeferred = async { repository.searchRecipes(query = "signature", number = 6) }
-                val healthyDeferred       = async { repository.byDiet("healthy", number = 8) }
-                val dessertsDeferred      = async { repository.byType("dessert", number = 8) }
-                val comfortDeferred       = async { repository.searchRecipes(query = "comfort food", number = 6) }
-                val dateNightDeferred     = async { repository.searchRecipes(query = "romantic dinner", number = 6) }
-                val breakfastDeferred     = async { repository.byType("breakfast", number = 8) }
-                val veganDeferred         = async { repository.byDiet("vegan", number = 8) }
-                val drinksDeferred        = async { repository.byType("drink", number = 6) }
-                val budgetDeferred        = async { repository.searchRecipes(query = "budget easy", number = 6) }
-                val kidsDeferred          = async { repository.searchRecipes(query = "kids friendly", number = 6) }
+                // Load fewer recipes initially (5 per category instead of 8)
+                val trendingDeferred      = async { runCatching { repository.randomRecipes(number = 5) }.getOrNull() ?: emptyList() }
+                val quickBitesDeferred    = async { runCatching { repository.byType("snack", number = 5) }.getOrNull() ?: emptyList() }
+                val seasonalDeferred      = async { runCatching { repository.randomRecipes(number = 5, tags = "seasonal") }.getOrNull() ?: emptyList() }
+                val chefSignatureDeferred = async { runCatching { repository.searchRecipes(query = "signature", number = 4) }.getOrNull() ?: emptyList() }
+                val healthyDeferred       = async { runCatching { repository.byDiet("healthy", number = 5) }.getOrNull() ?: emptyList() }
+                val dessertsDeferred      = async { runCatching { repository.byType("dessert", number = 5) }.getOrNull() ?: emptyList() }
+                val comfortDeferred       = async { runCatching { repository.searchRecipes(query = "comfort food", number = 4) }.getOrNull() ?: emptyList() }
+                val dateNightDeferred     = async { runCatching { repository.searchRecipes(query = "romantic dinner", number = 4) }.getOrNull() ?: emptyList() }
+                val breakfastDeferred     = async { runCatching { repository.byType("breakfast", number = 5) }.getOrNull() ?: emptyList() }
+                val veganDeferred         = async { runCatching { repository.byDiet("vegan", number = 5) }.getOrNull() ?: emptyList() }
+                val drinksDeferred        = async { runCatching { repository.byType("drink", number = 4) }.getOrNull() ?: emptyList() }
+                val budgetDeferred        = async { runCatching { repository.searchRecipes(query = "budget easy", number = 4) }.getOrNull() ?: emptyList() }
+                val kidsDeferred          = async { runCatching { repository.searchRecipes(query = "kids friendly", number = 4) }.getOrNull() ?: emptyList() }
 
                 _ui.value = HomeUiState(
                     trending      = trendingDeferred.await(),
@@ -83,9 +83,10 @@ class HomeViewModel @Inject constructor(
                     error         = null,
                 )
             } catch (e: Exception) {
+                android.util.Log.e("HomeViewModel", "Error loading data: ${e.message}", e)
                 _ui.value = HomeUiState(
                     isLoading = false,
-                    error     = e.message ?: "Failed to load home data",
+                    error     = "Failed to load recipes. Please check your internet connection.",
                 )
             }
         }
