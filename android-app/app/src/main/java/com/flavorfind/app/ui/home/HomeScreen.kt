@@ -1,11 +1,8 @@
 package com.flavorfind.app.ui.home
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,6 +53,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.detectTapGestures
 import coil.compose.AsyncImage
 import com.flavorfind.app.core.theme.Background
 import com.flavorfind.app.core.theme.OnBackground
@@ -128,9 +128,17 @@ fun HomeScreen(
         if (state.isLoading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = Primary)
+                    CircularProgressIndicator(color = Primary, modifier = Modifier.size(48.dp))
                     Spacer(Modifier.height(16.dp))
-                    Text("🍳 Loading delicious recipes...", color = TextSecondary, fontSize = 14.sp)
+                    Text("🍳 Loading recipes...", color = TextSecondary, fontSize = 14.sp)
+                }
+            }
+        } else if (state.error != null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                    Text("⚠️ Error", color = Color(0xFFEF4444), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp))
+                    Text(state.error!!, color = TextSecondary, fontSize = 14.sp, textAlign = TextAlign.Center)
                 }
             }
         } else {
@@ -146,200 +154,188 @@ fun HomeScreen(
                     onSearch = { onSearchIngredients(it) },
                 )
 
-                // ── Section 1: Trending Now ───────────────────────────────────
+                // ── Sections (Lazy load) ────────────────────────────────────
                 if (state.trending.isNotEmpty()) {
                     SectionHeader("🔥 Trending Now", "Most popular this week")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.trending) { recipe ->
+                        items(state.trending, key = { it.id }) { recipe ->
                             TrendingCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 2: Quick Bites ────────────────────────────────────
                 if (state.quickBites.isNotEmpty()) {
                     SectionHeader("⚡ Quick Bites", "Ready in under 30 minutes")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.quickBites) { recipe ->
+                        items(state.quickBites, key = { it.id }) { recipe ->
                             QuickBiteCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 3: World Cuisines (grid) ─────────────────────────
+                // ── World Cuisines (Grid) ──────────────────────────────────
                 SectionHeader("🌍 World Cuisines", "Explore global flavors", showSeeAll = false)
                 WorldCuisinesGrid(onCuisineClick = { query -> onSearchIngredients(query) })
                 Spacer(Modifier.height(24.dp))
 
-                // ── Section 4: Seasonal Spotlight ────────────────────────────
                 if (state.seasonal.isNotEmpty()) {
                     SectionHeader("🌱 Seasonal Spotlight", "What's fresh right now")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.seasonal) { recipe ->
+                        items(state.seasonal, key = { it.id }) { recipe ->
                             SeasonalCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 5: Chef's Signature ───────────────────────────────
                 if (state.chefSignature.isNotEmpty()) {
                     SectionHeader("👨‍🍳 Chef's Signature", "Masterchef creations")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.chefSignature) { recipe ->
+                        items(state.chefSignature, key = { it.id }) { recipe ->
                             ChefCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 6: Healthy Heroes ─────────────────────────────────
                 if (state.healthyHeroes.isNotEmpty()) {
                     SectionHeader("🥗 Healthy Heroes", "Under 500 calories")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.healthyHeroes) { recipe ->
+                        items(state.healthyHeroes, key = { it.id }) { recipe ->
                             HealthCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 7: Dessert Paradise ───────────────────────────────
                 if (state.desserts.isNotEmpty()) {
                     SectionHeader("🍰 Dessert Paradise", "Sweet indulgence")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.desserts) { recipe ->
+                        items(state.desserts, key = { it.id }) { recipe ->
                             DessertCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 8: Comfort Food ───────────────────────────────────
                 if (state.comfortFood.isNotEmpty()) {
                     SectionHeader("😌 Comfort Food", "Warm your soul")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.comfortFood) { recipe ->
+                        items(state.comfortFood, key = { it.id }) { recipe ->
                             ComfortCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 9: Date Night ─────────────────────────────────────
                 if (state.dateNight.isNotEmpty()) {
                     SectionHeader("💕 Date Night", "Impress someone special")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.dateNight) { recipe ->
+                        items(state.dateNight, key = { it.id }) { recipe ->
                             DateNightCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 10: Breakfast Club ────────────────────────────────
                 if (state.breakfast.isNotEmpty()) {
                     SectionHeader("☀️ Breakfast Club", "Start your day right")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.breakfast) { recipe ->
+                        items(state.breakfast, key = { it.id }) { recipe ->
                             BreakfastCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 11: Vegan Vibes ───────────────────────────────────
                 if (state.vegan.isNotEmpty()) {
                     SectionHeader("🌱 Vegan Vibes", "100% plant-based")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.vegan) { recipe ->
+                        items(state.vegan, key = { it.id }) { recipe ->
                             VeganCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 12: Drinks & Cocktails ────────────────────────────
                 if (state.drinks.isNotEmpty()) {
                     SectionHeader("🍸 Drinks & Cocktails", "Raise your glass")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.drinks) { recipe ->
+                        items(state.drinks, key = { it.id }) { recipe ->
                             DrinkCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 13: Budget Meals ──────────────────────────────────
                 if (state.budget.isNotEmpty()) {
                     SectionHeader("💰 Budget Meals", "Delicious on a dime")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.budget) { recipe ->
+                        items(state.budget, key = { it.id }) { recipe ->
                             BudgetCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 14: Kids' Favorites ───────────────────────────────
                 if (state.kids.isNotEmpty()) {
                     SectionHeader("👶 Kids' Favorites", "Fun for little ones")
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.kids) { recipe ->
+                        items(state.kids, key = { it.id }) { recipe ->
                             KidsCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // ── Section 15: Pro Cooking Tips ──────────────────────────────
+                // ── Pro Cooking Tips ────────────────────────────────────────
                 SectionHeader("💡 Pro Cooking Tips", "Level up your skills", showSeeAll = false)
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(COOKING_TIPS) { tip ->
+                    items(COOKING_TIPS, key = { it.emoji + it.tip }) { tip ->
                         TipCard(tip = tip)
                     }
                 }
