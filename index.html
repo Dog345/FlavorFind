@@ -1090,10 +1090,38 @@
 
     <!-- JavaScript remains the same -->
     <script>
-        // API Configuration - Updated with your deployed backend URL
-        const API_BASE_URL = 'https://recipe-finder-back-qibi.onrender.com';
+        // Performance: Debounce function
+        function debounce(fn, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fn(...args), delay);
+            };
+        }
 
-        // DOM Elements
+        // API Configuration
+        const API_BASE_URL = 'https://recipe-finder-back-qibi.onrender.com';
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        const apiCache = new Map();
+
+        // Error handler
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            document.body.insertBefore(successDiv, document.body.firstChild);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // DOM Elements (cached)
         const searchToggle = document.getElementById('searchToggle');
         const searchBar = document.getElementById('searchBar');
         const ingredientInput = document.getElementById('ingredientInput');
@@ -1110,75 +1138,92 @@
         const categoryRecipesGrid = document.getElementById('categoryRecipesGrid');
         const categoryRecipeCount = document.getElementById('categoryRecipeCount');
 
-        // Page navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
+        // Event delegation for nav links
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('nav-link')) {
                 e.preventDefault();
                 const page = e.target.getAttribute('data-page');
                 showPage(page);
-            });
+            }
         });
 
+        // Page navigation with smooth transition
         function showPage(pageName) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
             
-            // Show selected page
-            document.getElementById(`${pageName}-page`).classList.add('active');
-            
-            // Scroll to top
-            window.scrollTo(0, 0);
+            const targetPage = document.getElementById(`${pageName}-page`);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         // Toggle search bar
-        searchToggle.addEventListener('click', () => {
-            searchBar.classList.toggle('hidden');
-        });
+        if (searchToggle) {
+            searchToggle.addEventListener('click', () => {
+                searchBar.classList.toggle('hidden');
+            });
+        }
 
-        // Add ingredient from quick tags
+        // Add ingredient with debouncing
         function addIngredient(ingredient) {
-            const current = ingredientInput.value;
-            if (current) {
-                ingredientInput.value = current + ', ' + ingredient;
-            } else {
-                ingredientInput.value = ingredient;
-            }
+            const current = ingredientInput.value.trim();
+            ingredientInput.value = current ? `${current}, ${ingredient}` : ingredient;
             ingredientInput.focus();
         }
 
         function addHeroIngredient(ingredient) {
-            const current = heroIngredientInput.value;
-            if (current) {
-                heroIngredientInput.value = current + ', ' + ingredient;
-            } else {
-                heroIngredientInput.value = ingredient;
-            }
+            const current = heroIngredientInput.value.trim();
+            heroIngredientInput.value = current ? `${current}, ${ingredient}` : ingredient;
             heroIngredientInput.focus();
         }
 
-        // Search recipes from header
+        // API call with caching
+        async function fetchWithCache(url) {
+            const cached = apiCache.get(url);
+            if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+                return cached.data;
+            }
+
+            try {
+                const response = await Promise.race([
+                    fetch(url),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), 8000))
+                ]);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                apiCache.set(url, { data, timestamp: Date.now() });
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // Search recipes with better error handling
         async function searchRecipes() {
             const ingredients = ingredientInput.value.trim();
             if (!ingredients) {
-                alert('Please enter some ingredients');
+                showError('Please enter some ingredients');
                 return;
             }
             await performSearch(ingredients);
         }
 
-        // Search recipes from hero section
         async function searchRecipesFromHero() {
             const ingredients = heroIngredientInput.value.trim();
             if (!ingredients) {
-                alert('Please enter some ingredients');
+                showError('Please enter some ingredients');
                 return;
             }
             await performSearch(ingredients);
         }
 
-        // Search featured recipes
         async function searchFeaturedRecipe(ingredients) {
             await performSearch(ingredients);
         }
@@ -1193,52 +1238,44 @@
                 'vegetarian': 'vegetables,tofu,beans,lentils,cheese',
                 'dessert': 'sugar,flour,eggs,butter,chocolate'
             };
-            
+
             if (categoryIngredients[category]) {
                 await performCategorySearch(categoryIngredients[category], category);
+            } else {
+                showError('Category not found');
             }
         }
 
-        // Perform the actual search
+        // Optimized search with error handling
         async function performSearch(ingredients) {
             try {
-                // Show loading, hide hero and search bar
                 loadingSection.classList.remove('hidden');
                 heroSection.classList.add('hidden');
                 searchBar.classList.add('hidden');
                 resultsSection.classList.add('hidden');
                 recipesGrid.innerHTML = '';
 
-                console.log('Searching for recipes with ingredients:', ingredients);
+                const url = `${API_BASE_URL}/api/recipes?ingredients=${encodeURIComponent(ingredients)}`;
+                const recipes = await fetchWithCache(url);
 
-                const response = await fetch(`${API_BASE_URL}/api/recipes?ingredients=${encodeURIComponent(ingredients)}`);
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-                }
-
-                const recipes = await response.json();
-                
-                // Hide loading, show results
                 loadingSection.classList.add('hidden');
                 resultsSection.classList.remove('hidden');
-                
-                // Update recipe count
-                recipeCount.textContent = recipes.length;
-                
-                // Display recipes
-                displayRecipes(recipes, recipesGrid);
-                
+                recipeCount.textContent = recipes.length || '0';
+
+                if (recipes.length === 0) {
+                    recipesGrid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">No recipes found. Try different ingredients.</div>';
+                } else {
+                    displayRecipes(recipes, recipesGrid);
+                }
             } catch (error) {
-                console.error('Error searching recipes:', error);
                 loadingSection.classList.add('hidden');
                 heroSection.classList.remove('hidden');
-                alert(`Error searching for recipes: ${error.message}`);
+                showError(`Search failed: ${error.message}`);
+                console.error('Search error:', error);
             }
         }
 
-        // Perform category search
+        // Category search
         async function performCategorySearch(ingredients, categoryName) {
             try {
                 // Show loading, hide category results
