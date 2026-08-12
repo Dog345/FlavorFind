@@ -20,7 +20,7 @@ android {
 
         // Read API base URL from local.properties (falls back to production)
         val apiBase: String = project.findProperty("API_BASE_URL") as String?
-            ?: "https://api.flavorfind.dallah.co.ke"
+            ?: "https://recipe-finder-back-qibi.onrender.com"
         buildConfigField("String", "API_BASE_URL", "\"$apiBase\"")
     }
 
