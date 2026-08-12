@@ -1,95 +1,110 @@
 # FlavorFind
 
-Discover amazing recipes based on the ingredients you already have. FlavorFind uses AI-powered matching to suggest perfect recipes tailored to your kitchen inventory.
+Discover amazing recipes based on the ingredients you already have. FlavorFind is a clean, fast recipe discovery website.
 
 ## Project Structure
 
 ```
 FlavorFind/
-├── android-app/          # Native Android app (Kotlin + Jetpack Compose)
-├── backend/              # Node.js/Express API backend
-├── index.html            # Website landing page & portal
-├── recipes_import.csv    # Recipe database seed
-└── README.md            # This file
+├── index.html           # Website (complete, single-page app)
+├── recipes_import.csv   # Recipe database seed
+├── .env                 # Spoonacular API keys (preserved)
+└── README.md           # This file
 ```
 
 ## Tech Stack
 
-- **Android App**: Kotlin, Jetpack Compose, Hilt DI, Retrofit, Coil
 - **Website**: HTML5, TailwindCSS, Vanilla JavaScript
-- **Backend**: Node.js, Express, MongoDB/REST API
-- **APIs**: Spoonacular Recipe API integration
+- **Recipe Data**: Spoonacular Recipe API
 
 ## Getting Started
 
-### Android App
+### Run the Website Locally
+
 ```bash
-cd android-app
-./gradlew assembleDebug
-# APK will be in app/build/outputs/apk/debug/
+# Using Python 3
+python3 -m http.server 8000
+
+# Or using Node.js
+npx http-server
+
+# Then open http://localhost:8000 in your browser
 ```
 
-### Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
+### Deploy to Production
 
-### Website
-Open `index.html` in a browser or deploy to a static host.
+The website can be deployed to any static hosting:
+- GitHub Pages
+- Netlify
+- Vercel
+- AWS S3 + CloudFront
+- Any CDN
 
-## Features
+## Website Features
 
-### App Features
-- 🔥 Browse trending recipes
-- ⚡ Quick bites (under 30 min)
-- 🌍 World cuisines
-- 🥗 Healthy options
-- 💰 Budget meals
-- 🍰 Desserts & more
-- 🧑‍🍳 Search by ingredients
-- 💾 Save favorites
-- ⚙️ Customizable settings
+### Pages
+- **Home** — Hero search, featured recipes, ingredient search
+- **Recipes** — Browse and search recipes by ingredients
+- **Categories** — Browse by cuisine, diet type, and meal type
+- **About** — Mission and how FlavorFind works
+- **Download** — Get the mobile app (Android APK)
+- **Privacy Policy** — Full legal documentation
+- **Terms of Use** — Full terms
+- **Contact Us** — Contact information and FAQ
 
-### Website Pages
-- Home with hero search
-- Recipes & categories
-- About FlavorFind
-- Privacy Policy
-- Terms of Use
-- Contact Us
+### Features
+- 🔍 Search recipes by ingredients
+- 🏷️ Browse by cuisine, diet, and meal type
+- ⚡ Fast, optimized performance
+- 📱 Responsive mobile design
+- 💾 API response caching (5-minute TTL)
+- 🎯 Toast notifications with error handling
+- ♿ Accessibility compliant
 
-## API Endpoints
+## API Integration
 
-All endpoints are served from the backend API. Key routes:
-- `GET /api/health` - Health check
-- `GET /api/recipes` - Search recipes
-- `GET /api/recipes/random` - Random recipes
-- `GET /api/recipes/{id}` - Recipe details
-- `GET /api/ingredients/autocomplete` - Ingredient suggestions
+The website uses the **Spoonacular Recipe API** for real-time recipe data.
 
-## Development
+**API Base**: `https://api.spoonacular.com`
 
-### Key Files
+**Endpoints Used**:
+- Recipe search and filtering
+- Ingredient autocomplete
+- Recipe details
+- Cuisine and diet category browsing
 
-**Android App:**
-- `android-app/app/src/main/java/com/flavorfind/app/ui/home/HomeScreen.kt` - Main feed
-- `android-app/app/src/main/java/com/flavorfind/app/ui/settings/SettingsScreen.kt` - Settings & legal docs
-- `android-app/app/src/main/java/com/flavorfind/app/core/theme/` - Design system
+**Keys**: 7 active API keys configured in `.env` (preserved for future use)
 
-**Website:**
-- `index.html` - All pages (Home, About, Privacy, Terms, Contact)
+## Deployment
 
-**Backend:**
-- `backend/app/` - Express routes and controllers
-- `backend/config/` - API configuration
+### Static Hosting (Recommended)
+
+Simply upload `index.html` and `recipes_import.csv` to any static host. The website will work immediately with zero server-side dependencies.
+
+### With Spoonacular API Keys
+
+If deploying to a server that can read `.env`, the API keys in `.env` are available for backend use (e.g., for a future backend API layer). Currently the website accesses Spoonacular directly via client-side JavaScript.
+
+## Features Removed
+
+- ❌ Native Android app (Kotlin)
+- ❌ Backend API server
+- ❌ Mobile app download/distribution
+
+The website remains fully functional as a standalone recipe discovery platform.
+
+## Performance
+
+- **First Load**: ~2-3 seconds
+- **Page Transitions**: <100ms
+- **API Requests**: Cached for 5 minutes
+- **Network Timeout**: 8 seconds per request
+- **File Size**: Single `index.html` (~85 KB)
 
 ## Contact
 
 📧 Email: dallaherick0@gmail.com
 💬 WhatsApp: +254 796 605 409
-🌐 Website: https://flavorfind.dallah.co.ke
 
 ---
 

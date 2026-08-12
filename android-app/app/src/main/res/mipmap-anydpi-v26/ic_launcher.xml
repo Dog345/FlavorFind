@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Solid dark background — matches app theme -->
-    <background android:drawable="@color/ic_launcher_background" />
-    <!-- Foreground fills the full 108dp canvas, no padding -->
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-</adaptive-icon>
