@@ -10,28 +10,30 @@ use Illuminate\Support\Facades\Cache;
 class RecipeController extends Controller
 {
     /**
-     * GET /api/v1/recipes/search
-     *
-     * Search recipes by ingredients. Supports two modes:
-     *
-     *   mode=any  (default) — recipes that contain AT LEAST ONE of the given
-     *             ingredients, ranked by how many they match (most matches first).
-     *             Good for "I have chicken — show me anything with chicken."
-     *
-     *   mode=all  — recipes that contain ALL the given ingredients.
-     *             Good for "I have chicken + garlic + onion — what can I make exactly?"
-     *
-     * Additional filters: category, min_rating, max_calories, q (text search)
-     *
-     * Query params:
-     *   ingredient_ids[] — UUID list (required, max 15)
-     *   mode             — "any" | "all"  (default: "any")
-     *   category         — string, e.g. "Chicken Breast"
-     *   min_rating       — numeric 1-5
-     *   max_calories     — numeric
-     *   q                — free text search on name + description
-     *   limit            — 1-50 (default 20)
-     *   page             — 1-based (default 1)
+     * @OA\Get(
+     *     path="/api/v1/recipes/search",
+     *     summary="Search recipes by ingredients",
+     *     description="Find recipes that contain your ingredients. Two modes: **any** (default) returns recipes with at least one match, ranked by how many ingredients match. **all** returns only recipes that contain every ingredient you listed.",
+     *     tags={"Recipes"},
+     *     @OA\Parameter(name="ingredient_ids[]", in="query", required=true, description="Ingredient UUIDs to search with (1–15)", @OA\Schema(type="array", @OA\Items(type="string", format="uuid")), style="form", explode=true),
+     *     @OA\Parameter(name="mode", in="query", required=false, description="'any' = at least one match (default). 'all' = must contain every ingredient.", @OA\Schema(type="string", enum={"any","all"}, example="any")),
+     *     @OA\Parameter(name="category", in="query", required=false, description="Filter by recipe category (partial match)", @OA\Schema(type="string", example="Chicken")),
+     *     @OA\Parameter(name="min_rating", in="query", required=false, description="Minimum recipe rating (1–5)", @OA\Schema(type="number", example=4.0)),
+     *     @OA\Parameter(name="max_calories", in="query", required=false, description="Maximum calories per serving", @OA\Schema(type="number", example=500)),
+     *     @OA\Parameter(name="q", in="query", required=false, description="Full-text search on recipe name and description", @OA\Schema(type="string", example="spicy")),
+     *     @OA\Parameter(name="limit", in="query", required=false, description="Results per page (1–50, default 20)", @OA\Schema(type="integer", example=20)),
+     *     @OA\Parameter(name="page", in="query", required=false, description="Page number (default 1)", @OA\Schema(type="integer", example=1)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Recipe search results",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="mode", type="string", example="any"),
+     *             @OA\Property(property="results", type="array", @OA\Items(ref="#/components/schemas/RecipeSummary")),
+     *             @OA\Property(property="pagination", ref="#/components/schemas/Pagination")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function search(Request $request): JsonResponse
     {
@@ -207,12 +209,25 @@ class RecipeController extends Controller
     }
 
     /**
-     * GET /api/v1/recipes/categories
-     *
-     * Returns all distinct recipe categories with recipe count,
-     * ordered by count descending. Used for browse/filter UI.
-     *
-     * Cache: 1 hour (categories don't change often)
+     * @OA\Get(
+     *     path="/api/v1/recipes/categories",
+     *     summary="List all recipe categories",
+     *     description="Returns all distinct recipe categories with their recipe counts, ordered by count descending. Use this to build a browse/filter UI.",
+     *     tags={"Recipes"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category list",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="categories", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="category", type="string", example="Dessert"),
+     *                     @OA\Property(property="recipe_count", type="integer", example=61338)
+     *                 )
+     *             ),
+     *             @OA\Property(property="count", type="integer", example=316)
+     *         )
+     *     )
+     * )
      */
     public function categories(): JsonResponse
     {
@@ -235,11 +250,19 @@ class RecipeController extends Controller
     }
 
     /**
-     * GET /api/v1/recipes/{id}
-     *
-     * Full recipe detail including all ingredients with quantities.
-     *
-     * Cache: 24 hours (recipe data is static)
+     * @OA\Get(
+     *     path="/api/v1/recipes/{id}",
+     *     summary="Get full recipe detail",
+     *     description="Returns complete recipe information including step-by-step instructions, full ingredient list with quantities and units, and detailed nutrition data.",
+     *     tags={"Recipes"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Recipe UUID", @OA\Schema(type="string", format="uuid", example="7db8181c-86ff-4fae-bd4c-998c172237dd")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Full recipe detail",
+     *         @OA\JsonContent(ref="#/components/schemas/RecipeDetail")
+     *     ),
+     *     @OA\Response(response=404, description="Recipe not found", @OA\JsonContent(ref="#/components/schemas/Error"))
+     * )
      */
     public function show(string $id): JsonResponse
     {

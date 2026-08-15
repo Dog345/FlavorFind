@@ -1,0 +1,870 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "FlavorFind API",
+        "description": "FlavorFind is a smart ingredient pairing and recipe discovery API. It answers: 'I have these ingredients — what else goes well with them, and what can I cook?' Powered by 514,780 recipes and a pre-computed ingredient suggestion engine combining co-occurrence analysis and semantic vector similarity.",
+        "contact": {
+            "name": "FlavorFind Support",
+            "email": "dallaherick0@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://flavorfind-22iw.onrender.com",
+            "description": "Production"
+        },
+        {
+            "url": "http://localhost:8000",
+            "description": "Local development"
+        }
+    ],
+    "paths": {
+        "/api/v1/ingredients/search": {
+            "get": {
+                "tags": [
+                    "Ingredients"
+                ],
+                "summary": "Search ingredients by name (autocomplete)",
+                "description": "Returns ingredients matching the query, ordered by exact match first, then by popularity (recipe count), then alphabetically. Use this to power autocomplete in the UI.",
+                "operationId": "2081367d0b54c97bc3ed58bf0d185c16",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term (min 1 char)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "chick"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Max results (1–50, default 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Matching ingredients",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "query": {
+                                            "type": "string",
+                                            "example": "chick"
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/IngredientWithCount"
+                                            }
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/ingredients/{id}/suggestions": {
+            "get": {
+                "tags": [
+                    "Ingredients"
+                ],
+                "summary": "Get ingredient pairing suggestions for one ingredient",
+                "description": "Returns the top ingredients that pair well with the given ingredient. Scores combine co-occurrence (60%) — how often they appear together in recipes — and vector similarity (40%) — semantic closeness. Results are pre-computed for instant response.",
+                "operationId": "3573ac00ea8610466c6721eee6320f58",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ingredient UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "7bb3db1c-27bf-499e-9945-7ed92bdc16f5"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Max suggestions (1–50, default 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ingredient suggestions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ingredient": {
+                                            "$ref": "#/components/schemas/Ingredient"
+                                        },
+                                        "suggestions": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Suggestion"
+                                            }
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ingredient not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ingredients/suggest-multi": {
+            "get": {
+                "tags": [
+                    "Ingredients"
+                ],
+                "summary": "Get ingredient suggestions for multiple ingredients at once",
+                "description": "The core FlavorFind feature. Given 1–10 ingredients you already have, returns the best additional ingredients that pair well with ALL of them simultaneously. Results are ranked by average pairing score plus a breadth bonus that rewards ingredients pairing with multiple anchors.",
+                "operationId": "96ed840ec8bdc44393e6b59c42cc4c7e",
+                "parameters": [
+                    {
+                        "name": "ids[]",
+                        "in": "query",
+                        "description": "Array of ingredient UUIDs (1–10)",
+                        "required": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "format": "uuid"
+                            }
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Max suggestions (1–50, default 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Multi-ingredient suggestions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "anchors": {
+                                            "description": "The ingredients you provided",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Ingredient"
+                                            }
+                                        },
+                                        "suggestions": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MultiSuggestion"
+                                            }
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 15
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No valid ingredients found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/ingredients/{id}": {
+            "get": {
+                "tags": [
+                    "Ingredients"
+                ],
+                "summary": "Get a single ingredient by ID",
+                "operationId": "3ec8bef1ee407da9869b032c635d3001",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ingredient UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "7bb3db1c-27bf-499e-9945-7ed92bdc16f5"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ingredient detail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Ingredient"
+                                        },
+                                        {
+                                            "properties": {
+                                                "recipe_count": {
+                                                    "type": "integer",
+                                                    "example": 5903
+                                                },
+                                                "has_embedding": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/recipes/search": {
+            "get": {
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Search recipes by ingredients",
+                "description": "Find recipes that contain your ingredients. Two modes: **any** (default) returns recipes with at least one match, ranked by how many ingredients match. **all** returns only recipes that contain every ingredient you listed.",
+                "operationId": "606277d69cc0a4ce5191e53ca94b5fae",
+                "parameters": [
+                    {
+                        "name": "ingredient_ids[]",
+                        "in": "query",
+                        "description": "Ingredient UUIDs to search with (1–15)",
+                        "required": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "format": "uuid"
+                            }
+                        }
+                    },
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "description": "'any' = at least one match (default). 'all' = must contain every ingredient.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "any",
+                            "enum": [
+                                "any",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter by recipe category (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Chicken"
+                        }
+                    },
+                    {
+                        "name": "min_rating",
+                        "in": "query",
+                        "description": "Minimum recipe rating (1–5)",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 4
+                        }
+                    },
+                    {
+                        "name": "max_calories",
+                        "in": "query",
+                        "description": "Maximum calories per serving",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 500
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Full-text search on recipe name and description",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "spicy"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Results per page (1–50, default 20)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number (default 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recipe search results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mode": {
+                                            "type": "string",
+                                            "example": "any"
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RecipeSummary"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/Pagination"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/v1/recipes/categories": {
+            "get": {
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "List all recipe categories",
+                "description": "Returns all distinct recipe categories with their recipe counts, ordered by count descending. Use this to build a browse/filter UI.",
+                "operationId": "ce743e267db2035607d54212e255e9b3",
+                "responses": {
+                    "200": {
+                        "description": "Category list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "categories": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Dessert"
+                                                    },
+                                                    "recipe_count": {
+                                                        "type": "integer",
+                                                        "example": 61338
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 316
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/recipes/{id}": {
+            "get": {
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Get full recipe detail",
+                "description": "Returns complete recipe information including step-by-step instructions, full ingredient list with quantities and units, and detailed nutrition data.",
+                "operationId": "e20a404de5e2dee076e3ecb5908fb11e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "7db8181c-86ff-4fae-bd4c-998c172237dd"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Full recipe detail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecipeDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Recipe not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Ingredient": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7bb3db1c-27bf-499e-9945-7ed92bdc16f5"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "chicken"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "protein"
+                    }
+                },
+                "type": "object"
+            },
+            "IngredientWithCount": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "7bb3db1c-27bf-499e-9945-7ed92bdc16f5"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "chicken"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "protein"
+                    },
+                    "recipe_count": {
+                        "type": "integer",
+                        "example": 5903
+                    },
+                    "match_rank": {
+                        "description": "0=exact, 1=prefix, 2=partial",
+                        "type": "integer",
+                        "example": 0
+                    }
+                },
+                "type": "object"
+            },
+            "Suggestion": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "garlic"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "vegetable"
+                    },
+                    "score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.6213
+                    },
+                    "co_occurrence_score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.4102
+                    },
+                    "vector_score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
+                    },
+                    "rank": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "MultiSuggestion": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "onion"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "vegetable"
+                    },
+                    "anchor_matches": {
+                        "description": "How many of your input ingredients this pairs well with",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "avg_score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.5157
+                    },
+                    "final_score": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.6157
+                    }
+                },
+                "type": "object"
+            },
+            "RecipeSummary": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Chicken Pot Pie"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "Savory Pies"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "prep_time": {
+                        "type": "string",
+                        "example": "PT30M"
+                    },
+                    "cook_time": {
+                        "type": "string",
+                        "example": "PT45M"
+                    },
+                    "total_time": {
+                        "type": "string",
+                        "example": "PT1H15M"
+                    },
+                    "servings": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "rating": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.5
+                    },
+                    "review_count": {
+                        "type": "integer",
+                        "example": 128
+                    },
+                    "calories": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 538.3
+                    },
+                    "matched_count": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "total_searched": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "RecipeIngredientItem": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "chicken breast"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "protein"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "quantity_numeric": {
+                        "type": "number",
+                        "example": 2
+                    },
+                    "unit": {
+                        "type": "string",
+                        "example": "lbs"
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "example": 0
+                    }
+                },
+                "type": "object"
+            },
+            "RecipeDetail": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Chicken Pot Pie"
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "Savory Pies"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "prep_time": {
+                        "type": "string",
+                        "example": "PT30M"
+                    },
+                    "cook_time": {
+                        "type": "string",
+                        "example": "PT45M"
+                    },
+                    "total_time": {
+                        "type": "string",
+                        "example": "PT1H15M"
+                    },
+                    "servings": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "yield": {
+                        "type": "string",
+                        "example": "8 servings"
+                    },
+                    "rating": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.5
+                    },
+                    "review_count": {
+                        "type": "integer",
+                        "example": 128
+                    },
+                    "calories": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 538.3
+                    },
+                    "protein_g": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 32.1
+                    },
+                    "fat_g": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 18.4
+                    },
+                    "carbs_g": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 45.2
+                    },
+                    "fiber_g": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 3.1
+                    },
+                    "sugar_g": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 5
+                    },
+                    "sodium_mg": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 820
+                    },
+                    "instructions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "keywords": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ingredients": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecipeIngredientItem"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "properties": {
+                    "total": {
+                        "type": "integer",
+                        "example": 1240
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 20
+                    },
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 62
+                    }
+                },
+                "type": "object"
+            },
+            "Error": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Ingredient not found."
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Ingredients",
+            "description": "Search ingredients and get smart pairing suggestions"
+        },
+        {
+            "name": "Recipes",
+            "description": "Search and browse 514,780 recipes"
+        }
+    ]
+}
