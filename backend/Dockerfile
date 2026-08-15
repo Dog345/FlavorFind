@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:8.4-cli-alpine
 
 # Install system dependencies + all PHP extensions Laravel needs
 RUN apk add --no-cache \
@@ -25,14 +25,13 @@ WORKDIR /var/www
 # Copy composer files first for layer caching
 COPY composer.json composer.lock ./
 
-# Install dependencies — ignore platform reqs so extensions already installed
-# above satisfy the check without re-checking at runtime
+# Install dependencies
 RUN composer install \
         --no-dev \
         --optimize-autoloader \
         --no-interaction \
         --no-scripts \
-        --ignore-platform-req=ext-redis
+        --ignore-platform-reqs
 
 # Copy full application
 COPY . .
