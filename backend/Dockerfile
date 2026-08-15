@@ -44,6 +44,7 @@ RUN mkdir -p storage/framework/cache/data \
              storage/framework/sessions \
              storage/framework/views \
              storage/logs \
+             storage/api-docs \
              bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
@@ -51,4 +52,5 @@ EXPOSE 10000
 
 CMD php artisan config:cache && \
     php artisan route:cache && \
+    php artisan l5-swagger:generate && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}

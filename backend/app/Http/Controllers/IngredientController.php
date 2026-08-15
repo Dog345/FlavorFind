@@ -10,13 +10,24 @@ use Illuminate\Support\Facades\Cache;
 class IngredientController extends Controller
 {
     /**
-     * GET /api/ingredients/search?q=chick&limit=10
-     *
-     * Autocomplete — returns ingredients matching the search query.
-     * Ordered by: exact prefix match first, then by how many recipes
-     * contain the ingredient (popularity), then alphabetically.
-     *
-     * Cache: 1 hour per query string (ingredient names don't change)
+     * @OA\Get(
+     *     path="/api/v1/ingredients/search",
+     *     summary="Search ingredients by name (autocomplete)",
+     *     description="Returns ingredients matching the query, ordered by exact match first, then by popularity (recipe count), then alphabetically. Use this to power autocomplete in the UI.",
+     *     tags={"Ingredients"},
+     *     @OA\Parameter(name="q", in="query", required=true, description="Search term (min 1 char)", @OA\Schema(type="string", example="chick")),
+     *     @OA\Parameter(name="limit", in="query", required=false, description="Max results (1–50, default 10)", @OA\Schema(type="integer", example=10)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Matching ingredients",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="query", type="string", example="chick"),
+     *             @OA\Property(property="results", type="array", @OA\Items(ref="#/components/schemas/IngredientWithCount")),
+     *             @OA\Property(property="count", type="integer", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function search(Request $request): JsonResponse
     {
@@ -65,14 +76,24 @@ class IngredientController extends Controller
     }
 
     /**
-     * GET /api/ingredients/{id}/suggestions?limit=10
-     *
-     * Returns top ingredient suggestions for a single ingredient,
-     * sourced from the pre-computed combined_suggestions table.
-     *
-     * Combined score = 0.6 × co-occurrence + 0.4 × vector similarity
-     *
-     * Cache: 24 hours (pre-computed table only changes when re-run)
+     * @OA\Get(
+     *     path="/api/v1/ingredients/{id}/suggestions",
+     *     summary="Get ingredient pairing suggestions for one ingredient",
+     *     description="Returns the top ingredients that pair well with the given ingredient. Scores combine co-occurrence (60%) — how often they appear together in recipes — and vector similarity (40%) — semantic closeness. Results are pre-computed for instant response.",
+     *     tags={"Ingredients"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Ingredient UUID", @OA\Schema(type="string", format="uuid", example="7bb3db1c-27bf-499e-9945-7ed92bdc16f5")),
+     *     @OA\Parameter(name="limit", in="query", required=false, description="Max suggestions (1–50, default 10)", @OA\Schema(type="integer", example=10)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ingredient suggestions",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="ingredient", ref="#/components/schemas/Ingredient"),
+     *             @OA\Property(property="suggestions", type="array", @OA\Items(ref="#/components/schemas/Suggestion")),
+     *             @OA\Property(property="count", type="integer", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Ingredient not found", @OA\JsonContent(ref="#/components/schemas/Error"))
+     * )
      */
     public function suggestions(Request $request, string $id): JsonResponse
     {
@@ -118,22 +139,25 @@ class IngredientController extends Controller
     }
 
     /**
-     * GET /api/ingredients/suggest-multi?ids[]=uuid1&ids[]=uuid2&limit=15
-     *
-     * Given multiple ingredients the user already has, return the best
-     * additional ingredients that pair well with ALL of them.
-     *
-     * Algorithm:
-     *   For each candidate ingredient C:
-     *     score(C) = average combined_score across all provided anchors
-     *              + bonus if C pairs well with multiple anchors (breadth bonus)
-     *
-     *   Exclude any ingredient already in the input list.
-     *   Return top N by aggregated score.
-     *
-     * This is the core "what goes well with everything I have?" query.
-     *
-     * Cache: 1 hour per combination of input ids
+     * @OA\Get(
+     *     path="/api/v1/ingredients/suggest-multi",
+     *     summary="Get ingredient suggestions for multiple ingredients at once",
+     *     description="The core FlavorFind feature. Given 1–10 ingredients you already have, returns the best additional ingredients that pair well with ALL of them simultaneously. Results are ranked by average pairing score plus a breadth bonus that rewards ingredients pairing with multiple anchors.",
+     *     tags={"Ingredients"},
+     *     @OA\Parameter(name="ids[]", in="query", required=true, description="Array of ingredient UUIDs (1–10)", @OA\Schema(type="array", @OA\Items(type="string", format="uuid")), style="form", explode=true),
+     *     @OA\Parameter(name="limit", in="query", required=false, description="Max suggestions (1–50, default 15)", @OA\Schema(type="integer", example=15)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Multi-ingredient suggestions",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="anchors", type="array", @OA\Items(ref="#/components/schemas/Ingredient"), description="The ingredients you provided"),
+     *             @OA\Property(property="suggestions", type="array", @OA\Items(ref="#/components/schemas/MultiSuggestion")),
+     *             @OA\Property(property="count", type="integer", example=15)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="No valid ingredients found", @OA\JsonContent(ref="#/components/schemas/Error")),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function suggestMulti(Request $request): JsonResponse
     {
@@ -204,9 +228,22 @@ class IngredientController extends Controller
     }
 
     /**
-     * GET /api/ingredients/{id}
-     *
-     * Returns full details for a single ingredient.
+     * @OA\Get(
+     *     path="/api/v1/ingredients/{id}",
+     *     summary="Get a single ingredient by ID",
+     *     tags={"Ingredients"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Ingredient UUID", @OA\Schema(type="string", format="uuid", example="7bb3db1c-27bf-499e-9945-7ed92bdc16f5")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ingredient detail",
+     *         @OA\JsonContent(
+     *             allOf={@OA\Schema(ref="#/components/schemas/Ingredient")},
+     *             @OA\Property(property="recipe_count", type="integer", example=5903),
+     *             @OA\Property(property="has_embedding", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Not found", @OA\JsonContent(ref="#/components/schemas/Error"))
+     * )
      */
     public function show(string $id): JsonResponse
     {
