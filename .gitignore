@@ -7,3 +7,15 @@ PHASE_2_PLAN.md
 backend/.env
 laravel-backend/app/Console/Commands/SeedHomeSections.php
 laravel-backend/app/Console/Commands/SeedRecipesFromJson.php
+archive (3)/recipes.csv
+data/african_recipes.csv
+data/kenya_recipes.csv
+archive (3)/recipes.parquet
+data/tanzania_recipes.csv
+data/deepseek_african_recipes.csv
+deepseek_html_20260812_7dd307.html
+data/ethiopia_recipes.csv
+android-app/app/src/main/java/com/flavorfind/app/core/navigation/NavGraph.kt
+data/uganda_recipes.csv
+deepseek_html_20260812_0544dc.html
+archive (3)/reviews.csv
