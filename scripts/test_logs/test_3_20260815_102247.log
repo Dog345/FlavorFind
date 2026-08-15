@@ -1,0 +1,112 @@
+
+======================================================================
+  TEST 3: QUALITY — Suggestion Accuracy vs. Ground Truth
+======================================================================
+
+======================================================================
+  DETAILED RESULTS
+======================================================================
+
+  ⚠️  chicken                   1/5 expected found (20%)
+     Top 5 : chicken broth, salt, chicken meat, onion, chicken pieces
+     ❌ Missing from top-20: garlic, butter, olive oil, pepper
+
+  ⚠️  beef                      1/5 expected found (20%)
+     Top 5 : salt, onion, beef broth, beef steak, beef burger
+     ❌ Missing from top-20: garlic, tomatoes, pepper, potatoes
+
+  ⚠️  salmon                    0/5 expected found (0%)
+     Top 5 : salt, salted salmon, fresh salmon, red salmon, salmon fillets
+     ❌ Missing from top-20: lemon juice, butter, garlic, pepper, dill
+
+  ⚠️  eggs                      4/5 expected found (80%)
+     Top 5 : salt, milk, butter, sugar, eggs}
+     ❌ Missing from top-20: flour
+
+  ⚠️  garlic                    2/5 expected found (40%)
+     Top 5 : salt, garlic cloves, garlic clove, fresh garlic, olive oil
+     ❌ Missing from top-20: butter, tomatoes, pepper
+
+  ⚠️  tomatoes                  1/5 expected found (20%)
+     Top 5 : salt, onion, tomato paste, tomato, fresh tomatoes
+     ❌ Missing from top-20: garlic, olive oil, basil, pepper
+
+  ⚠️  spinach                   2/5 expected found (40%)
+     Top 5 : salt, fresh spinach, parsley, fresh spinach leaves, spinach pasta
+     ❌ Missing from top-20: garlic, parmesan cheese, butter
+
+  ⚠️  mushrooms                 2/5 expected found (40%)
+     Top 5 : onion, salt, mushroom, fresh mushrooms, mushroom pieces
+     ❌ Missing from top-20: garlic, olive oil, thyme
+
+  ⚠️  flour                     3/5 expected found (60%)
+     Top 5 : salt, butter, sugar, eggs, wheat flour
+     ❌ Missing from top-20: baking powder, milk
+
+  ⚠️  butter                    2/5 expected found (40%)
+     Top 5 : flour, salt, margarine, sweet butter, firm butter
+     ❌ Missing from top-20: sugar, eggs, milk
+
+  ⚠️  sugar                     1/5 expected found (20%)
+     Top 5 : salt, brown sugar, powdered sugar, confectioners' sugar, butter
+     ❌ Missing from top-20: flour, eggs, vanilla extract, milk
+
+  ⚠️  cumin                     3/5 expected found (60%)
+     Top 5 : chili powder, salt, onion, cinnamon, turmeric
+     ❌ Missing from top-20: coriander, garlic
+
+  ⚠️  cinnamon                  4/5 expected found (80%)
+     Top 5 : sugar, brown sugar, salt, nutmeg, vanilla
+     ❌ Missing from top-20: vanilla extract
+
+  ⚠️  ginger                    1/5 expected found (20%)
+     Top 5 : cinnamon, garlic, salt, nutmeg, pepper
+     ❌ Missing from top-20: soy sauce, onion, sesame oil, sugar
+
+  ⚠️  cream cheese              4/5 expected found (80%)
+     Top 5 : sour cream, butter, cream cheese spread, heavy cream, cream cheese frosting
+     ❌ Missing from top-20: vanilla extract
+
+  ⚠️  parmesan cheese           1/5 expected found (20%)
+     Top 5 : mozzarella cheese, salt, fresh parmesan cheese, cheddar cheese, olive oil
+     ❌ Missing from top-20: pasta, garlic, butter, basil
+
+  ⚠️  rice                      3/5 expected found (60%)
+     Top 5 : onion, salt, water, cooked rice, white rice
+     ❌ Missing from top-20: garlic, butter
+
+  ⚠️  pasta                     2/5 expected found (40%)
+     Top 5 : olive oil, italian pasta, cooked pasta, pasta noodles, desired pasta
+     ❌ Missing from top-20: garlic, onion, tomatoes
+
+  ⚠️  coconut milk              0/5 expected found (0%)
+     Top 5 : salt, coconut, coconut oil, fresh coconut milk, coconut milk powder
+     ❌ Missing from top-20: garlic, onion, ginger, coriander, tomatoes
+
+  ⚠️  pilau masala              0/5 expected found (0%)
+     Top 5 : masala, tandoori masala, tikka masala sauce, pickle masala, garam masala
+     ❌ Missing from top-20: coriander, cumin, cinnamon, cardamom, ginger
+
+======================================================================
+  SUMMARY
+======================================================================
+
+  Anchor ingredients tested : 20
+  ✅ Perfect               : 0
+  ⚠️  Partial               : 20
+  ❌ Missing from DB       : 0
+
+  Recall (known pairs in top-20):
+    Found 37 / 100 expected pairs  →  37.0%
+
+  Anti-pair rejection (bad pairs NOT in top-5):
+    Rejected 74 / 74 anti-pairs  →  100.0%
+
+======================================================================
+  ❌  FAIL — Recall 37.0% < 97.0% target
+  ✅  PASS — Anti-pair rejection 100.0% >= 90% target
+
+  Final verdict: ❌  SOME TESTS FAILED
+  Runtime: 17.4s
+======================================================================
+

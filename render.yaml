@@ -1,0 +1,67 @@
+services:
+  - type: web
+    name: flavorfind-api
+    runtime: php
+    plan: free
+    region: frankfurt        # closest to Nairobi
+    rootDir: backend
+
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader --no-interaction
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+
+    startCommand: |
+      php artisan serve --host=0.0.0.0 --port=$PORT
+
+    envVars:
+      # App
+      - key: APP_NAME
+        value: FlavorFind
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true    # Render generates a secure random key on first deploy
+
+      # Database — DigitalOcean droplet (already has all the data)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: REDACTED_HOST
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: flavorfind
+      - key: DB_USERNAME
+        value: flavorfind
+      - key: DB_PASSWORD
+        sync: false            # Set this manually in Render dashboard (keeps secret out of git)
+      - key: DB_SSLMODE
+        value: prefer
+
+      # Cache — use database driver on Render (no Redis on free plan)
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # Logging — stderr goes to Render log viewer
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+
+      # CORS — allow website and app to call the API
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: "flavorfind.co,*.flavorfind.co,localhost,localhost:3000"
+
+      # Disable unused services
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: MAIL_MAILER
+        value: log
