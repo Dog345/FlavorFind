@@ -112,13 +112,11 @@ return [
             'generator_factory' => null,
 
             /*
-             * Use both PHP 8 attributes AND docblock (@OA\...) annotations.
-             * doctrine/annotations must be installed for docblock support.
+             * analyser is set at runtime in AppServiceProvider to support both
+             * PHP 8 attributes AND docblock (@OA\...) annotations without
+             * breaking config:cache (objects can't be serialized in config files).
              */
-            'analyser' => new \OpenApi\Analysers\ReflectionAnalyser([
-                new \OpenApi\Analysers\AttributeAnnotationFactory(),
-                new \OpenApi\Analysers\DocBlockAnnotationFactory(),
-            ]),
+            'analyser' => null,
 
             /**
              * Configuration for default processors. Allows to pass processors configuration to swagger-php.

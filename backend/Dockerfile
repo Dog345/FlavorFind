@@ -50,7 +50,6 @@ RUN mkdir -p storage/framework/cache/data \
 
 EXPOSE 10000
 
-CMD php artisan config:cache && \
-    php artisan route:cache && \
+CMD php artisan route:cache && \
     php artisan l5-swagger:generate && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
