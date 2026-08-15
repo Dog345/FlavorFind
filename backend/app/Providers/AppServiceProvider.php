@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use OpenApi\Analysers\AttributeAnnotationFactory;
 use OpenApi\Analysers\DocBlockAnnotationFactory;
@@ -22,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production so asset URLs (including Swagger UI assets)
+        // are never generated as http:// behind Render's TLS termination proxy.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Configure swagger-php to scan both PHP 8 attributes (#[OA\...])
         // AND docblock annotations (@OA\...). This must be done at runtime
         // (not in the config file) because objects can't be serialized by
