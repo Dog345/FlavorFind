@@ -113,8 +113,15 @@ class RecipeController extends Controller
                         r.review_count,
                         r.calories,
                         {$ingCount} AS matched_count,
-                        {$ingCount} AS total_searched
+                        {$ingCount} AS total_searched,
+                        img.url AS image_url
                     FROM recipes r
+                    LEFT JOIN LATERAL (
+                        SELECT url FROM recipe_images
+                        WHERE recipe_id = r.id
+                        ORDER BY sort_order ASC
+                        LIMIT 1
+                    ) img ON true
                     WHERE EXISTS (
                         SELECT 1 FROM recipe_ingredients ri
                         WHERE ri.recipe_id = r.id
@@ -144,7 +151,8 @@ class RecipeController extends Controller
                         r.review_count,
                         r.calories,
                         ri_match.matched_count,
-                        {$ingCount} AS total_searched
+                        {$ingCount} AS total_searched,
+                        img.url AS image_url
                     FROM recipes r
                     JOIN (
                         SELECT recipe_id, COUNT(DISTINCT ingredient_id)::int AS matched_count
@@ -152,6 +160,12 @@ class RecipeController extends Controller
                         WHERE ingredient_id IN ({$ingPlaceholders})
                         GROUP BY recipe_id
                     ) ri_match ON ri_match.recipe_id = r.id
+                    LEFT JOIN LATERAL (
+                        SELECT url FROM recipe_images
+                        WHERE recipe_id = r.id
+                        ORDER BY sort_order ASC
+                        LIMIT 1
+                    ) img ON true
                     WHERE 1=1 {$filterSql}
                     ORDER BY ri_match.matched_count DESC, r.rating DESC NULLS LAST, r.review_count DESC
                     LIMIT ? OFFSET ?
@@ -322,6 +336,17 @@ class RecipeController extends Controller
             ", [$id]);
 
             $row->ingredients = $ingredients;
+
+            // Fetch images ordered by sort_order
+            $images = DB::select("
+                SELECT url, sort_order
+                FROM recipe_images
+                WHERE recipe_id = ?::uuid
+                ORDER BY sort_order ASC
+            ", [$id]);
+
+            $row->images    = $images;
+            $row->image_url = count($images) > 0 ? $images[0]->url : null;
 
             return $row;
         });
