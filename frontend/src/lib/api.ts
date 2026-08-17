@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://flavorfind-22iw.onrender.com/api/v1'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.flavorfind.co.ke/api/v1'
 
 async function get<T>(path: string, params?: Record<string, string | string[] | number | undefined>): Promise<T> {
   const url = new URL(`${API_BASE}${path}`)
