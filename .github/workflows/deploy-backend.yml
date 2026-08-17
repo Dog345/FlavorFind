@@ -1,4 +1,4 @@
-name: Deploy Backend to Production
+name: Deploy to Production
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to DigitalOcean (api.flavorfind.co.ke)
+    name: Deploy to DigitalOcean (flavorfind.co.ke)
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +17,7 @@ jobs:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USER }}
           key: ${{ secrets.DO_SSH_KEY }}
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
             set -e
 
@@ -26,28 +26,39 @@ jobs:
             git fetch origin production
             git reset --hard origin/production
 
+            # ── Backend ──────────────────────────────────────────
+            echo "🔧 [Backend] Installing dependencies..."
             cd /var/www/flavorfind/backend
 
-            echo "🔧 Installing composer dependencies..."
             COMPOSER_ALLOW_SUPERUSER=1 composer install \
               --no-dev \
               --optimize-autoloader \
               --no-interaction
 
-            echo "🗄️ Running migrations..."
+            echo "🗄️ [Backend] Running migrations..."
             php8.4 artisan migrate --force
 
-            echo "⚡ Caching routes and views..."
+            echo "⚡ [Backend] Caching..."
             php8.4 artisan route:cache
             php8.4 artisan view:cache
             php8.4 artisan event:cache
 
-            echo "🔐 Setting permissions..."
             chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache
-
-            echo "🔄 Reloading PHP-FPM..."
             systemctl reload php8.4-fpm
 
+            # ── Frontend ─────────────────────────────────────────
+            echo "🎨 [Frontend] Installing dependencies..."
+            cd /var/www/flavorfind/frontend
+            npm ci
+
+            echo "🏗️ [Frontend] Building..."
+            NEXT_PUBLIC_API_URL=https://api.flavorfind.co.ke/api/v1 npm run build
+
+            echo "🔄 [Frontend] Restarting PM2..."
+            pm2 restart flavorfind-web
+            pm2 save
+
             echo "✅ Deployed successfully at $(date)"
-            echo "🌐 Live at https://api.flavorfind.co.ke"
+            echo "🌐 Frontend: https://flavorfind.co.ke"
+            echo "🔌 Backend:  https://api.flavorfind.co.ke"
