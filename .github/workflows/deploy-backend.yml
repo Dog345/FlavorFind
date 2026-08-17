@@ -11,9 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -31,15 +28,11 @@ jobs:
 
             cd /var/www/flavorfind/backend
 
-            echo "🔧 Installing/updating composer dependencies..."
+            echo "🔧 Installing composer dependencies..."
             COMPOSER_ALLOW_SUPERUSER=1 composer install \
               --no-dev \
               --optimize-autoloader \
-              --no-interaction \
-              --no-scripts
-
-            composer dump-autoload --optimize --no-scripts
-            php8.4 artisan package:discover --ansi
+              --no-interaction
 
             echo "🗄️ Running migrations..."
             php8.4 artisan migrate --force
