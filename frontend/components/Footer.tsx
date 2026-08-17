@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
-  LeafIcon,
   MailIcon,
   SendIcon,
   InstagramIcon,
@@ -39,7 +39,7 @@ export default function Footer() {
           {/* Brand — always full width on mobile */}
           <div>
             <div className="mb-3 flex items-center gap-2.5">
-              <LeafIcon className="h-7 w-7 stroke-gold-light" />
+              <Image src="/logo.jpeg" alt="FlavorFind" width={40} height={40} className="rounded-xl overflow-hidden" />
               <span className="font-display text-[17px] tracking-[1px] text-white">
                 FLAVOR FIND
               </span>
@@ -140,10 +140,12 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-2 border-t border-white/10 pt-5 text-center text-[12.5px] text-[#9aa39a] sm:flex-row sm:text-left">
-          <span>© 2024 Flavor Find. All Rights Reserved.</span>
+          <span>© 2026 Flavor Find. All Rights Reserved.</span>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
+            <Link href="https://dallah.co.ke" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">dallah.co.ke</Link>
+
           </div>
         </div>
 

@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LeafIcon, SearchIcon } from './Icons'
+import { SearchIcon } from './Icons'
 
 const NAV_LINKS = [
   { label: 'Home',       href: '/' },
@@ -21,7 +22,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 text-white">
-          <LeafIcon className="h-7 w-7 stroke-gold-light" />
+          <Image src="/logo.jpeg" alt="FlavorFind" width={40} height={40} className="rounded-xl overflow-hidden" />
           <div>
             <div className="font-display text-[16px] tracking-[2px] text-white leading-none">FLAVOR FIND</div>
             <div className="text-[8px] tracking-[3px] text-gold-light uppercase">Recipes</div>

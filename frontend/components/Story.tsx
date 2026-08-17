@@ -6,25 +6,15 @@ export default function Story() {
     <section className="px-8 pb-[100px] pt-10" id="story">
       <div className="mx-auto max-w-[1240px] grid grid-cols-1 items-center gap-[60px] md:grid-cols-[0.95fr_1.05fr]">
 
-        {/* Left — main image + overlapping chef portrait */}
+        {/* Left — main image */}
         <div className="relative">
           <div className="relative w-full h-[380px] rounded-lg2 overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
-              alt="Home cook preparing a meal"
+              src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"
+              alt="Fresh ingredients and recipe preparation"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-          {/* Overlapping small portrait — bottom left */}
-          <div className="absolute -bottom-[30px] left-[40px] h-[120px] w-[120px] rounded-full overflow-hidden border-[6px] border-cream shadow-[0_14px_30px_-10px_rgba(0,0,0,0.35)]">
-            <Image
-              src="https://images.unsplash.com/photo-1607631568010-a87245c0daf0?w=300&q=80"
-              alt="Happy home cook"
-              fill
-              className="object-cover"
-              sizes="120px"
             />
           </div>
         </div>
@@ -49,7 +39,7 @@ export default function Story() {
             Just tell us what&apos;s in your kitchen, and we&apos;ll handle the rest.
           </p>
           <a
-            href="#dishes"
+            href="/recipes"
             className="btn btn-outline-green btn-small inline-flex items-center gap-2 rounded-full border border-green-deep px-[18px] py-[9px] text-[12.5px] font-semibold text-green-deep hover:bg-green-deep hover:text-white transition-colors"
           >
             Start Exploring →
