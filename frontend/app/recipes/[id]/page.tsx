@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getRecipe, getFeaturedRecipes, type Recipe } from '@/src/lib/api'
-import { LeafIcon } from '@/components/Icons'
 import Navbar from '@/components/Navbar'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -403,7 +402,7 @@ export default async function RecipePage({ params }: { params: { id: string } })
       ══════════════════════════════════════════ */}
       <footer className="mt-10 bg-gradient-to-b from-green-deep to-green-deeper px-6 py-8 text-center">
         <Link href="/" className="inline-flex items-center gap-2 text-white mb-2">
-          <LeafIcon className="h-6 w-6 stroke-gold-light" />
+          <Image src="/logo.jpeg" alt="FlavorFind" width={36} height={36} className="rounded-xl overflow-hidden" />
           <span className="font-display text-[15px] tracking-[2px]">FLAVOR FIND</span>
         </Link>
         <p className="text-[12px] text-white/40">© 2024 Flavor Find. All Rights Reserved.</p>

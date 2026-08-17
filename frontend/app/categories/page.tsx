@@ -1,92 +1,97 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getCategories } from '@/src/lib/api'
 import Navbar from '@/components/Navbar'
 import { StarBurst } from '@/components/Icons'
 import Footer from '@/components/Footer'
 
-// Emoji + color per category
-const CAT_META: Record<string, { emoji: string; color: string }> = {
-  'Dessert':          { emoji: '🍰', color: 'from-pink-400/20 to-pink-100/10' },
-  'Lunch/Snacks':     { emoji: '🥙', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'One Dish Meal':    { emoji: '🥘', color: 'from-orange-400/20 to-orange-100/10' },
-  'Vegetable':        { emoji: '🥦', color: 'from-green-400/20 to-green-100/10' },
-  'Breakfast':        { emoji: '🥞', color: 'from-amber-400/20 to-amber-100/10' },
-  'Beverages':        { emoji: '🥤', color: 'from-blue-400/20 to-blue-100/10' },
-  'Chicken':          { emoji: '🍗', color: 'from-yellow-500/20 to-yellow-100/10' },
-  'Meat':             { emoji: '🥩', color: 'from-red-400/20 to-red-100/10' },
-  'Breads':           { emoji: '🍞', color: 'from-amber-600/20 to-amber-100/10' },
-  'Pork':             { emoji: '🥓', color: 'from-pink-500/20 to-pink-100/10' },
-  'Sauces':           { emoji: '🫙', color: 'from-red-300/20 to-red-100/10' },
-  'Chicken Breast':   { emoji: '🍖', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'Pasta':            { emoji: '🍝', color: 'from-yellow-300/20 to-yellow-100/10' },
-  'Seafood':          { emoji: '🦞', color: 'from-blue-500/20 to-blue-100/10' },
-  'Soups':            { emoji: '🍲', color: 'from-orange-300/20 to-orange-100/10' },
-  'Salads':           { emoji: '🥗', color: 'from-green-500/20 to-green-100/10' },
-  'Fruit':            { emoji: '🍎', color: 'from-red-400/20 to-red-100/10' },
-  'Pizza':            { emoji: '🍕', color: 'from-orange-500/20 to-orange-100/10' },
-  'Fish':             { emoji: '🐟', color: 'from-cyan-400/20 to-cyan-100/10' },
-  'Appetizers':       { emoji: '🫙', color: 'from-purple-400/20 to-purple-100/10' },
-  'Lamb':             { emoji: '🍖', color: 'from-red-500/20 to-red-100/10' },
-  'Beef':             { emoji: '🥩', color: 'from-red-600/20 to-red-100/10' },
-  'Casseroles':       { emoji: '🥗', color: 'from-amber-400/20 to-amber-100/10' },
-  'Stew':             { emoji: '🫕', color: 'from-brown-400/20 to-orange-100/10' },
-  'Side Dish':        { emoji: '🍜', color: 'from-teal-400/20 to-teal-100/10' },
-  'Cheese':           { emoji: '🧀', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'Eggs':             { emoji: '🥚', color: 'from-yellow-200/20 to-yellow-100/10' },
-  'Beans':            { emoji: '🫘', color: 'from-green-600/20 to-green-100/10' },
-  'Veal':             { emoji: '🍖', color: 'from-pink-300/20 to-pink-100/10' },
-  'Potatoes':         { emoji: '🥔', color: 'from-amber-300/20 to-amber-100/10' },
-  default:            { emoji: '🍽', color: 'from-gray-400/20 to-gray-100/10' },
+// ── Food images per category (Unsplash, stable URLs) ──────────────────────────
+const CAT_IMG: Record<string, string> = {
+  'Dessert':        'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=75',
+  'Lunch/Snacks':   'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=75',
+  'One Dish Meal':  'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=75',
+  'Vegetable':      'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=75',
+  'Breakfast':      'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&q=75',
+  'Beverages':      'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=75',
+  'Chicken':        'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=600&q=75',
+  'Meat':           'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=75',
+  'Breads':         'https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=600&q=75',
+  'Pork':           'https://images.unsplash.com/photo-1432139509613-5c4255815697?w=600&q=75',
+  'Sauces':         'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=600&q=75',
+  'Chicken Breast': 'https://images.unsplash.com/photo-1604503468506-a8da13d11bea?w=600&q=75',
+  'Pasta':          'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600&q=75',
+  'Seafood':        'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=600&q=75',
+  'Soups':          'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=75',
+  'Salads':         'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=75',
+  'Fruit':          'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=600&q=75',
+  'Pizza':          'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=75',
+  'Fish':           'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&q=75',
+  'Appetizers':     'https://images.unsplash.com/photo-1626200926749-ccb8e935e659?w=600&q=75',
+  'Lamb':           'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=75',
+  'Beef':           'https://images.unsplash.com/photo-1558030006-450675393462?w=600&q=75',
+  'Casseroles':     'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=600&q=75',
+  'Stew':           'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=75',
+  'Side Dish':      'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&q=75',
+  'Cheese':         'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=600&q=75',
+  'Eggs':           'https://images.unsplash.com/photo-1607690424506-f1d80f9a0834?w=600&q=75',
+  'Beans':          'https://images.unsplash.com/photo-1574805627696-5d6f4b870cb6?w=600&q=75',
+  'Veal':           'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=75',
+  'Potatoes':       'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&q=75',
+  default:          'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=75',
 }
 
-function getMeta(category: string) {
-  return CAT_META[category] ?? CAT_META.default
+function getCatImg(name: string) {
+  return CAT_IMG[name] ?? CAT_IMG.default
 }
 
-// Group categories into cuisine, meal type, ingredient-based
-const GROUPS: { label: string; emoji: string; cats: string[] }[] = [
+const GROUPS: { label: string; icon: string; cats: string[] }[] = [
   {
-    label: 'By Meal Type',
-    emoji: '🍽',
+    label: 'By Meal Type', icon: '🍽',
     cats: ['Breakfast', 'Lunch/Snacks', 'One Dish Meal', 'Side Dish', 'Appetizers', 'Dessert', 'Beverages'],
   },
   {
-    label: 'By Protein',
-    emoji: '🥩',
+    label: 'By Protein', icon: '🥩',
     cats: ['Chicken', 'Chicken Breast', 'Meat', 'Beef', 'Pork', 'Seafood', 'Fish', 'Lamb', 'Veal'],
   },
   {
-    label: 'By Dish',
-    emoji: '🍳',
+    label: 'By Dish', icon: '🍳',
     cats: ['Pasta', 'Pizza', 'Soups', 'Stew', 'Casseroles', 'Salads', 'Breads', 'Sauces'],
   },
   {
-    label: 'By Ingredient',
-    emoji: '🥦',
+    label: 'By Ingredient', icon: '🥦',
     cats: ['Vegetable', 'Fruit', 'Beans', 'Eggs', 'Cheese', 'Potatoes'],
   },
 ]
 
-export default async function CategoriesPage() {
-  let allCategories: { category: string; recipe_count: number }[] = []
-  try {
-    const data = await getCategories()
-    allCategories = data.categories
-  } catch { /* silently fail */ }
+const OTHERS_PER_PAGE = 10
+
+export default function CategoriesPage() {
+  const [allCategories, setAllCategories] = useState<{ category: string; recipe_count: number }[]>([])
+  const [othersPage, setOthersPage] = useState(1)
+
+  useEffect(() => {
+    getCategories().then(d => setAllCategories(d.categories)).catch(() => {})
+  }, [])
 
   const countMap = Object.fromEntries(allCategories.map(c => [c.category, c.recipe_count]))
+  const groupedNames = GROUPS.flatMap(g => g.cats)
+  const others = allCategories.filter(c => !groupedNames.includes(c.category))
+  const totalOthersPages = Math.ceil(others.length / OTHERS_PER_PAGE)
+  const pagedOthers = others.slice((othersPage - 1) * OTHERS_PER_PAGE, othersPage * OTHERS_PER_PAGE)
+
+  const totalRecipes = allCategories.reduce((s, c) => s + c.recipe_count, 0)
 
   return (
     <div className="min-h-screen bg-cream">
-
       <Navbar />
 
-      {/* ── Page Hero ── */}
+      {/* ── Hero ── */}
       <div className="bg-gradient-to-b from-green-deep to-green-deeper px-6 py-14 text-center">
         <div className="mx-auto max-w-[1240px]">
-          <div className="eyebrow justify-center !text-gold-light mb-3">
-            Browse
-          </div>
+          <div className="eyebrow justify-center !text-gold-light mb-3">Browse</div>
           <h1 className="font-display text-[32px] text-white md:text-[46px]">
             Explore Recipe Categories
           </h1>
@@ -94,9 +99,9 @@ export default async function CategoriesPage() {
             From quick breakfasts to hearty dinners — find exactly what you&apos;re craving.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3 text-[13px] text-white/50">
-            <span>🍽 {allCategories.length} categories</span>
+            <span>{allCategories.length} categories</span>
             <span>·</span>
-            <span>📖 {allCategories.reduce((s, c) => s + c.recipe_count, 0).toLocaleString()} recipes</span>
+            <span>{totalRecipes.toLocaleString()} recipes</span>
           </div>
         </div>
       </div>
@@ -112,64 +117,109 @@ export default async function CategoriesPage() {
           return (
             <div key={group.label} className="mb-14">
               <div className="mb-6 flex items-center gap-3">
-                <span className="text-[24px]">{group.emoji}</span>
+                <span className="text-[22px]">{group.icon}</span>
                 <h2 className="font-display text-[22px] text-green-deep">{group.label}</h2>
                 <div className="flex-1 h-px bg-cream-2" />
               </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {cats.map(({ name, count }) => {
-                  const meta = getMeta(name)
-                  return (
-                    <Link
-                      key={name}
-                      href={`/recipes?category=${encodeURIComponent(name)}`}
-                      className={`group relative overflow-hidden rounded-lg2 bg-gradient-to-br ${meta.color} border border-white bg-white p-5 shadow-[0_4px_16px_-6px_rgba(18,51,38,0.15)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(18,51,38,0.25)]`}
-                    >
-                      <div className="mb-3 text-[36px]">{meta.emoji}</div>
-                      <h3 className="font-display text-[15px] leading-tight text-green-deep">{name}</h3>
-                      <p className="mt-1 text-[12px] text-ink-soft">{count.toLocaleString()} recipes</p>
-                      <div className="mt-3 inline-flex items-center gap-1 text-[11.5px] font-semibold text-terracotta opacity-0 transition-opacity group-hover:opacity-100">
-                        Browse →
+                {cats.map(({ name, count }) => (
+                  <Link
+                    key={name}
+                    href={`/recipes?category=${encodeURIComponent(name)}`}
+                    className="group relative overflow-hidden rounded-lg2 shadow-[0_4px_16px_-6px_rgba(18,51,38,0.2)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(18,51,38,0.3)] bg-white"
+                  >
+                    {/* Food image */}
+                    <div className="relative h-[140px] overflow-hidden">
+                      <Image
+                        src={getCatImg(name)}
+                        alt={name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
+                        unoptimized
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      {/* Category name overlaid on image */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <h3 className="font-display text-[14px] text-white leading-tight drop-shadow">{name}</h3>
                       </div>
-                    </Link>
-                  )
-                })}
+                    </div>
+                    {/* Count + hover cta */}
+                    <div className="flex items-center justify-between px-3 py-2.5">
+                      <span className="text-[12px] text-ink-soft">{count.toLocaleString()} recipes</span>
+                      <span className="text-[11.5px] font-semibold text-terracotta opacity-0 transition-opacity group-hover:opacity-100">
+                        Browse →
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           )
         })}
 
-        {/* ── All other categories ── */}
-        {(() => {
-          const grouped = GROUPS.flatMap(g => g.cats)
-          const others = allCategories.filter(c => !grouped.includes(c.category))
-          if (others.length === 0) return null
-          return (
-            <div className="mb-14">
-              <div className="mb-6 flex items-center gap-3">
-                <span className="text-[24px]">🗂</span>
-                <h2 className="font-display text-[22px] text-green-deep">All Other Categories</h2>
-                <div className="flex-1 h-px bg-cream-2" />
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {others.map(({ category, recipe_count }) => {
-                  const meta = getMeta(category)
-                  return (
-                    <Link
-                      key={category}
-                      href={`/recipes?category=${encodeURIComponent(category)}`}
-                      className="group flex flex-col items-center rounded-md2 bg-white py-5 px-3 text-center shadow-[0_4px_16px_-6px_rgba(18,51,38,0.12)] border border-cream-2 transition-all hover:-translate-y-1 hover:border-green-deep/20"
-                    >
-                      <span className="mb-2 text-[28px]">{meta.emoji}</span>
-                      <span className="font-display text-[13px] text-green-deep leading-tight line-clamp-1">{category}</span>
-                      <span className="mt-1 text-[11px] text-ink-soft">{recipe_count.toLocaleString()}</span>
-                    </Link>
-                  )
-                })}
-              </div>
+        {/* ── All other categories (paginated) ── */}
+        {others.length > 0 && (
+          <div className="mb-14">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="text-[22px]">🗂</span>
+              <h2 className="font-display text-[22px] text-green-deep">All Other Categories</h2>
+              <div className="flex-1 h-px bg-cream-2" />
+              <span className="text-[12px] text-ink-soft">{others.length} total</span>
             </div>
-          )
-        })()}
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {pagedOthers.map(({ category, recipe_count }) => (
+                <Link
+                  key={category}
+                  href={`/recipes?category=${encodeURIComponent(category)}`}
+                  className="group relative overflow-hidden rounded-lg2 bg-white shadow-[0_4px_16px_-6px_rgba(18,51,38,0.12)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(18,51,38,0.25)]"
+                >
+                  <div className="relative h-[100px] overflow-hidden">
+                    <Image
+                      src={getCatImg(category)}
+                      alt={category}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      sizes="(max-width:640px) 50vw, 20vw"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-2">
+                      <span className="font-display text-[12px] text-white leading-tight line-clamp-1 drop-shadow">{category}</span>
+                    </div>
+                  </div>
+                  <div className="px-2.5 py-2">
+                    <span className="text-[11px] text-ink-soft">{recipe_count.toLocaleString()} recipes</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalOthersPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setOthersPage(p => Math.max(1, p - 1))}
+                  disabled={othersPage === 1}
+                  className="rounded-full border border-green-deep/20 px-5 py-2 text-[13px] font-medium text-green-deep hover:bg-green-deep hover:text-white transition-colors disabled:opacity-30"
+                >
+                  ← Prev
+                </button>
+                <span className="px-4 text-[13px] text-ink-soft">
+                  Page {othersPage} of {totalOthersPages}
+                </span>
+                <button
+                  onClick={() => setOthersPage(p => Math.min(totalOthersPages, p + 1))}
+                  disabled={othersPage === totalOthersPages}
+                  className="rounded-full border border-green-deep/20 px-5 py-2 text-[13px] font-medium text-green-deep hover:bg-green-deep hover:text-white transition-colors disabled:opacity-30"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── CTA strip ── */}
         <div className="rounded-lg2 bg-gradient-to-br from-green-deep to-green-deeper px-8 py-10 text-center text-white">

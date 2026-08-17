@@ -1,11 +1,12 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { LeafIcon, StarBurst } from '@/components/Icons'
+import { StarBurst } from '@/components/Icons'
 import { getCategories } from '@/src/lib/api'
 
 const TEAM = [
-  { name: 'Erick Dallah', role: 'Founder & Lead Developer', emoji: '👨‍💻' },
+  { name: 'dallah.co.ke', role: 'Founder & Lead Developer', emoji: '👨‍💻' },
   { name: 'The FlavorFind Team', role: 'Recipe Curators', emoji: '👨‍🍳' },
 ]
 
@@ -27,7 +28,7 @@ const VALUES = [
   },
   {
     emoji: '📱',
-    title: 'Works Everywhere',
+    title: 'Works Everywhere, anywhere',
     desc: 'Optimised for mobile, tablet and desktop so you can cook from any device.',
   },
 ]
@@ -95,7 +96,7 @@ export default async function AboutPage() {
             </p>
           </div>
           <div className="rounded-lg2 bg-gradient-to-br from-green-deep to-green-deeper p-8 text-white text-center">
-            <LeafIcon className="mx-auto mb-4 h-16 w-16 stroke-gold-light" />
+            <Image src="/logo.jpeg" alt="FlavorFind" width={80} height={80} className="mx-auto mb-4 rounded-2xl overflow-hidden" />
             <div className="font-display text-[22px] tracking-[2px] mb-1">FLAVOR FIND</div>
             <div className="text-[12px] tracking-[3px] text-gold-light uppercase mb-6">Discover · Cook · Enjoy</div>
             <div className="grid grid-cols-2 gap-4 text-center">

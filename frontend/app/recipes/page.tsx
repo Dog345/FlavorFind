@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { searchIngredients, searchRecipes, getCategories, type IngredientResult, type Recipe } from '@/src/lib/api'
@@ -10,7 +10,7 @@ import Navbar from '@/components/Navbar'
 
 const QUICK_TAGS = ['Chicken', 'Pasta', 'Beef', 'Salmon', 'Eggs', 'Rice', 'Mushrooms', 'Tomato', 'Broccoli', 'Shrimp']
 
-export default function RecipesPage() {
+function RecipesContent() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get('category') ?? ''
   const initialIngNames = searchParams.getAll('ing') // from hero search
@@ -150,7 +150,7 @@ export default function RecipesPage() {
       <Navbar />
 
       {/* ── Page header ── */}
-      <div className="bg-gradient-to-b from-green-deep to-green-deeper px-6 py-12 text-center">
+      <div className="relative z-10 bg-gradient-to-b from-green-deep to-green-deeper px-6 py-12 text-center overflow-visible">
         <div className="eyebrow justify-center !text-gold-light">
           Browse Recipes
         </div>
@@ -162,7 +162,7 @@ export default function RecipesPage() {
         </p>
 
         {/* Search bar */}
-        <div className="relative mx-auto mt-8 max-w-[560px]">
+        <div className="relative z-50 mx-auto mt-8 max-w-[560px]">
           <div className="flex items-center gap-3 rounded-full bg-white px-5 py-3.5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)]">
             <SearchIcon className="h-4 w-4 stroke-ink-soft flex-shrink-0" />
             <input
@@ -305,5 +305,17 @@ export default function RecipesPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function RecipesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="h-10 w-10 rounded-full border-4 border-cream-2 border-t-terracotta animate-spin" />
+      </div>
+    }>
+      <RecipesContent />
+    </Suspense>
   )
 }
