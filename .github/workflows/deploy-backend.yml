@@ -1,39 +1,60 @@
-name: Deploy to DigitalOcean
+name: Deploy Backend to Production
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'laravel-backend/**'
-      - 'nextjs-frontend/**'
+    branches: [production]
   workflow_dispatch:
 
 jobs:
   deploy:
+    name: Deploy to DigitalOcean (api.flavorfind.co.ke)
     runs-on: ubuntu-latest
+
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USER }}
           key: ${{ secrets.DO_SSH_KEY }}
+          command_timeout: 10m
           script: |
-            cd /var/www/flavorfind && git pull origin main
+            set -e
 
-            # --- Backend ---
-            cd /var/www/flavorfind/laravel-backend
-            COMPOSER_ALLOW_SUPERUSER=1 php8.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+            echo "📦 Pulling latest production branch..."
+            cd /var/www/flavorfind
+            git fetch origin production
+            git reset --hard origin/production
+
+            cd /var/www/flavorfind/backend
+
+            echo "🔧 Installing/updating composer dependencies..."
+            COMPOSER_ALLOW_SUPERUSER=1 composer install \
+              --no-dev \
+              --optimize-autoloader \
+              --no-interaction \
+              --no-scripts
+
+            composer dump-autoload --optimize --no-scripts
+            php8.4 artisan package:discover --ansi
+
+            echo "🗄️ Running migrations..."
             php8.4 artisan migrate --force
-            php8.4 artisan config:cache
+
+            echo "⚡ Caching routes and views..."
             php8.4 artisan route:cache
-            chown -R www-data:www-data storage bootstrap/cache database/database.sqlite database/
+            php8.4 artisan view:cache
+            php8.4 artisan event:cache
+
+            echo "🔐 Setting permissions..."
+            chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
-            # --- Frontend ---
-            cd /var/www/flavorfind/nextjs-frontend
-            npm install
-            npm run build
-            pm2 restart flavorfind-web
+            echo "🔄 Reloading PHP-FPM..."
+            systemctl reload php8.4-fpm
 
-            echo "✅ Deployed successfully"
+            echo "✅ Deployed successfully at $(date)"
+            echo "🌐 Live at https://api.flavorfind.co.ke"
