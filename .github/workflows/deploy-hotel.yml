@@ -1,0 +1,59 @@
+name: Deploy Hotel Backend
+
+on:
+  push:
+    branches: [production]
+    paths:
+      - 'hotel/backend/**'
+      - '.github/workflows/deploy-hotel.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Hotel API to DigitalOcean
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+
+            echo "📦 Pulling latest production branch..."
+            cd /var/www/hotel
+            git fetch origin production
+            git reset --hard origin/production
+
+            # ── Backend ──────────────────────────────────────────────────────
+            echo "🔧 Installing dependencies..."
+            cd /var/www/hotel/backend
+
+            COMPOSER_ALLOW_SUPERUSER=1 composer install \
+              --no-dev \
+              --optimize-autoloader \
+              --no-interaction
+
+            echo "🧹 Clearing bootstrap cache..."
+            rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
+            php8.4 artisan package:discover --ansi
+
+            echo "🗄️ Running migrations..."
+            php8.4 artisan migrate --force
+
+            echo "⚡ Caching config + routes..."
+            php8.4 artisan config:cache
+            php8.4 artisan route:cache
+            php8.4 artisan event:cache
+
+            echo "🔐 Setting permissions..."
+            chown -R www-data:www-data storage bootstrap/cache
+            chmod -R 775 storage bootstrap/cache
+            systemctl reload php8.4-fpm
+
+            echo "✅ Hotel API deployed at $(date)"
+            echo "🔌 API: https://api.hotel.flavorfind.co.ke"
