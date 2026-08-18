@@ -35,6 +35,10 @@ jobs:
               --optimize-autoloader \
               --no-interaction
 
+            echo "🧹 [Backend] Clearing bootstrap cache..."
+            rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
+            php8.4 artisan package:discover --ansi
+
             echo "🗄️ [Backend] Running migrations..."
             php8.4 artisan migrate --force
 
