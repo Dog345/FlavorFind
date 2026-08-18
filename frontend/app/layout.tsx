@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "Flavor Find — Discover Amazing Recipes",
   description:
     "Discover amazing recipes based on the ingredients you already have. Flavor Find is a clean, fast recipe discovery website.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
