@@ -121,7 +121,7 @@ export default function Header() {
                   transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
                   ${expanded
                     ? 'flex-1 min-w-0 rounded-2xl bg-white px-4 py-3 gap-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.35)]'
-                    : 'rounded-full bg-terracotta px-[28px] py-4 gap-2 shadow-[0_10px_24px_-8px_rgba(210,98,44,0.55)] cursor-pointer hover:-translate-y-0.5 hover:bg-terracotta-dark active:scale-95 h-[54px]'
+                    : 'rounded-full bg-terracotta px-[28px] h-[52px] gap-2 shadow-[0_10px_24px_-8px_rgba(210,98,44,0.55)] cursor-pointer hover:-translate-y-0.5 hover:bg-terracotta-dark active:scale-95'
                   }
                 `}
                 onClick={!expanded ? () => setExpanded(true) : undefined}
@@ -236,7 +236,7 @@ export default function Header() {
                 href="/categories"
                 className={`
                   inline-flex items-center gap-2 rounded-full border-[1.5px] border-white/60
-                  px-[28px] py-4 text-[14px] font-semibold text-white h-[54px]
+                  px-[28px] h-[52px] text-[14px] font-semibold text-white
                   transition-all duration-500 hover:-translate-y-0.5 hover:bg-white/10
                   ${expanded ? 'opacity-0 pointer-events-none w-0 px-0 overflow-hidden' : 'opacity-100'}
                 `}
