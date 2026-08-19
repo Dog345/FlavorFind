@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { getRecipe, getFeaturedRecipes, type Recipe } from '@/src/lib/api'
 import Navbar from '@/components/Navbar'
 
@@ -63,7 +63,7 @@ export default async function RecipePage({ params }: { params: { id: string } })
   try {
     recipe = await getRecipe(params.id)
   } catch {
-    notFound()
+    redirect('/')
   }
 
   // Fetch related recipes in parallel

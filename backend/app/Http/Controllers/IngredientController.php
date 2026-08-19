@@ -44,21 +44,18 @@ class IngredientController extends Controller
         $results = Cache::remember($cacheKey, 3600, function () use ($q, $limit) {
             return DB::select("
                 SELECT
-                    mi.id::text,
-                    mi.name,
-                    mi.category,
-                    COUNT(ri.recipe_id)::int AS recipe_count,
-                    -- Rank: exact prefix match scores higher
+                    id::text,
+                    name,
+                    category,
+                    recipe_count,
                     CASE
-                        WHEN lower(mi.name) = lower(:exact)   THEN 0
-                        WHEN lower(mi.name) LIKE lower(:start) THEN 1
+                        WHEN lower(name) = lower(:exact)   THEN 0
+                        WHEN lower(name) LIKE lower(:start) THEN 1
                         ELSE 2
                     END AS match_rank
-                FROM master_ingredients mi
-                LEFT JOIN recipe_ingredients ri ON ri.ingredient_id = mi.id
-                WHERE mi.name ILIKE :pattern
-                GROUP BY mi.id, mi.name, mi.category
-                ORDER BY match_rank ASC, recipe_count DESC, mi.name ASC
+                FROM master_ingredients
+                WHERE name ILIKE :pattern
+                ORDER BY match_rank ASC, recipe_count DESC, name ASC
                 LIMIT :limit
             ", [
                 'exact'   => $q,
@@ -249,15 +246,13 @@ class IngredientController extends Controller
     {
         $ingredient = DB::selectOne("
             SELECT
-                mi.id::text,
-                mi.name,
-                mi.category,
-                COUNT(ri.recipe_id)::int AS recipe_count,
-                CASE WHEN mi.flavor_vector IS NOT NULL THEN true ELSE false END AS has_embedding
-            FROM master_ingredients mi
-            LEFT JOIN recipe_ingredients ri ON ri.ingredient_id = mi.id
-            WHERE mi.id = ?::uuid
-            GROUP BY mi.id, mi.name, mi.category, mi.flavor_vector
+                id::text,
+                name,
+                category,
+                recipe_count,
+                CASE WHEN flavor_vector IS NOT NULL THEN true ELSE false END AS has_embedding
+            FROM master_ingredients
+            WHERE id = ?::uuid
         ", [$id]);
 
         if (! $ingredient) {

@@ -97,78 +97,111 @@ class RecipeController extends Controller
 
             if ($mode === 'all') {
                 // Recipes that have ALL the requested ingredients.
-                // We use HAVING COUNT(DISTINCT ingredient_id) = N so we need exactly
-                // N distinct ingredient matches per recipe.
+                // Image LATERAL is applied AFTER the LIMIT via a wrapping subquery —
+                // this prevents 34K+ image lookups before pagination.
                 $sql = "
                     SELECT
-                        r.id::text,
-                        r.name,
-                        r.category,
-                        r.description,
-                        r.prep_time,
-                        r.cook_time,
-                        r.total_time,
-                        r.servings,
-                        r.rating,
-                        r.review_count,
-                        r.calories,
-                        {$ingCount} AS matched_count,
-                        {$ingCount} AS total_searched,
+                        base.id,
+                        base.name,
+                        base.category,
+                        base.description,
+                        base.prep_time,
+                        base.cook_time,
+                        base.total_time,
+                        base.servings,
+                        base.rating,
+                        base.review_count,
+                        base.calories,
+                        base.matched_count,
+                        base.total_searched,
                         img.url AS image_url
-                    FROM recipes r
+                    FROM (
+                        SELECT
+                            r.id::text,
+                            r.name,
+                            r.category,
+                            r.description,
+                            r.prep_time,
+                            r.cook_time,
+                            r.total_time,
+                            r.servings,
+                            r.rating,
+                            r.review_count,
+                            r.calories,
+                            {$ingCount} AS matched_count,
+                            {$ingCount} AS total_searched
+                        FROM recipes r
+                        WHERE EXISTS (
+                            SELECT 1 FROM recipe_ingredients ri
+                            WHERE ri.recipe_id = r.id
+                              AND ri.ingredient_id IN ({$ingPlaceholders})
+                            HAVING COUNT(DISTINCT ri.ingredient_id) = {$ingCount}
+                        )
+                        {$filterSql}
+                        ORDER BY r.rating DESC NULLS LAST, r.review_count DESC
+                        LIMIT ? OFFSET ?
+                    ) base
                     LEFT JOIN LATERAL (
                         SELECT url FROM recipe_images
-                        WHERE recipe_id = r.id
+                        WHERE recipe_id = base.id::uuid
                         ORDER BY sort_order ASC
                         LIMIT 1
                     ) img ON true
-                    WHERE EXISTS (
-                        SELECT 1 FROM recipe_ingredients ri
-                        WHERE ri.recipe_id = r.id
-                          AND ri.ingredient_id IN ({$ingPlaceholders})
-                        HAVING COUNT(DISTINCT ri.ingredient_id) = {$ingCount}
-                    )
-                    {$filterSql}
-                    ORDER BY r.rating DESC NULLS LAST, r.review_count DESC
-                    LIMIT ? OFFSET ?
                 ";
 
                 $args = array_merge($ingredientIds, $filterArgs, [$limit, $offset]);
 
             } else {
-                // mode=any — rank by how many of the searched ingredients appear
+                // mode=any — rank by how many of the searched ingredients appear.
+                // Image LATERAL is applied AFTER the LIMIT via a wrapping subquery.
                 $sql = "
                     SELECT
-                        r.id::text,
-                        r.name,
-                        r.category,
-                        r.description,
-                        r.prep_time,
-                        r.cook_time,
-                        r.total_time,
-                        r.servings,
-                        r.rating,
-                        r.review_count,
-                        r.calories,
-                        ri_match.matched_count,
-                        {$ingCount} AS total_searched,
+                        base.id,
+                        base.name,
+                        base.category,
+                        base.description,
+                        base.prep_time,
+                        base.cook_time,
+                        base.total_time,
+                        base.servings,
+                        base.rating,
+                        base.review_count,
+                        base.calories,
+                        base.matched_count,
+                        base.total_searched,
                         img.url AS image_url
-                    FROM recipes r
-                    JOIN (
-                        SELECT recipe_id, COUNT(DISTINCT ingredient_id)::int AS matched_count
-                        FROM recipe_ingredients
-                        WHERE ingredient_id IN ({$ingPlaceholders})
-                        GROUP BY recipe_id
-                    ) ri_match ON ri_match.recipe_id = r.id
+                    FROM (
+                        SELECT
+                            r.id::text,
+                            r.name,
+                            r.category,
+                            r.description,
+                            r.prep_time,
+                            r.cook_time,
+                            r.total_time,
+                            r.servings,
+                            r.rating,
+                            r.review_count,
+                            r.calories,
+                            ri_match.matched_count,
+                            {$ingCount} AS total_searched
+                        FROM recipes r
+                        JOIN (
+                            SELECT recipe_id, COUNT(DISTINCT ingredient_id)::int AS matched_count
+                            FROM recipe_ingredients
+                            WHERE ingredient_id IN ({$ingPlaceholders})
+                            GROUP BY recipe_id
+                        ) ri_match ON ri_match.recipe_id = r.id
+                        WHERE 1=1 {$filterSql}
+                        ORDER BY ri_match.matched_count DESC, r.rating DESC NULLS LAST, r.review_count DESC
+                        LIMIT ? OFFSET ?
+                    ) base
                     LEFT JOIN LATERAL (
                         SELECT url FROM recipe_images
-                        WHERE recipe_id = r.id
+                        WHERE recipe_id = base.id::uuid
                         ORDER BY sort_order ASC
                         LIMIT 1
                     ) img ON true
-                    WHERE 1=1 {$filterSql}
-                    ORDER BY ri_match.matched_count DESC, r.rating DESC NULLS LAST, r.review_count DESC
-                    LIMIT ? OFFSET ?
                 ";
 
                 $args = array_merge($ingredientIds, $filterArgs, [$limit, $offset]);
@@ -280,6 +313,11 @@ class RecipeController extends Controller
      */
     public function show(string $id): JsonResponse
     {
+        // Validate UUID format before hitting the DB — prevents Postgres cast errors
+        if (! preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+            return response()->json(['error' => 'Recipe not found.'], 404);
+        }
+
         $cacheKey = 'recipe_detail_' . $id;
 
         $recipe = Cache::remember($cacheKey, 86400, function () use ($id) {
