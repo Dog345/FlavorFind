@@ -6,8 +6,10 @@ use App\Http\Controllers\MenuCategoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\UpsellRuleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -143,6 +145,28 @@ Route::prefix('v1')->group(function () {
 
         // ── Payments (status polling) ─────────────────────────────────────────
         Route::get('payments/{paymentId}/status', [PaymentController::class, 'status']);
+
+        // ── Reservations ──────────────────────────────────────────────────────
+        Route::prefix('reservations')->group(function () {
+            Route::get('/',              [ReservationController::class, 'index']);
+            Route::post('/',             [ReservationController::class, 'store']);
+            Route::get('/{id}',          [ReservationController::class, 'show']);
+            Route::put('/{id}',          [ReservationController::class, 'update'])->middleware('role:admin,manager');
+            Route::post('/{id}/confirm', [ReservationController::class, 'confirm'])->middleware('role:admin,manager');
+            Route::post('/{id}/arrive',  [ReservationController::class, 'markArrived']);
+            Route::post('/{id}/cancel',  [ReservationController::class, 'cancel']);
+            Route::patch('/{id}/no-show',[ReservationController::class, 'noShow'])->middleware('role:admin,manager');
+        });
+
+        // ── Upsell Rules ──────────────────────────────────────────────────────
+        Route::prefix('upsell-rules')->group(function () {
+            Route::get('/suggestions',  [UpsellRuleController::class, 'suggestions']); // Before /{id} to avoid conflict
+            Route::get('/',             [UpsellRuleController::class, 'index']);
+            Route::post('/',            [UpsellRuleController::class, 'store'])->middleware('role:admin,manager');
+            Route::get('/{id}',         [UpsellRuleController::class, 'show']);
+            Route::put('/{id}',         [UpsellRuleController::class, 'update'])->middleware('role:admin,manager');
+            Route::delete('/{id}',      [UpsellRuleController::class, 'destroy'])->middleware('role:admin,manager');
+        });
 
     });
 });
