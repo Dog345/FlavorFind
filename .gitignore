@@ -19,3 +19,7 @@ android-app/app/src/main/java/com/flavorfind/app/core/navigation/NavGraph.kt
 data/uganda_recipes.csv
 deepseek_html_20260812_0544dc.html
 archive (3)/reviews.csv
+backend/database/migrations/2026_08_18_000003_add_covering_index_to_recipe_ingredients.php
+HOTEL_ARCHITECTURE.md
+HOTEL_SCHEMA.md
+HOTEL_ROADMAP.md
