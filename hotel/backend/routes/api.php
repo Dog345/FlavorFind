@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\MenuCategoryController;
@@ -135,19 +136,28 @@ Route::prefix('v1')->group(function () {
             Route::get('/',                   [OrderController::class, 'index']);
             Route::post('/',                  [OrderController::class, 'store']);
             Route::get('/{id}',               [OrderController::class, 'show']);
-            Route::patch('/{id}/status',      [OrderController::class, 'updateStatus']);
-            Route::post('/{id}/cancel',       [OrderController::class, 'cancel']);
+            Route::patch('/{id}/status',                        [OrderController::class, 'updateStatus']);
+            Route::patch('/{id}/items/{itemId}/status',         [OrderController::class, 'updateItemStatus'])->middleware('role:admin,manager,kitchen,waiter');
+            Route::post('/{id}/cancel',                         [OrderController::class, 'cancel']);
 
             // Payments per order
-            Route::post('/{orderId}/payments/mpesa', [PaymentController::class, 'initiateStk']);
-            Route::post('/{orderId}/payments/cash',  [PaymentController::class, 'cash'])->middleware('role:admin,manager,cashier');
+            Route::post('/{orderId}/payments/mpesa',     [PaymentController::class, 'initiateStk']);
+            Route::post('/{orderId}/payments/cash',      [PaymentController::class, 'cash'])->middleware('role:admin,manager,cashier');
+            Route::post('/{orderId}/payments/external',  [PaymentController::class, 'external'])->middleware('role:admin,manager,cashier');
         });
 
-        // ── Payments (status polling) ─────────────────────────────────────────
-        Route::get('payments/{paymentId}/status', [PaymentController::class, 'status']);
+        // ── Payments ──────────────────────────────────────────────────────────
+        // Listing + reconciliation (admin/manager/cashier)
+        Route::get('payments',                        [PaymentController::class, 'index'])->middleware('role:admin,manager,cashier');
+        Route::get('payments/reconciliation',         [PaymentController::class, 'reconciliation'])->middleware('role:admin,manager,cashier');
+        // Status polling (any authenticated user can check their payment)
+        Route::get('payments/{paymentId}/status',     [PaymentController::class, 'status']);
 
         // ── Reservations ──────────────────────────────────────────────────────
         Route::prefix('reservations')->group(function () {
+            // Static routes BEFORE /{id} to avoid conflict
+            Route::get('/availability',  [ReservationController::class, 'availability']);
+
             Route::get('/',              [ReservationController::class, 'index']);
             Route::post('/',             [ReservationController::class, 'store']);
             Route::get('/{id}',          [ReservationController::class, 'show']);
@@ -158,9 +168,25 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{id}/no-show',[ReservationController::class, 'noShow'])->middleware('role:admin,manager');
         });
 
+        // ── Analytics & Reporting ─────────────────────────────────────────────
+        Route::prefix('analytics')->middleware('role:admin,manager')->group(function () {
+            Route::get('/revenue',           [AnalyticsController::class, 'revenue']);
+            Route::get('/top-items',         [AnalyticsController::class, 'topItems']);
+            Route::get('/hourly-orders',     [AnalyticsController::class, 'hourlyOrders']);
+            Route::get('/status-funnel',     [AnalyticsController::class, 'statusFunnel']);
+            Route::get('/payment-breakdown', [AnalyticsController::class, 'paymentBreakdown']);
+            Route::get('/table-occupancy',   [AnalyticsController::class, 'tableOccupancy']);
+            Route::get('/export',            [AnalyticsController::class, 'export']);
+        });
+
         // ── Upsell Rules ──────────────────────────────────────────────────────
-        Route::prefix('upsell-rules')->group(function () {
-            Route::get('/suggestions',  [UpsellRuleController::class, 'suggestions']); // Before /{id} to avoid conflict
+        Route::prefix('upsell-rules')->group(function () {            // Static routes BEFORE /{id} to avoid collision
+            Route::get('/suggestions',                              [UpsellRuleController::class, 'suggestions']);
+            Route::get('/analytics',                               [UpsellRuleController::class, 'analytics'])->middleware('role:admin,manager');
+            Route::post('/impressions',                            [UpsellRuleController::class, 'recordImpression']);
+            Route::patch('/impressions/{impressionId}/accept',     [UpsellRuleController::class, 'acceptImpression']);
+
+            // CRUD
             Route::get('/',             [UpsellRuleController::class, 'index']);
             Route::post('/',            [UpsellRuleController::class, 'store'])->middleware('role:admin,manager');
             Route::get('/{id}',         [UpsellRuleController::class, 'show']);
