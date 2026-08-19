@@ -1,0 +1,785 @@
+{
+  "info": {
+    "name": "HotelManager API",
+    "_postman_id": "hotel-manager-api-v1",
+    "description": "FlavorFind HotelManager — multi-tenant POS & reservation backend.\n\n**Setup:**\n1. Set `base_url` variable to `https://flavorfind-hotel.onrender.com` (or `http://localhost:8000` locally)\n2. Set `tenant_slug` to your tenant slug (e.g. `demo`)\n3. Run **Register** or **Login** — the token is auto-saved to `auth_token`\n4. All protected requests use `auth_token` automatically",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",    "value": "https://flavorfind-hotel.onrender.com", "type": "string" },
+    { "key": "tenant_slug", "value": "demo",                                   "type": "string" },
+    { "key": "auth_token",  "value": "",                                        "type": "string" },
+    { "key": "staff_id",    "value": "",                                        "type": "string" },
+    { "key": "floor_id",    "value": "",                                        "type": "string" },
+    { "key": "table_id",    "value": "",                                        "type": "string" },
+    { "key": "session_id",  "value": "",                                        "type": "string" },
+    { "key": "category_id", "value": "",                                        "type": "string" },
+    { "key": "item_id",     "value": "",                                        "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Returns service status. No auth or tenant required."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('auth_token', res.token);",
+                  "  console.log('Token saved:', res.token.substring(0, 20) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Eric Dallah\",\n  \"email\": \"eric@demo.hotel\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Register a new user for a tenant. Auto-saves token to `auth_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('auth_token', res.token);",
+                  "  console.log('Token saved:', res.token.substring(0, 20) + '...');",
+                  "}",
+                  "if (res.user && res.user.id) {",
+                  "  pm.collectionVariables.set('staff_id', res.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"eric@demo.hotel\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login and get a Sanctum token. Auto-saves token to `auth_token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (current user)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",         "value": "application/json" },
+              { "key": "Authorization",  "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug",  "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "me"]
+            },
+            "description": "Returns the authenticated user's profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('auth_token', res.token);",
+                  "  console.log('Token refreshed');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Revokes current token and issues a new one. Auto-saves new token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('auth_token', '');",
+                  "console.log('Token cleared');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Revokes the current token. Clears `auth_token` variable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tenant",
+      "item": [
+        {
+          "name": "Get Tenant",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenant",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenant"]
+            },
+            "description": "Returns the current tenant's profile and settings."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Tenant (admin only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo Hotel & Restaurant\",\n  \"primary_color\": \"#f97316\",\n  \"mpesa_paybill\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenant",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenant"]
+            },
+            "description": "Update tenant settings. Requires admin role."
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tenant/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "tenant", "stats"]
+            },
+            "description": "Dashboard stats — orders today, revenue, active tables, reservations."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "List Staff",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "staff"]
+            },
+            "description": "List all staff for the tenant. Requires admin or manager role."
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.user && res.user.id) {",
+                  "  pm.collectionVariables.set('staff_id', res.user.id);",
+                  "  console.log('Staff ID saved:', res.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Wairimu\",\n  \"email\": \"jane@demo.hotel\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"waiter\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "staff"]
+            },
+            "description": "Create a new staff account. Auto-saves new staff ID to `staff_id`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Wairimu Updated\",\n  \"email\": \"jane.updated@demo.hotel\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/{{staff_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "staff", "{{staff_id}}"]
+            },
+            "description": "Update a staff member's details. Uses `staff_id` variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Staff Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/{{staff_id}}/role",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "staff", "{{staff_id}}", "role"]
+            },
+            "description": "Change a staff member's role. Valid roles: admin, manager, waiter, cashier, kitchen."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Staff",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/{{staff_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "staff", "{{staff_id}}"]
+            },
+            "description": "Delete a staff member. Uses `staff_id` variable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Floors",
+      "item": [
+        {
+          "name": "List Floors",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/floors", "host": ["{{base_url}}"], "path": ["api","v1","floors"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Floor",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('floor_id',r.data.id);console.log('Floor ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ground Floor\",\n  \"sort_order\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/floors", "host": ["{{base_url}}"], "path": ["api","v1","floors"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Floor",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/floors/{{floor_id}}", "host": ["{{base_url}}"], "path": ["api","v1","floors","{{floor_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Floor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ground Floor (Updated)\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/floors/{{floor_id}}", "host": ["{{base_url}}"], "path": ["api","v1","floors","{{floor_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Floor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/floors/{{floor_id}}", "host": ["{{base_url}}"], "path": ["api","v1","floors","{{floor_id}}"] },
+            "description": "Only works if floor has no tables."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "List Tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tables",
+              "host": ["{{base_url}}"], "path": ["api","v1","tables"],
+              "query": [
+                { "key": "floor_id", "value": "{{floor_id}}", "disabled": true },
+                { "key": "status",   "value": "available",    "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Table",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('table_id',r.data.id);console.log('Table ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"floor_id\": {{floor_id}},\n  \"label\": \"T01\",\n  \"capacity\": 4,\n  \"position\": { \"x\": 100, \"y\": 150 }\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/tables", "host": ["{{base_url}}"], "path": ["api","v1","tables"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Table",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Table",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"T01-VIP\",\n  \"capacity\": 6\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Open Session",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('session_id',r.data.id);console.log('Session ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"covers\": 3,\n  \"guest_name\": \"Kamau Party\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}/open", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}","open"] },
+            "description": "Table must be 'available'. Auto-saves session_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Close Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}/close", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}","close"] },
+            "description": "Closes session and sets table back to 'available'."
+          },
+          "response": []
+        },
+        {
+          "name": "List Table Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}/sessions", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}","sessions"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Table",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/tables/{{table_id}}", "host": ["{{base_url}}"], "path": ["api","v1","tables","{{table_id}}"] },
+            "description": "Only works if no open session."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Menu — Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/menu/categories", "host": ["{{base_url}}"], "path": ["api","v1","menu","categories"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('category_id',r.data.id);console.log('Category ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Starters\",\n  \"description\": \"Soups, salads and appetizers\",\n  \"sort_order\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/categories", "host": ["{{base_url}}"], "path": ["api","v1","menu","categories"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/menu/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","categories","{{category_id}}"] },
+            "description": "Returns category with all menu items, variants, and modifiers."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Starters & Soups\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","categories","{{category_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/menu/categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","categories","{{category_id}}"] },
+            "description": "Only works if category has no menu items."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Menu — Items",
+      "item": [
+        {
+          "name": "List Items",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/menu/items",
+              "host": ["{{base_url}}"], "path": ["api","v1","menu","items"],
+              "query": [
+                { "key": "category_id",    "value": "{{category_id}}", "disabled": true },
+                { "key": "available_only", "value": "true",            "disabled": true },
+                { "key": "search",         "value": "burger",          "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Item (with variants & modifiers)",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('item_id',r.data.id);console.log('Item ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"category_id\": {{category_id}},\n  \"name\": \"Beef Burger\",\n  \"description\": \"Juicy beef patty with lettuce, tomato and fries\",\n  \"base_price\": 650,\n  \"prep_time_min\": 15,\n  \"tags\": [\"beef\", \"popular\"],\n  \"variants\": [\n    { \"name\": \"Regular\",      \"price\": 650 },\n    { \"name\": \"Double Patty\", \"price\": 950 }\n  ],\n  \"modifiers\": [\n    { \"name\": \"Extra Cheese\", \"price_delta\": 80 },\n    { \"name\": \"No Onions\",    \"price_delta\": 0 },\n    { \"name\": \"Add Bacon\",    \"price_delta\": 120 }\n  ]\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/items", "host": ["{{base_url}}"], "path": ["api","v1","menu","items"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Item",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"base_price\": 700,\n  \"is_available\": true\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Variant",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Family Size\",\n  \"price\": 1200\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}/variants", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}","variants"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Modifier",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Gluten-free bun\",\n  \"price_delta\": 50\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}/modifiers", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}","modifiers"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
