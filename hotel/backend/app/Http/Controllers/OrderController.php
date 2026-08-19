@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCreated;
+use App\Events\OrderItemStatusUpdated;
+use App\Events\OrderPlaced;
+use App\Events\OrderStatusUpdated;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -154,6 +158,11 @@ class OrderController extends Controller
             return $order;
         });
 
+        // Broadcast to kitchen display (both events for backward compat)
+        $loadedOrder = $order->load(['items', 'table:id,label', 'waiter:id,name', 'tenant:id,slug']);
+        OrderPlaced::dispatch($loadedOrder);
+        OrderCreated::dispatch($loadedOrder);
+
         return response()->json([
             'data' => $order->load(['items', 'table:id,label', 'waiter:id,name']),
         ], 201);
@@ -211,6 +220,9 @@ class OrderController extends Controller
         }
 
         $order->update(array_merge(['status' => $newStatus], $timestamps));
+
+        // Broadcast status change to kitchen and waiter
+        OrderStatusUpdated::dispatch($order->load('table:id,label'));
 
         return response()->json(['data' => $order->fresh()]);
     }
@@ -295,9 +307,69 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * PATCH /api/v1/orders/{id}/items/{itemId}/status
+     *
+     * Kitchen staff mark an individual item as preparing or ready.
+     * Allowed transitions: pending → preparing → ready
+     * (cancelled items cannot be updated)
+     *
+     * Roles: kitchen, waiter, manager, admin
+     */
+    public function updateItemStatus(Request $request, string $orderId, string $itemId): JsonResponse
+    {
+        $order = $this->findForTenant($request, $orderId);
+
+        $item = OrderItem::where('order_id', $order->id)
+            ->where('id', $itemId)
+            ->firstOrFail();
+
+        if ($item->status === OrderItem::STATUS_CANCELLED) {
+            return response()->json(['error' => 'Cannot update a cancelled item.'], 422);
+        }
+
+        $data = $request->validate([
+            'status' => ['required', 'in:' . implode(',', [
+                OrderItem::STATUS_PENDING,
+                OrderItem::STATUS_PREPARING,
+                OrderItem::STATUS_READY,
+            ])],
+        ]);
+
+        $newStatus = $data['status'];
+
+        // Enforce forward-only transitions
+        $rank = [
+            OrderItem::STATUS_PENDING   => 0,
+            OrderItem::STATUS_PREPARING => 1,
+            OrderItem::STATUS_READY     => 2,
+        ];
+
+        if (($rank[$newStatus] ?? -1) <= ($rank[$item->status] ?? -1)) {
+            return response()->json([
+                'error' => "Cannot change item status from '{$item->status}' to '{$newStatus}'.",
+            ], 422);
+        }
+
+        $item->update(['status' => $newStatus]);
+
+        // Broadcast item-level update to kitchen + waiter
+        $item->load('order.tenant');
+        OrderItemStatusUpdated::dispatch($item);
+
+        return response()->json([
+            'data' => [
+                'id'       => $item->id,
+                'name'     => $item->name,
+                'status'   => $item->status,
+                'order_id' => $item->order_id,
+            ],
+        ]);
+    }
+
     // ─── Private helpers ──────────────────────────────────────────────────────
 
-    private function findForTenant(Request $request, int $id): Order
+    private function findForTenant(Request $request, string $id): Order
     {
         $tenant = $request->tenant();
         $order  = Order::forTenant($tenant->id)->find($id);
