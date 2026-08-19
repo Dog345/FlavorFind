@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FloorController;
+use App\Http\Controllers\GuestController;
 use App\Http\Controllers\MenuCategoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
@@ -51,6 +52,20 @@ Route::prefix('v1')->group(function () {
             Route::get('me',       [AuthController::class, 'me']);
             Route::post('refresh', [AuthController::class, 'refresh']);
         });
+    });
+
+    // ── Guest QR ordering — NO auth, secured by session token in URL ─────────
+    // Tenant is resolved from the TableSession token (no X-Tenant-Slug header needed).
+    Route::prefix('guest/{token}')->withoutMiddleware(\App\Http\Middleware\ResolveTenant::class)->group(function () {
+        Route::get('/',                           [GuestController::class, 'resolveSession']);
+        Route::get('/menu',                       [GuestController::class, 'menu']);
+        Route::get('/menu/search',                [GuestController::class, 'searchMenu']);
+        Route::get('/popular',                    [GuestController::class, 'popular']);
+        Route::post('/orders',                    [GuestController::class, 'placeOrder']);
+        Route::get('/orders/{orderId}',           [GuestController::class, 'trackOrder']);
+        Route::get('/upsell',                     [GuestController::class, 'upsell']);
+        Route::post('/payments/mpesa',            [GuestController::class, 'initiatePayment']);
+        Route::get('/payments/{paymentId}/status',[GuestController::class, 'paymentStatus']);
     });
 
     // ── All routes below require auth + active tenant ─────────────────────────
