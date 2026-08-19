@@ -28,7 +28,7 @@ WORKDIR /var/www/html
 # Copy composer files first for layer caching
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
+# Install PHP dependencies (--no-scripts skips artisan calls that need .env)
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
     --optimize-autoloader \
@@ -38,8 +38,8 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 # Copy application code
 COPY . .
 
-# Run post-install scripts now that full app is present
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer run-script post-autoload-dump
+# Generate optimized autoload without running artisan scripts
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize --no-scripts
 
 # Set permissions
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions \
