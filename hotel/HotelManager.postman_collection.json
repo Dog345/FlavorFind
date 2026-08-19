@@ -16,7 +16,9 @@
     { "key": "category_id", "value": "",                                        "type": "string" },
     { "key": "item_id",     "value": "",                                        "type": "string" },
     { "key": "order_id",    "value": "",                                        "type": "string" },
-    { "key": "payment_id",  "value": "",                                        "type": "string" }
+    { "key": "payment_id",  "value": "",                                        "type": "string" },
+    { "key": "reservation_id", "value": "",                                     "type": "string" },
+    { "key": "rule_id",     "value": "",                                        "type": "string" }
   ],
   "item": [
     {
@@ -960,6 +962,228 @@
             "body": { "mode": "raw", "raw": "{\n  \"Body\": {\n    \"stkCallback\": {\n      \"MerchantRequestID\": \"test-merchant-id\",\n      \"CheckoutRequestID\": \"ws_CO_test123\",\n      \"ResultCode\": 0,\n      \"ResultDesc\": \"The service request is processed successfully.\",\n      \"CallbackMetadata\": {\n        \"Item\": [\n          { \"Name\": \"Amount\",        \"Value\": 1300 },\n          { \"Name\": \"MpesaReceiptNumber\", \"Value\": \"QHX4T5ABCD\" },\n          { \"Name\": \"PhoneNumber\",   \"Value\": 254712345678 }\n        ]\n      }\n    }\n  }\n}" },
             "url": { "raw": "{{base_url}}/api/v1/payments/mpesa/callback", "host": ["{{base_url}}"], "path": ["api","v1","payments","mpesa","callback"] },
             "description": "No auth required. Called by Safaricom. Simulated payload for testing."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "List Reservations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reservations",
+              "host": ["{{base_url}}"], "path": ["api","v1","reservations"],
+              "query": [
+                { "key": "today",    "value": "true",        "disabled": true },
+                { "key": "upcoming", "value": "true",        "disabled": true },
+                { "key": "status",   "value": "confirmed",   "disabled": true },
+                { "key": "date",     "value": "2026-08-19",  "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Reservation",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('reservation_id',r.data.id);console.log('Reservation ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"guest_name\": \"John Kamau\",\n  \"guest_phone\": \"0712345678\",\n  \"guest_email\": \"john@example.com\",\n  \"covers\": 4,\n  \"reserved_at\": \"2026-08-20 19:00:00\",\n  \"duration_min\": 90,\n  \"table_id\": {{table_id}},\n  \"notes\": \"Anniversary dinner, window seat preferred\",\n  \"source\": \"phone\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/reservations", "host": ["{{base_url}}"], "path": ["api","v1","reservations"] },
+            "description": "Auto-saves reservation_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reservation",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Reservation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"covers\": 6,\n  \"notes\": \"Birthday — need a cake\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/confirm", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}","confirm"] },
+            "description": "Moves status from tentative → confirmed."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Arrived",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/arrive", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}","arrive"] },
+            "description": "Marks guest as arrived and sets the reserved table to occupied."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark No-Show",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/no-show", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}","no-show"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Guest called to cancel\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/cancel", "host": ["{{base_url}}"], "path": ["api","v1","reservations","{{reservation_id}}","cancel"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Upsell Rules",
+      "item": [
+        {
+          "name": "List Rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/upsell-rules", "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Rule",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('rule_id',r.data.id);console.log('Rule ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"trigger_item_id\": {{item_id}},\n  \"suggested_item_id\": 2,\n  \"message\": \"Pair with a cold Tusker for only KES 200?\",\n  \"discount_pct\": 10,\n  \"sort_order\": 1\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/upsell-rules", "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules"] },
+            "description": "Auto-saves rule_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Rule",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/upsell-rules/{{rule_id}}", "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules","{{rule_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"How about a cold drink?\",\n  \"discount_pct\": 15,\n  \"is_active\": true\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/upsell-rules/{{rule_id}}", "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules","{{rule_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/upsell-rules/{{rule_id}}", "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules","{{rule_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Suggestions (by item IDs)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/upsell-rules/suggestions?item_ids[]={{item_id}}",
+              "host": ["{{base_url}}"], "path": ["api","v1","upsell-rules","suggestions"],
+              "query": [{ "key": "item_ids[]", "value": "{{item_id}}", "description": "Add more &item_ids[]=X for multiple items" }]
+            },
+            "description": "Pass the item IDs currently in the order. Returns active upsell suggestions excluding items already ordered."
           },
           "response": []
         }
