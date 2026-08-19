@@ -313,6 +313,11 @@ class RecipeController extends Controller
      */
     public function show(string $id): JsonResponse
     {
+        // Validate UUID format before hitting the DB — prevents Postgres cast errors
+        if (! preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)) {
+            return response()->json(['error' => 'Recipe not found.'], 404);
+        }
+
         $cacheKey = 'recipe_detail_' . $id;
 
         $recipe = Cache::remember($cacheKey, 86400, function () use ($id) {
