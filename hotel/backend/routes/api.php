@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\MenuCategoryController;
 use App\Http\Controllers\MenuItemController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +34,9 @@ Route::get('/health', function () {
 });
 
 Route::prefix('v1')->group(function () {
+
+    // ── M-Pesa callback — NO auth, Safaricom calls this directly ─────────────
+    Route::post('payments/mpesa/callback', [PaymentController::class, 'mpesaCallback']);
 
     // ── Auth (no tenant required for register/login) ──────────────────────────
     Route::prefix('auth')->group(function () {
@@ -120,6 +125,24 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/{id}/modifiers/{modifierId}',[MenuItemController::class, 'destroyModifier'])->middleware('role:admin,manager');
             });
         });
+
+        // ── Orders ────────────────────────────────────────────────────────────
+        Route::prefix('orders')->group(function () {
+            Route::get('/kitchen',            [OrderController::class, 'kitchen']);      // Kitchen display
+            Route::get('/session/{sessionId}',[OrderController::class, 'bySession']);   // Session bill
+            Route::get('/',                   [OrderController::class, 'index']);
+            Route::post('/',                  [OrderController::class, 'store']);
+            Route::get('/{id}',               [OrderController::class, 'show']);
+            Route::patch('/{id}/status',      [OrderController::class, 'updateStatus']);
+            Route::post('/{id}/cancel',       [OrderController::class, 'cancel']);
+
+            // Payments per order
+            Route::post('/{orderId}/payments/mpesa', [PaymentController::class, 'initiateStk']);
+            Route::post('/{orderId}/payments/cash',  [PaymentController::class, 'cash'])->middleware('role:admin,manager,cashier');
+        });
+
+        // ── Payments (status polling) ─────────────────────────────────────────
+        Route::get('payments/{paymentId}/status', [PaymentController::class, 'status']);
 
     });
 });

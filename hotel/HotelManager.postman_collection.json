@@ -14,7 +14,9 @@
     { "key": "table_id",    "value": "",                                        "type": "string" },
     { "key": "session_id",  "value": "",                                        "type": "string" },
     { "key": "category_id", "value": "",                                        "type": "string" },
-    { "key": "item_id",     "value": "",                                        "type": "string" }
+    { "key": "item_id",     "value": "",                                        "type": "string" },
+    { "key": "order_id",    "value": "",                                        "type": "string" },
+    { "key": "payment_id",  "value": "",                                        "type": "string" }
   ],
   "item": [
     {
@@ -776,6 +778,188 @@
             ],
             "body": { "mode": "raw", "raw": "{\n  \"name\": \"Gluten-free bun\",\n  \"price_delta\": 50\n}" },
             "url": { "raw": "{{base_url}}/api/v1/menu/items/{{item_id}}/modifiers", "host": ["{{base_url}}"], "path": ["api","v1","menu","items","{{item_id}}","modifiers"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"], "path": ["api","v1","orders"],
+              "query": [
+                { "key": "status",      "value": "pending",        "disabled": true },
+                { "key": "table_id",    "value": "{{table_id}}",   "disabled": true },
+                { "key": "session_id",  "value": "{{session_id}}", "disabled": true },
+                { "key": "active_only", "value": "true",           "disabled": true },
+                { "key": "date",        "value": "2026-08-19",     "disabled": true }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Order",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.data?.id){pm.collectionVariables.set('order_id',r.data.id);console.log('Order ID:',r.data.id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"session_id\": {{session_id}},\n  \"type\": \"dine_in\",\n  \"notes\": \"No chilli on table 1\",\n  \"items\": [\n    {\n      \"menu_item_id\": {{item_id}},\n      \"quantity\": 2,\n      \"modifiers\": [\n        { \"name\": \"Extra Cheese\", \"price_delta\": 80 }\n      ]\n    }\n  ]\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/orders", "host": ["{{base_url}}"], "path": ["api","v1","orders"] },
+            "description": "Creates order and auto-calculates subtotal, tax (16%), and total. Auto-saves order_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["api","v1","orders","{{order_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"confirmed\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/orders/{{order_id}}/status", "host": ["{{base_url}}"], "path": ["api","v1","orders","{{order_id}}","status"] },
+            "description": "Valid statuses: pending → confirmed → preparing → ready → served → paid. Use cancel endpoint to cancel."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/orders/{{order_id}}/cancel", "host": ["{{base_url}}"], "path": ["api","v1","orders","{{order_id}}","cancel"] },
+            "description": "Cannot cancel if order is paid or already served."
+          },
+          "response": []
+        },
+        {
+          "name": "Kitchen Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/orders/kitchen", "host": ["{{base_url}}"], "path": ["api","v1","orders","kitchen"] },
+            "description": "Returns all confirmed + preparing orders oldest-first (FIFO). Used by kitchen display screen."
+          },
+          "response": []
+        },
+        {
+          "name": "Session Bill (all orders for a session)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/orders/session/{{session_id}}", "host": ["{{base_url}}"], "path": ["api","v1","orders","session","{{session_id}}"] },
+            "description": "Returns all orders + running total for the session. Used on POS to show bill."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Pay — Cash",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); console.log('Change due:', r.change_due);"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"amount_tendered\": 2000\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/orders/{{order_id}}/payments/cash", "host": ["{{base_url}}"], "path": ["api","v1","orders","{{order_id}}","payments","cash"] },
+            "description": "Records cash payment and marks order as paid. Returns change_due. Requires cashier/manager role."
+          },
+          "response": []
+        },
+        {
+          "name": "Pay — M-Pesa STK Push",
+          "event": [{ "listen": "test", "script": { "exec": ["const r=pm.response.json(); if(r.payment_id){pm.collectionVariables.set('payment_id',r.payment_id);console.log('Payment ID:',r.payment_id);}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"254712345678\"\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/orders/{{order_id}}/payments/mpesa", "host": ["{{base_url}}"], "path": ["api","v1","orders","{{order_id}}","payments","mpesa"] },
+            "description": "Sends STK push to customer's phone. Returns 202 with payment_id. Poll /payments/{id}/status for result. Auto-saves payment_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Payment Status (poll)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "X-Tenant-Slug", "value": "{{tenant_slug}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/v1/payments/{{payment_id}}/status", "host": ["{{base_url}}"], "path": ["api","v1","payments","{{payment_id}}","status"] },
+            "description": "Poll this after STK push. If still pending after 15s it queries Safaricom directly."
+          },
+          "response": []
+        },
+        {
+          "name": "M-Pesa Callback (Safaricom → server)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"Body\": {\n    \"stkCallback\": {\n      \"MerchantRequestID\": \"test-merchant-id\",\n      \"CheckoutRequestID\": \"ws_CO_test123\",\n      \"ResultCode\": 0,\n      \"ResultDesc\": \"The service request is processed successfully.\",\n      \"CallbackMetadata\": {\n        \"Item\": [\n          { \"Name\": \"Amount\",        \"Value\": 1300 },\n          { \"Name\": \"MpesaReceiptNumber\", \"Value\": \"QHX4T5ABCD\" },\n          { \"Name\": \"PhoneNumber\",   \"Value\": 254712345678 }\n        ]\n      }\n    }\n  }\n}" },
+            "url": { "raw": "{{base_url}}/api/v1/payments/mpesa/callback", "host": ["{{base_url}}"], "path": ["api","v1","payments","mpesa","callback"] },
+            "description": "No auth required. Called by Safaricom. Simulated payload for testing."
           },
           "response": []
         }
