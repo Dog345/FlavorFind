@@ -116,8 +116,8 @@ class GuestController extends Controller
                 ->ordered()
                 ->with([
                     'menuItems' => fn ($q) => $q->available()->ordered()->with([
-                        'variants:id,menu_item_id,name,price_adjustment,is_available',
-                        'modifiers:id,menu_item_id,name,price,is_available',
+                        'variants:id,menu_item_id,name,price,is_available',
+                        'modifiers:id,menu_item_id,name,price_delta,is_available',
                     ]),
                 ])
                 ->get()
@@ -159,8 +159,8 @@ class GuestController extends Controller
                       ->orWhereRaw("tags::text ILIKE ?", ["%{$q}%"]);
             })
             ->with([
-                'variants:id,menu_item_id,name,price_adjustment,is_available',
-                'modifiers:id,menu_item_id,name,price,is_available',
+                'variants:id,menu_item_id,name,price,is_available',
+                'modifiers:id,menu_item_id,name,price_delta,is_available',
                 'category:id,name',
             ])
             ->ordered()
@@ -207,8 +207,8 @@ class GuestController extends Controller
                 ->available()
                 ->whereIn('name', $topIds)
                 ->with([
-                    'variants:id,menu_item_id,name,price_adjustment,is_available',
-                    'modifiers:id,menu_item_id,name,price,is_available',
+                    'variants:id,menu_item_id,name,price,is_available',
+                    'modifiers:id,menu_item_id,name,price_delta,is_available',
                     'category:id,name',
                 ])
                 ->get()
@@ -302,7 +302,7 @@ class GuestController extends Controller
                 if (! empty($line['variant_id'])) {
                     $variant = $menuItem->variants->firstWhere('id', $line['variant_id']);
                     if ($variant && $variant->is_available) {
-                        $unitPrice += $variant->price_adjustment;
+                        $unitPrice = $variant->price; // variant has absolute price
                     }
                 }
 
@@ -312,7 +312,7 @@ class GuestController extends Controller
                     foreach ($line['modifier_ids'] as $modId) {
                         $mod = $menuItem->modifiers->firstWhere('id', $modId);
                         if ($mod && $mod->is_available) {
-                            $modifierTotal += $mod->price;
+                            $modifierTotal += $mod->price_delta;
                         }
                     }
                 }
