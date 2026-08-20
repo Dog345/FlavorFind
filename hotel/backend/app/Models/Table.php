@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * A physical or virtual table in the venue.
  *
- * @property int         $id
- * @property int         $tenant_id
- * @property int         $floor_id
+ * @property string      $id
+ * @property string      $tenant_id
+ * @property string|null $floor_id
  * @property string      $label       e.g. "T01", "Bar-1", "Private-Room"
  * @property int         $capacity    Number of seats
  * @property string      $status      One of the STATUS_* constants
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Table extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     // ─── Status constants ────────────────────────────────────────────────────
     public const STATUS_AVAILABLE = 'available';
