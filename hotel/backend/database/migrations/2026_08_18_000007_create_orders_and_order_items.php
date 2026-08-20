@@ -16,20 +16,23 @@ return new class extends Migration
             $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
             $table->uuid('tenant_id');
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
-            $table->uuid('table_session_id')->nullable();
-            $table->foreign('table_session_id')->references('id')->on('table_sessions')->onDelete('set null');
+            $table->uuid('session_id')->nullable();              // TableSession FK
+            $table->foreign('session_id')->references('id')->on('table_sessions')->onDelete('set null');
             $table->uuid('table_id')->nullable();
             $table->foreign('table_id')->references('id')->on('tables')->onDelete('set null');
-            $table->uuid('taken_by')->nullable();               // waiter user_id
-            $table->foreign('taken_by')->references('id')->on('users')->onDelete('set null');
-            $table->integer('order_number');                    // per-tenant sequential
-            $table->string('status', 20)->default('pending');   // pending|confirmed|prep|ready|served|cancelled|closed
-            $table->string('payment_status', 20)->default('unpaid'); // unpaid|partial|paid|refunded
-            $table->decimal('total_amount', 10, 2)->default(0);
-            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->uuid('waiter_id')->nullable();
+            $table->foreign('waiter_id')->references('id')->on('users')->onDelete('set null');
+            $table->string('order_number', 20);                 // e.g. "#0042"
+            $table->string('status', 20)->default('pending');   // pending|confirmed|preparing|ready|served|cancelled|paid
+            $table->string('type', 20)->default('dine_in');     // dine_in|takeaway|delivery
+            $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
-            $table->string('order_type', 20)->default('dine_in'); // dine_in|takeaway|delivery
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->decimal('total_amount', 10, 2)->default(0);
             $table->text('notes')->nullable();
+            $table->timestamp('kitchen_accepted_at')->nullable();
+            $table->timestamp('kitchen_ready_at')->nullable();
+            $table->timestamp('served_at')->nullable();
             $table->timestamps();
         });
 
@@ -41,11 +44,13 @@ return new class extends Migration
             $table->foreign('menu_item_id')->references('id')->on('menu_items')->onDelete('restrict');
             $table->uuid('variant_id')->nullable();
             $table->foreign('variant_id')->references('id')->on('item_variants')->onDelete('set null');
+            $table->string('name');                             // snapshot of item name at order time
+            $table->decimal('unit_price', 10, 2);              // snapshot of price at order time
             $table->smallInteger('quantity')->default(1);
-            $table->decimal('unit_price', 10, 2);               // price at time of order
-            $table->jsonb('modifiers_json')->default('[]');      // snapshot of modifiers chosen
-            $table->text('special_instructions')->nullable();
-            $table->string('status', 20)->default('pending');   // pending|prep|ready|served
+            $table->decimal('line_total', 10, 2);              // unit_price * quantity + modifier deltas
+            $table->jsonb('modifiers')->nullable();             // [{name, price_delta}]
+            $table->text('notes')->nullable();                  // special instructions
+            $table->string('status', 20)->default('pending');  // pending|preparing|ready|cancelled
             $table->timestamps();
         });
 
@@ -74,9 +79,8 @@ return new class extends Migration
         ");
 
         DB::statement("CREATE INDEX orders_tenant_status_idx ON orders (tenant_id, status)");
-        DB::statement("CREATE INDEX orders_tenant_payment_idx ON orders (tenant_id, payment_status)");
         DB::statement("CREATE INDEX orders_tenant_created_idx ON orders (tenant_id, created_at DESC)");
-        DB::statement("CREATE INDEX orders_table_session_idx ON orders (table_session_id)");
+        DB::statement("CREATE INDEX orders_session_idx ON orders (session_id)");
         DB::statement("CREATE INDEX order_items_order_idx ON order_items (order_id)");
         DB::statement("CREATE INDEX order_items_status_idx ON order_items (order_id, status)");
     }

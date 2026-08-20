@@ -14,10 +14,11 @@ return new class extends Migration
             $table->uuid('menu_item_id');
             $table->foreign('menu_item_id')->references('id')->on('menu_items')->onDelete('cascade');
             $table->string('name');                              // Small, Medium, Large
-            $table->decimal('price_adjustment', 8, 2)->default(0); // + or - from base_price
-            $table->boolean('is_default')->default(false);
+            $table->decimal('price', 10, 2);                    // absolute price for this variant
+            $table->boolean('is_available')->default(true);
             $table->boolean('is_active')->default(true);
             $table->smallInteger('sort_order')->default(0);
+            $table->timestamps();
         });
 
         Schema::create('item_modifiers', function (Blueprint $table) {
@@ -25,9 +26,10 @@ return new class extends Migration
             $table->uuid('menu_item_id');
             $table->foreign('menu_item_id')->references('id')->on('menu_items')->onDelete('cascade');
             $table->string('name');                              // Extra Cheese, No Onions
-            $table->decimal('price_adjustment', 8, 2)->default(0);
+            $table->decimal('price_delta', 8, 2)->default(0);   // + or - from item price
             $table->boolean('is_available')->default(true);
             $table->smallInteger('sort_order')->default(0);
+            $table->timestamps();
         });
 
         DB::statement("CREATE INDEX iv_item_idx ON item_variants (menu_item_id)");
