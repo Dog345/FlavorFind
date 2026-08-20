@@ -122,7 +122,7 @@ class Order extends Model
 
     // ─── Scopes ──────────────────────────────────────────────────────────────
 
-    public function scopeForTenant($query, int $tenantId)
+    public function scopeForTenant($query, string $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
     }
