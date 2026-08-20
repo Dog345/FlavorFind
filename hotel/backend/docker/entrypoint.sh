@@ -13,14 +13,16 @@ echo "==> Running migrations..."
 php artisan migrate --force
 
 echo "==> Checking if seed data is needed..."
-TENANT_COUNT=$(php artisan tinker --no-interaction --execute="echo \App\Models\Tenant::count();" 2>/dev/null | tail -1 | tr -d '[:space:]')
+# Count rows in table_sessions — if 0, the seed hasn't completed successfully yet
+SESSION_COUNT=$(php artisan tinker --no-interaction --execute="echo \App\Models\TableSession::count();" 2>/dev/null | tail -1 | tr -d '[:space:]')
 
-if [ "$TENANT_COUNT" = "0" ] || [ -z "$TENANT_COUNT" ]; then
-    echo "==> No tenants found — running MambaHotelSeeder..."
+if [ "$SESSION_COUNT" = "0" ] || [ -z "$SESSION_COUNT" ]; then
+    echo "==> No sessions found — wiping tables and re-seeding..."
+    php artisan migrate:fresh --force
     php artisan db:seed --class=MambaHotelSeeder --force
     echo "==> Seed complete."
 else
-    echo "==> Database already seeded ($TENANT_COUNT tenant(s) found) — skipping."
+    echo "==> Database already seeded ($SESSION_COUNT session(s) found) — skipping."
 fi
 
 echo "==> Starting services..."
