@@ -1,0 +1,681 @@
+{
+  "meta": {
+    "hotel": "Mamba Hotel",
+    "tenant_slug": "mamba",
+    "total_items": 50,
+    "categories": 6,
+    "currency": "KES",
+    "note": "image_url fields are PLACEHOLDERS. Replace each with your Midjourney/DALL-E image URL before seeding."
+  },
+  "categories": [
+    {
+      "slug": "starters",
+      "name": "Starters & Soups",
+      "description": "Light bites and warming soups to open your appetite",
+      "sort_order": 1,
+      "image_url": "PLACEHOLDER_starters_category"
+    },
+    {
+      "slug": "mains",
+      "name": "Mains",
+      "description": "Hearty dishes cooked fresh to order",
+      "sort_order": 2,
+      "image_url": "PLACEHOLDER_mains_category"
+    },
+    {
+      "slug": "pasta_rice",
+      "name": "Pasta & Rice",
+      "description": "Comforting pasta and fragrant rice dishes",
+      "sort_order": 3,
+      "image_url": "PLACEHOLDER_pasta_category"
+    },
+    {
+      "slug": "sides",
+      "name": "Sides",
+      "description": "Perfect accompaniments to your main course",
+      "sort_order": 4,
+      "image_url": "PLACEHOLDER_sides_category"
+    },
+    {
+      "slug": "desserts",
+      "name": "Desserts",
+      "description": "Sweet endings crafted in our kitchen",
+      "sort_order": 5,
+      "image_url": "PLACEHOLDER_desserts_category"
+    },
+    {
+      "slug": "drinks",
+      "name": "Drinks",
+      "description": "Fresh juices, mocktails and hot beverages",
+      "sort_order": 6,
+      "image_url": "PLACEHOLDER_drinks_category"
+    }
+  ],
+  "items": [
+
+    // ─────────────────────────────────────────────
+    // STARTERS & SOUPS  (8 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "s01",
+      "category": "starters",
+      "name": "Crispy Calamari",
+      "description": "Tender rings of fresh squid lightly dusted in seasoned flour and fried until golden. Served with a zesty lemon aioli and chilli flakes.",
+      "base_price": 750,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular", "seafood"],
+      "pairs_with": ["d01", "d05"],
+      "image_url": "PLACEHOLDER_s01_crispy_calamari"
+    },
+    {
+      "id": "s02",
+      "category": "starters",
+      "name": "Beef Broth Soup",
+      "description": "Rich slow-simmered beef bone broth with shredded tenderloin, garden vegetables and fresh herbs. Warming and deeply flavourful.",
+      "base_price": 600,
+      "unit": "bowl",
+      "prep_time_min": 10,
+      "tags": ["popular"],
+      "pairs_with": ["si01", "si02"],
+      "image_url": "PLACEHOLDER_s02_beef_broth_soup"
+    },
+    {
+      "id": "s03",
+      "category": "starters",
+      "name": "Bruschetta al Pomodoro",
+      "description": "Toasted sourdough rubbed with garlic, topped with ripe diced tomatoes, fresh basil and a drizzle of extra-virgin olive oil.",
+      "base_price": 550,
+      "unit": "portion",
+      "prep_time_min": 10,
+      "tags": ["vegetarian", "popular"],
+      "pairs_with": ["d01", "d07"],
+      "image_url": "PLACEHOLDER_s03_bruschetta"
+    },
+    {
+      "id": "s04",
+      "category": "starters",
+      "name": "Pumpkin Cream Soup",
+      "description": "Velvety roasted pumpkin purée with coconut milk, ginger and a swirl of cream. Served with toasted pumpkin seeds.",
+      "base_price": 580,
+      "unit": "bowl",
+      "prep_time_min": 15,
+      "tags": ["vegetarian", "popular"],
+      "pairs_with": ["si04", "d07"],
+      "image_url": "PLACEHOLDER_s04_pumpkin_soup"
+    },
+    {
+      "id": "s05",
+      "category": "starters",
+      "name": "Garlic Prawn Skewers",
+      "description": "Plump tiger prawns marinated in garlic butter, lemon and smoked paprika. Grilled on skewers and served over dressed greens.",
+      "base_price": 950,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular", "seafood", "premium"],
+      "pairs_with": ["d01", "d05", "si03"],
+      "image_url": "PLACEHOLDER_s05_garlic_prawn_skewers"
+    },
+    {
+      "id": "s06",
+      "category": "starters",
+      "name": "Chicken Liver Pâté",
+      "description": "Smooth and rich chicken liver pâté with caramelised onions, a touch of brandy and fresh thyme. Served with toasted ciabatta.",
+      "base_price": 680,
+      "unit": "portion",
+      "prep_time_min": 10,
+      "tags": [],
+      "pairs_with": ["d01", "d08"],
+      "image_url": "PLACEHOLDER_s06_chicken_liver_pate"
+    },
+    {
+      "id": "s07",
+      "category": "starters",
+      "name": "Tomato Basil Soup",
+      "description": "Classic slow-roasted tomato soup blended with fresh basil and a splash of cream. Served with a grilled cheese crouton on top.",
+      "base_price": 520,
+      "unit": "bowl",
+      "prep_time_min": 10,
+      "tags": ["vegetarian"],
+      "pairs_with": ["si01", "d07"],
+      "image_url": "PLACEHOLDER_s07_tomato_basil_soup"
+    },
+    {
+      "id": "s08",
+      "category": "starters",
+      "name": "Loaded Potato Skins",
+      "description": "Crispy baked potato skins filled with melted cheddar, sour cream and chives. A crowd-pleasing bar-style snack.",
+      "base_price": 650,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular", "vegetarian"],
+      "pairs_with": ["d02", "d06"],
+      "image_url": "PLACEHOLDER_s08_potato_skins"
+    },
+
+    // ─────────────────────────────────────────────
+    // MAINS  (12 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "m01",
+      "category": "mains",
+      "name": "Grilled Sirloin Steak",
+      "description": "250g prime beef sirloin grilled to your preference, finished with herb butter. Served with roasted garlic and a red wine jus.",
+      "base_price": 2800,
+      "unit": "portion",
+      "prep_time_min": 25,
+      "tags": ["popular", "premium"],
+      "pairs_with": ["si01", "si02", "d01", "d05"],
+      "image_url": "PLACEHOLDER_m01_sirloin_steak"
+    },
+    {
+      "id": "m02",
+      "category": "mains",
+      "name": "Herb Roasted Chicken",
+      "description": "Half chicken marinated in rosemary, thyme, garlic and lemon. Slow-roasted until golden and juicy, served with pan drippings.",
+      "base_price": 1600,
+      "unit": "portion",
+      "prep_time_min": 35,
+      "tags": ["popular"],
+      "pairs_with": ["si02", "si04", "d07"],
+      "image_url": "PLACEHOLDER_m02_herb_roasted_chicken"
+    },
+    {
+      "id": "m03",
+      "category": "mains",
+      "name": "Pan-Seared Tilapia",
+      "description": "Whole tilapia fillet pan-seared in brown butter with capers and dill. Light, flaky and perfectly seasoned.",
+      "base_price": 1450,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular", "seafood"],
+      "pairs_with": ["si03", "p04", "d01"],
+      "image_url": "PLACEHOLDER_m03_pan_seared_tilapia"
+    },
+    {
+      "id": "m04",
+      "category": "mains",
+      "name": "Slow-Braised Beef Short Ribs",
+      "description": "Beef short ribs braised for 6 hours in red wine and aromatics until fall-off-the-bone tender. Served with creamy mash.",
+      "base_price": 2600,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular", "premium"],
+      "pairs_with": ["si01", "d01", "d05"],
+      "image_url": "PLACEHOLDER_m04_beef_short_ribs"
+    },
+    {
+      "id": "m05",
+      "category": "mains",
+      "name": "Chicken Tikka Masala",
+      "description": "Tender chunks of marinated chicken in a rich, aromatic tomato-cream curry. Served with steamed basmati rice and naan.",
+      "base_price": 1550,
+      "unit": "portion",
+      "prep_time_min": 25,
+      "tags": ["popular", "spicy"],
+      "pairs_with": ["p04", "d07", "d09"],
+      "image_url": "PLACEHOLDER_m05_chicken_tikka_masala"
+    },
+    {
+      "id": "m06",
+      "category": "mains",
+      "name": "Grilled Salmon Fillet",
+      "description": "Atlantic salmon fillet grilled over charcoal with lemon-dill butter. Served with sautéed spinach and wedge of lemon.",
+      "base_price": 2100,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular", "seafood"],
+      "pairs_with": ["si03", "d01", "d05"],
+      "image_url": "PLACEHOLDER_m06_grilled_salmon"
+    },
+    {
+      "id": "m07",
+      "category": "mains",
+      "name": "Lamb Chops with Mint Jus",
+      "description": "Three tender lamb loin chops seasoned with cumin and coriander, grilled and finished with a fresh mint and garlic jus.",
+      "base_price": 2400,
+      "unit": "portion",
+      "prep_time_min": 25,
+      "tags": ["premium"],
+      "pairs_with": ["si02", "si04", "d01"],
+      "image_url": "PLACEHOLDER_m07_lamb_chops"
+    },
+    {
+      "id": "m08",
+      "category": "mains",
+      "name": "Beef Burger Classic",
+      "description": "180g hand-formed beef patty, toasted brioche bun, aged cheddar, lettuce, tomato, pickles and house burger sauce.",
+      "base_price": 1350,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular"],
+      "pairs_with": ["si01", "d02", "d06"],
+      "image_url": "PLACEHOLDER_m08_beef_burger"
+    },
+    {
+      "id": "m09",
+      "category": "mains",
+      "name": "Butter Chicken",
+      "description": "Classic Punjabi butter chicken — yoghurt-marinated chicken in a silky tomato-butter-cream sauce. Mild, fragrant and rich.",
+      "base_price": 1500,
+      "unit": "portion",
+      "prep_time_min": 25,
+      "tags": ["popular"],
+      "pairs_with": ["p04", "si04", "d09"],
+      "image_url": "PLACEHOLDER_m09_butter_chicken"
+    },
+    {
+      "id": "m10",
+      "category": "mains",
+      "name": "Whole Grilled Snapper",
+      "description": "Fresh whole red snapper scored and grilled over open flame with garlic, chilli and lime. Served with a tropical mango salsa.",
+      "base_price": 2200,
+      "unit": "portion",
+      "prep_time_min": 30,
+      "tags": ["seafood", "popular"],
+      "pairs_with": ["p04", "si03", "d01"],
+      "image_url": "PLACEHOLDER_m10_grilled_snapper"
+    },
+    {
+      "id": "m11",
+      "category": "mains",
+      "name": "Vegetable Coconut Curry",
+      "description": "Seasonal vegetables — courgette, chickpeas, sweet potato and spinach — simmered in a fragrant coconut and lemongrass curry. Served with rice.",
+      "base_price": 1200,
+      "unit": "portion",
+      "prep_time_min": 25,
+      "tags": ["vegetarian", "vegan", "popular"],
+      "pairs_with": ["p04", "d07", "d09"],
+      "image_url": "PLACEHOLDER_m11_vegetable_curry"
+    },
+    {
+      "id": "m12",
+      "category": "mains",
+      "name": "Chicken Schnitzel",
+      "description": "Flattened chicken breast coated in crispy panko breadcrumbs, pan-fried golden. Served with creamy mushroom sauce.",
+      "base_price": 1450,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular"],
+      "pairs_with": ["si01", "si02", "d07"],
+      "image_url": "PLACEHOLDER_m12_chicken_schnitzel"
+    },
+
+    // ─────────────────────────────────────────────
+    // PASTA & RICE  (6 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "p01",
+      "category": "pasta_rice",
+      "name": "Spaghetti Carbonara",
+      "description": "Authentic Roman carbonara — spaghetti tossed with crispy pancetta, egg yolk, Pecorino Romano and black pepper. No cream.",
+      "base_price": 1100,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular"],
+      "pairs_with": ["d01", "s03"],
+      "image_url": "PLACEHOLDER_p01_spaghetti_carbonara"
+    },
+    {
+      "id": "p02",
+      "category": "pasta_rice",
+      "name": "Penne Arrabbiata",
+      "description": "Penne pasta in a fierce, spicy tomato and garlic sauce with fresh chilli and basil. Simple, punchy and satisfying.",
+      "base_price": 950,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["vegetarian", "spicy"],
+      "pairs_with": ["d01", "s03"],
+      "image_url": "PLACEHOLDER_p02_penne_arrabbiata"
+    },
+    {
+      "id": "p03",
+      "category": "pasta_rice",
+      "name": "Fettuccine Alfredo",
+      "description": "Wide ribbon pasta in a luxurious Parmesan cream sauce. Finished with grilled chicken breast and fresh parsley.",
+      "base_price": 1250,
+      "unit": "portion",
+      "prep_time_min": 20,
+      "tags": ["popular"],
+      "pairs_with": ["d01", "d07"],
+      "image_url": "PLACEHOLDER_p03_fettuccine_alfredo"
+    },
+    {
+      "id": "p04",
+      "category": "pasta_rice",
+      "name": "Steamed Basmati Rice",
+      "description": "Fragrant long-grain basmati rice steamed with a bay leaf and cardamom. Light, fluffy and the perfect base for any curry or stew.",
+      "base_price": 350,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["vegetarian", "vegan"],
+      "pairs_with": ["m05", "m09", "m11"],
+      "image_url": "PLACEHOLDER_p04_basmati_rice"
+    },
+    {
+      "id": "p05",
+      "category": "pasta_rice",
+      "name": "Chicken Fried Rice",
+      "description": "Wok-tossed jasmine rice with diced chicken, egg, spring onions, garlic and soy sauce. Light smoke from the wok, crispy edges.",
+      "base_price": 1050,
+      "unit": "portion",
+      "prep_time_min": 18,
+      "tags": ["popular"],
+      "pairs_with": ["d02", "d06"],
+      "image_url": "PLACEHOLDER_p05_chicken_fried_rice"
+    },
+    {
+      "id": "p06",
+      "category": "pasta_rice",
+      "name": "Mushroom Risotto",
+      "description": "Arborio rice slow-cooked with mixed wild mushrooms, white wine and Parmesan until creamy and al dente. Finished with truffle oil.",
+      "base_price": 1300,
+      "unit": "portion",
+      "prep_time_min": 30,
+      "tags": ["vegetarian", "popular"],
+      "pairs_with": ["d01", "d07"],
+      "image_url": "PLACEHOLDER_p06_mushroom_risotto"
+    },
+
+    // ─────────────────────────────────────────────
+    // SIDES  (6 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "si01",
+      "category": "sides",
+      "name": "Hand-Cut Chips",
+      "description": "Thick-cut potato chips double-fried for a crispy shell and fluffy centre. Seasoned with sea salt and served with house ketchup.",
+      "base_price": 350,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular", "vegan"],
+      "pairs_with": ["m08", "m12", "d02"],
+      "image_url": "PLACEHOLDER_si01_hand_cut_chips"
+    },
+    {
+      "id": "si02",
+      "category": "sides",
+      "name": "Creamy Mashed Potato",
+      "description": "Yukon Gold potatoes mashed with butter, warm cream and a pinch of nutmeg until silky smooth. Rich and comforting.",
+      "base_price": 380,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular", "vegetarian"],
+      "pairs_with": ["m01", "m04", "m07"],
+      "image_url": "PLACEHOLDER_si02_mashed_potato"
+    },
+    {
+      "id": "si03",
+      "category": "sides",
+      "name": "Sautéed Garlic Spinach",
+      "description": "Fresh baby spinach wilted in a hot pan with garlic, olive oil, sea salt and a squeeze of lemon. Vibrant and nutritious.",
+      "base_price": 320,
+      "unit": "portion",
+      "prep_time_min": 10,
+      "tags": ["vegetarian", "vegan"],
+      "pairs_with": ["m03", "m06", "m07"],
+      "image_url": "PLACEHOLDER_si03_garlic_spinach"
+    },
+    {
+      "id": "si04",
+      "category": "sides",
+      "name": "Roasted Root Vegetables",
+      "description": "Seasonal carrots, parsnips and beetroot tossed in olive oil, honey and thyme, roasted until caramelised and tender.",
+      "base_price": 380,
+      "unit": "portion",
+      "prep_time_min": 30,
+      "tags": ["vegetarian", "vegan"],
+      "pairs_with": ["m02", "m07", "m11"],
+      "image_url": "PLACEHOLDER_si04_roasted_vegetables"
+    },
+    {
+      "id": "si05",
+      "category": "sides",
+      "name": "Steamed Broccoli & Tenderstem",
+      "description": "Tenderstem broccoli and florets steamed until bright green and just tender. Dressed with a lemon and almond butter.",
+      "base_price": 350,
+      "unit": "portion",
+      "prep_time_min": 10,
+      "tags": ["vegetarian", "vegan"],
+      "pairs_with": ["m01", "m06", "m12"],
+      "image_url": "PLACEHOLDER_si05_broccoli"
+    },
+    {
+      "id": "si06",
+      "category": "sides",
+      "name": "Grilled Corn on the Cob",
+      "description": "Sweet corn grilled on open flame until charred, brushed with herb butter and a dusting of chilli powder.",
+      "base_price": 280,
+      "unit": "piece",
+      "prep_time_min": 10,
+      "tags": ["popular", "vegetarian"],
+      "pairs_with": ["m08", "m02", "d02"],
+      "image_url": "PLACEHOLDER_si06_grilled_corn"
+    },
+
+    // ─────────────────────────────────────────────
+    // DESSERTS  (8 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "de01",
+      "category": "desserts",
+      "name": "Chocolate Fondant",
+      "description": "Warm dark chocolate cake with a molten centre, dusted with icing sugar. Served with a scoop of vanilla bean ice cream.",
+      "base_price": 750,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular", "premium"],
+      "pairs_with": ["d08", "d09"],
+      "image_url": "PLACEHOLDER_de01_chocolate_fondant"
+    },
+    {
+      "id": "de02",
+      "category": "desserts",
+      "name": "Classic Crème Brûlée",
+      "description": "Silky vanilla custard set in a ramekin and finished with a perfectly caramelised sugar crust. Crack and enjoy.",
+      "base_price": 680,
+      "unit": "portion",
+      "prep_time_min": 10,
+      "tags": ["popular"],
+      "pairs_with": ["d08"],
+      "image_url": "PLACEHOLDER_de02_creme_brulee"
+    },
+    {
+      "id": "de03",
+      "category": "desserts",
+      "name": "New York Cheesecake",
+      "description": "Dense and creamy baked cheesecake on a buttery digestive biscuit base. Served with a fresh strawberry compote.",
+      "base_price": 650,
+      "unit": "slice",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["d08", "d07"],
+      "image_url": "PLACEHOLDER_de03_cheesecake"
+    },
+    {
+      "id": "de04",
+      "category": "desserts",
+      "name": "Mango Panna Cotta",
+      "description": "Light Italian-style panna cotta infused with fresh Kenyan mango. Set in a glass and topped with mango coulis and mint.",
+      "base_price": 600,
+      "unit": "portion",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["d08"],
+      "image_url": "PLACEHOLDER_de04_mango_panna_cotta"
+    },
+    {
+      "id": "de05",
+      "category": "desserts",
+      "name": "Banana Foster Pancakes",
+      "description": "Fluffy buttermilk pancakes topped with caramelised banana in brown sugar rum sauce and a drizzle of cream.",
+      "base_price": 700,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular"],
+      "pairs_with": ["d07", "d08"],
+      "image_url": "PLACEHOLDER_de05_banana_foster_pancakes"
+    },
+    {
+      "id": "de06",
+      "category": "desserts",
+      "name": "Tiramisu",
+      "description": "Classic Italian tiramisu — espresso-soaked savoiardi layered with mascarpone cream and dusted with fine cocoa powder.",
+      "base_price": 720,
+      "unit": "portion",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["d08"],
+      "image_url": "PLACEHOLDER_de06_tiramisu"
+    },
+    {
+      "id": "de07",
+      "category": "desserts",
+      "name": "Fruit Salad with Cream",
+      "description": "Seasonal fresh fruits — watermelon, pineapple, pawpaw, kiwi and passion fruit — tossed in a honey-lime dressing. Served with whipped cream.",
+      "base_price": 500,
+      "unit": "bowl",
+      "prep_time_min": 5,
+      "tags": ["popular", "vegan"],
+      "pairs_with": ["d08", "d09"],
+      "image_url": "PLACEHOLDER_de07_fruit_salad"
+    },
+    {
+      "id": "de08",
+      "category": "desserts",
+      "name": "Warm Malva Pudding",
+      "description": "South African sticky apricot sponge pudding soaked in a warm cream sauce. Served with a side of vanilla custard.",
+      "base_price": 620,
+      "unit": "portion",
+      "prep_time_min": 15,
+      "tags": ["popular"],
+      "pairs_with": ["d08"],
+      "image_url": "PLACEHOLDER_de08_malva_pudding"
+    },
+
+    // ─────────────────────────────────────────────
+    // DRINKS  (10 items)
+    // ─────────────────────────────────────────────
+    {
+      "id": "d01",
+      "category": "drinks",
+      "name": "Still Water",
+      "description": "Chilled still mineral water. Small (500ml) or large (1L) available.",
+      "base_price": 150,
+      "unit": "bottle",
+      "prep_time_min": 2,
+      "tags": [],
+      "pairs_with": [],
+      "image_url": "PLACEHOLDER_d01_still_water"
+    },
+    {
+      "id": "d02",
+      "category": "drinks",
+      "name": "Coca-Cola",
+      "description": "Ice-cold Coca-Cola served over ice in a tall glass.",
+      "base_price": 200,
+      "unit": "glass",
+      "prep_time_min": 2,
+      "tags": ["popular"],
+      "pairs_with": ["m08", "si01"],
+      "image_url": "PLACEHOLDER_d02_coca_cola"
+    },
+    {
+      "id": "d03",
+      "category": "drinks",
+      "name": "Fresh Orange Juice",
+      "description": "Freshly squeezed Kenyan oranges, no added sugar. Served chilled.",
+      "base_price": 380,
+      "unit": "glass",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["s03", "de05"],
+      "image_url": "PLACEHOLDER_d03_orange_juice"
+    },
+    {
+      "id": "d04",
+      "category": "drinks",
+      "name": "Mango Passion Smoothie",
+      "description": "Blended fresh mango and passion fruit with yoghurt and a touch of honey. Thick, tropical and refreshing.",
+      "base_price": 450,
+      "unit": "glass",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["de04", "de07"],
+      "image_url": "PLACEHOLDER_d04_mango_smoothie"
+    },
+    {
+      "id": "d05",
+      "category": "drinks",
+      "name": "Sparkling Water",
+      "description": "Ice-cold carbonated mineral water with a wedge of lemon.",
+      "base_price": 200,
+      "unit": "bottle",
+      "prep_time_min": 2,
+      "tags": [],
+      "pairs_with": [],
+      "image_url": "PLACEHOLDER_d05_sparkling_water"
+    },
+    {
+      "id": "d06",
+      "category": "drinks",
+      "name": "Ginger Lemonade",
+      "description": "Housemade lemonade with a kick of fresh ginger, mint leaves and a pinch of cayenne. Served over ice.",
+      "base_price": 420,
+      "unit": "glass",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["m05", "m08", "s05"],
+      "image_url": "PLACEHOLDER_d06_ginger_lemonade"
+    },
+    {
+      "id": "d07",
+      "category": "drinks",
+      "name": "Hot Coffee",
+      "description": "Freshly brewed Kenyan AA coffee. Choose: espresso, Americano, cappuccino or flat white.",
+      "base_price": 350,
+      "unit": "cup",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["de01", "de02", "de06"],
+      "image_url": "PLACEHOLDER_d07_hot_coffee"
+    },
+    {
+      "id": "d08",
+      "category": "drinks",
+      "name": "Dessert Wine Glass",
+      "description": "A glass of chilled sweet dessert wine. Ask your waiter for today's selection.",
+      "base_price": 900,
+      "unit": "glass",
+      "prep_time_min": 2,
+      "tags": ["premium"],
+      "pairs_with": ["de01", "de02", "de03", "de06"],
+      "image_url": "PLACEHOLDER_d08_dessert_wine"
+    },
+    {
+      "id": "d09",
+      "category": "drinks",
+      "name": "Masala Chai",
+      "description": "Kenyan tea brewed strong with milk, cardamom, ginger, cinnamon and black pepper. The ultimate comfort drink.",
+      "base_price": 280,
+      "unit": "cup",
+      "prep_time_min": 8,
+      "tags": ["popular"],
+      "pairs_with": ["m05", "m09", "de08"],
+      "image_url": "PLACEHOLDER_d09_masala_chai"
+    },
+    {
+      "id": "d10",
+      "category": "drinks",
+      "name": "Virgin Mojito",
+      "description": "Muddled fresh mint and lime with sugar syrup, topped with sparkling water and crushed ice. Bright and refreshing.",
+      "base_price": 480,
+      "unit": "glass",
+      "prep_time_min": 5,
+      "tags": ["popular"],
+      "pairs_with": ["m03", "m06", "m10", "s05"],
+      "image_url": "PLACEHOLDER_d10_virgin_mojito"
+    }
+
+  ]
+}
