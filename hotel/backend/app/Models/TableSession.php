@@ -79,7 +79,7 @@ class TableSession extends Model
         return $query->whereNotNull('closed_at');
     }
 
-    public function scopeForTenant($query, int $tenantId)
+    public function scopeForTenant($query, string $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
     }

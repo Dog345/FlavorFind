@@ -82,7 +82,7 @@ class MenuItem extends Model
         return $query->where('is_available', true)->where('is_active', true);
     }
 
-    public function scopeForTenant($query, int $tenantId)
+    public function scopeForTenant($query, string $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
     }

@@ -101,7 +101,7 @@ class Table extends Model
         return $query->where('status', self::STATUS_AVAILABLE);
     }
 
-    public function scopeForTenant($query, int $tenantId)
+    public function scopeForTenant($query, string $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
     }
