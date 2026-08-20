@@ -21,9 +21,10 @@ return [
     'servers' => [
 
         'reverb' => [
-            'host'    => env('REVERB_HOST', '0.0.0.0'),
-            'port'    => env('REVERB_PORT', 8080),
-            'scheme'  => env('REVERB_SCHEME', 'http'),
+            'host'     => env('REVERB_HOST', '0.0.0.0'),
+            'hostname' => env('REVERB_HOST', '0.0.0.0'),
+            'port'     => env('REVERB_PORT', 8080),
+            'scheme'   => env('REVERB_SCHEME', 'http'),
 
             // Maximum allowed connections (tune based on server RAM)
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
@@ -51,15 +52,15 @@ return [
 
         'apps' => [
             [
-                'key'             => env('REVERB_APP_KEY'),
-                'secret'          => env('REVERB_APP_SECRET'),
-                'app_id'          => env('REVERB_APP_ID'),
+                'key'             => env('REVERB_APP_KEY', 'hotel-app-key'),
+                'secret'          => env('REVERB_APP_SECRET', 'hotel-app-secret'),
+                'app_id'          => env('REVERB_APP_ID', 'hotel-app'),
                 'options'         => [
                     'host'   => env('REVERB_HOST', '0.0.0.0'),
                     'port'   => env('REVERB_PORT', 8080),
                     'scheme' => env('REVERB_SCHEME', 'http'),
                 ],
-                'allowed_origins' => [env('APP_URL', '*')],
+                'allowed_origins' => ['*'],
                 'ping_interval'   => env('REVERB_PING_INTERVAL', 60),
                 'max_message_size'=> env('REVERB_MAX_REQUEST_SIZE', 10_000),
             ],
