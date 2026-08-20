@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * A single line item within an order.
  *
- * @property int         $id
- * @property int         $order_id
- * @property int         $menu_item_id
- * @property int|null    $variant_id      ItemVariant if applicable
+ * @property string      $id
+ * @property string      $order_id
+ * @property string      $menu_item_id
+ * @property string|null $variant_id      ItemVariant if applicable
  * @property string      $name            Snapshot of item name at order time
  * @property float       $unit_price      Snapshot of price at order time
  * @property int         $quantity
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class OrderItem extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     public const STATUS_PENDING   = 'pending';
     public const STATUS_PREPARING = 'preparing';

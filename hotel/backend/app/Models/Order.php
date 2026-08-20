@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,11 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * A single order ticket associated with a table session.
  * Multiple orders can belong to one session (e.g. ordering rounds).
  *
- * @property int         $id
- * @property int         $tenant_id
- * @property int         $session_id      TableSession
- * @property int         $table_id
- * @property int|null    $waiter_id
+ * @property string      $id
+ * @property string      $tenant_id
+ * @property string      $session_id      TableSession
+ * @property string      $table_id
+ * @property string|null $waiter_id
  * @property string      $order_number    Human-readable, e.g. "#0042"
  * @property string      $status          One of the STATUS_* constants
  * @property string      $type            'dine_in' | 'takeaway' | 'delivery'
@@ -33,7 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     // ─── Status constants ────────────────────────────────────────────────────
     public const STATUS_PENDING   = 'pending';    // Just placed, not yet sent to kitchen

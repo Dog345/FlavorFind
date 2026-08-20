@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * An add-on / modifier for a menu item (e.g. "Extra cheese +50", "No onions").
  *
- * @property int    $id
- * @property int    $menu_item_id
+ * @property string $id
+ * @property string $menu_item_id
  * @property string $name           e.g. "Extra Cheese", "Gluten-free bun"
  * @property float  $price_delta    Amount to add to the item price (can be 0 or negative)
  * @property bool   $is_available
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ItemModifier extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'menu_item_id',
