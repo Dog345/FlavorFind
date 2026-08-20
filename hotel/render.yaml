@@ -1,0 +1,89 @@
+services:
+  - type: web
+    name: flavorfind-hotel
+    runtime: docker
+    region: frankfurt
+    rootDir: hotel/backend
+    dockerfilePath: ./Dockerfile
+
+    envVars:
+      # ── App ────────────────────────────────────────────────────────────────
+      - key: APP_NAME
+        value: HotelManager
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://flavorfind-hotel.onrender.com
+
+      # ── Primary DB — hotel PostgreSQL on DigitalOcean ─────────────────────
+      # DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD must be set manually
+      # in the Render dashboard (Environment → Secret Files / Env Vars).
+      # Use the private IP of the DigitalOcean droplet if both Render and DO
+      # are in the same region; otherwise use the public IP.
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false          # e.g. your_do_droplet_ip
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        sync: false          # e.g. hotel
+      - key: DB_USERNAME
+        sync: false          # e.g. hotel_user
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: prefer
+
+      # ── Cache / Session / Queue ────────────────────────────────────────────
+      # No Redis on the free tier — use the database driver instead.
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # ── Logging ────────────────────────────────────────────────────────────
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+
+      # ── Broadcasting / Mail ────────────────────────────────────────────────
+      # Reverb WebSocket server runs inside the same Docker container on port 8080.
+      # Set REVERB_* values in the dashboard once the service URL is known.
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: REVERB_APP_ID
+        sync: false
+      - key: REVERB_APP_KEY
+        sync: false
+      - key: REVERB_APP_SECRET
+        sync: false
+      - key: REVERB_HOST
+        value: 0.0.0.0
+      - key: REVERB_PORT
+        value: 8080
+      - key: REVERB_SCHEME
+        value: https
+      - key: MAIL_MAILER
+        value: log
+
+      # ── M-Pesa / Daraja ───────────────────────────────────────────────────
+      - key: MPESA_ENV
+        value: sandbox
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        value: https://flavorfind-hotel.onrender.com/api/v1/payments/mpesa/callback

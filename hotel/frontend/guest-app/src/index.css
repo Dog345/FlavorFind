@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Overridden at runtime from hotel.primary_color once the session loads */
+  --color-primary: #d9642e;
+  --color-primary-dark: #b84f22;
+  --color-primary-light: #f3ddce;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-cream text-ink font-sans antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+/* Keep the app pinned to a phone-width column even on wider viewports */
+.app-shell {
+  max-width: 480px;
+  margin-inline: auto;
+  min-height: 100dvh;
+  position: relative;
+  background: theme('colors.cream.DEFAULT');
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
+}
+
+/* Tactile tap feedback used across buttons and cards */
+.tap-shrink {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.tap-shrink:active {
+  transform: scale(0.95);
+}
+
+.skeleton {
+  @apply relative overflow-hidden bg-line/70;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
