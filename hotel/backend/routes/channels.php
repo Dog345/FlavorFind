@@ -95,6 +95,39 @@ Broadcast::channel('{slug}.dashboard', function ($user, string $slug) {
 });
 
 /**
+ * Tables / floor plan channel — all staff see live table status changes.
+ *
+ * Channel: {slug}.tables
+ * Broadcasts: TableStatusChanged
+ */
+Broadcast::channel('{slug}.tables', function ($user, string $slug) {
+    if (! $user || $user->tenant->slug !== $slug || ! $user->is_active) {
+        return false;
+    }
+
+    // Any active staff member may watch the floor plan
+    return true;
+});
+
+/**
+ * Payments channel — cashiers and managers see live payment events.
+ *
+ * Channel: {slug}.payments
+ * Broadcasts: PaymentReceived
+ */
+Broadcast::channel('{slug}.payments', function ($user, string $slug) {
+    if (! $user || $user->tenant->slug !== $slug) {
+        return false;
+    }
+
+    return in_array($user->role, [
+        \App\Models\User::ROLE_CASHIER,
+        \App\Models\User::ROLE_MANAGER,
+        \App\Models\User::ROLE_ADMIN,
+    ], true);
+});
+
+/**
  * Session channel — staff assigned to or managing a session.
  *
  * Channel: {slug}.session.{sessionId}

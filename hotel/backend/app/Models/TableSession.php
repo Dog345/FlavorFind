@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,10 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * A dining session — opened when guests sit, closed when they pay and leave.
  * Links a table to all orders placed during a single visit.
  *
- * @property int              $id
- * @property int              $tenant_id
- * @property int              $table_id
- * @property int|null         $waiter_id     Staff who opened the session
+ * @property string           $id
+ * @property string           $tenant_id
+ * @property string           $table_id
+ * @property string|null      $waiter_id     Staff who opened the session
  * @property int              $covers        Number of guests
  * @property string|null      $guest_name    Optional name for the party
  * @property string           $token         Random UUID for QR self-service
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class TableSession extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'tenant_id',

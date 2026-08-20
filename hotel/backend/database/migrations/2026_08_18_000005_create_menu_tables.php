@@ -29,18 +29,18 @@ return new class extends Migration
             $table->foreign('category_id')->references('id')->on('menu_categories')->onDelete('set null');
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('base_price', 10, 2);
             $table->string('image_url')->nullable();
+            $table->decimal('base_price', 10, 2);
+            $table->string('unit', 50)->nullable();           // e.g. "portion", "bottle", "kg"
             $table->boolean('is_available')->default(true);
-            $table->smallInteger('preparation_time_mins')->default(15);
+            $table->boolean('is_active')->default(true);
+            $table->smallInteger('prep_time_min')->default(15);
+            $table->jsonb('tags')->nullable();                // ["popular","vegan","spicy"]
             $table->smallInteger('sort_order')->default(0);
-            // Optional link to FlavorFind recipe DB (UUID from the flavorfind.recipes table)
+            // Optional link to FlavorFind recipe DB
             $table->uuid('flavorfind_recipe_id')->nullable();
             $table->timestamps();
         });
-
-        // allergen_flags stored as Postgres text array
-        DB::statement('ALTER TABLE menu_items ADD COLUMN allergen_flags TEXT[] DEFAULT ARRAY[]::TEXT[]');
 
         DB::statement("CREATE INDEX mc_tenant_sort_idx ON menu_categories (tenant_id, sort_order)");
         DB::statement("CREATE INDEX mi_tenant_category_idx ON menu_items (tenant_id, category_id)");
