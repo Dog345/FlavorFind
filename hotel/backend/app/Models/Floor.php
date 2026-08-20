@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Represents a physical floor/section within a tenant's venue.
  *
- * @property int         $id
- * @property int         $tenant_id
+ * @property string      $id
+ * @property string      $tenant_id
  * @property string      $name        e.g. "Ground Floor", "Rooftop", "VIP Lounge"
  * @property int         $sort_order  Display order in the UI
  * @property bool        $is_active
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Floor extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'tenant_id',

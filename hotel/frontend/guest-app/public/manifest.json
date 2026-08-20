@@ -1,0 +1,24 @@
+{
+  "name": "Mamba Hotel — Order at your table",
+  "short_name": "Mamba Order",
+  "description": "Browse the menu, order, and pay via M-Pesa without leaving your table.",
+  "start_url": "/menu",
+  "display": "standalone",
+  "background_color": "#FBF7F1",
+  "theme_color": "#2B2119",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

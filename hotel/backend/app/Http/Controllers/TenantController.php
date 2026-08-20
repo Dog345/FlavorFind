@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Reservation;
+use App\Models\Table;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +19,11 @@ class TenantController extends Controller
     {
         $tenant = $request->user()->tenant;
 
-        return response()->json($tenant);
+        return response()->json($tenant->makeHidden([
+            'mpesa_consumer_key',
+            'mpesa_consumer_secret',
+            'mpesa_passkey',
+        ]));
     }
 
     /**
@@ -44,7 +52,6 @@ class TenantController extends Controller
             'mpesa_consumer_secret', 'mpesa_passkey', 'mpesa_shortcode', 'mpesa_env',
         ]));
 
-        // Don't return sensitive M-Pesa keys in response
         return response()->json($tenant->makeHidden([
             'mpesa_consumer_key', 'mpesa_consumer_secret', 'mpesa_passkey',
         ]));
@@ -52,49 +59,66 @@ class TenantController extends Controller
 
     /**
      * GET /api/v1/tenant/stats
-     * Quick numbers for the dashboard home widget.
+     *
+     * Quick dashboard counters for the home widget.
+     * All queries are explicitly scoped to the authenticated user's tenant.
      */
     public function stats(Request $request): JsonResponse
     {
-        $tenantId = $request->user()->tenant_id;
-        $today    = now()->toDateString();
+        $tenantId = $request->tenant()->id;
+        $today    = today()->toDateString();
 
-        $stats = DB::selectOne("
-            SELECT
-                (SELECT COUNT(*)::int FROM orders
-                 WHERE tenant_id = :t1
-                   AND DATE(created_at) = :today
-                   AND status != 'cancelled') AS orders_today,
+        // ── Orders today (non-cancelled) ──────────────────────────────────────
+        $ordersToday = Order::where('tenant_id', $tenantId)
+            ->whereDate('created_at', $today)
+            ->where('status', '!=', Order::STATUS_CANCELLED)
+            ->count();
 
-                (SELECT COALESCE(SUM(amount), 0)::numeric(10,2) FROM payments
-                 WHERE tenant_id = :t2
-                   AND DATE(created_at) = :today2
-                   AND mpesa_status = 'paid' OR (method = 'cash' AND mpesa_status IS NULL)) AS revenue_today,
+        // ── Revenue today (sum of completed payments) ─────────────────────────
+        $revenueToday = Payment::where('tenant_id', $tenantId)
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->whereDate('paid_at', $today)
+            ->sum('amount');
 
-                (SELECT COUNT(*)::int FROM orders
-                 WHERE tenant_id = :t3
-                   AND status IN ('pending','confirmed','prep')) AS active_orders,
+        // ── Active (in-flight) orders ─────────────────────────────────────────
+        $activeOrders = Order::where('tenant_id', $tenantId)
+            ->whereIn('status', [
+                Order::STATUS_PENDING,
+                Order::STATUS_CONFIRMED,
+                Order::STATUS_PREPARING,
+                Order::STATUS_READY,
+            ])
+            ->count();
 
-                (SELECT COUNT(*)::int FROM tables
-                 WHERE tenant_id = :t4
-                   AND status = 'occupied') AS occupied_tables,
+        // ── Table occupancy ───────────────────────────────────────────────────
+        $occupiedTables = Table::where('tenant_id', $tenantId)
+            ->where('status', Table::STATUS_OCCUPIED)
+            ->count();
 
-                (SELECT COUNT(*)::int FROM tables
-                 WHERE tenant_id = :t5) AS total_tables,
+        $totalTables = Table::where('tenant_id', $tenantId)
+            ->where('is_active', true)
+            ->count();
 
-                (SELECT COUNT(*)::int FROM reservations
-                 WHERE tenant_id = :t6
-                   AND DATE(reserved_at) = :today3
-                   AND status IN ('pending','confirmed')) AS reservations_today
-        ", [
-            't1' => $tenantId, 'today'  => $today,
-            't2' => $tenantId, 'today2' => $today,
-            't3' => $tenantId,
-            't4' => $tenantId,
-            't5' => $tenantId,
-            't6' => $tenantId, 'today3' => $today,
+        // ── Today's reservations (confirmed / tentative) ──────────────────────
+        $reservationsToday = Reservation::where('tenant_id', $tenantId)
+            ->whereDate('reserved_at', $today)
+            ->whereIn('status', [
+                Reservation::STATUS_TENTATIVE,
+                Reservation::STATUS_CONFIRMED,
+            ])
+            ->count();
+
+        return response()->json([
+            'orders_today'       => $ordersToday,
+            'revenue_today'      => round((float) $revenueToday, 2),
+            'active_orders'      => $activeOrders,
+            'occupied_tables'    => $occupiedTables,
+            'total_tables'       => $totalTables,
+            'occupancy_rate'     => $totalTables > 0
+                ? round($occupiedTables / $totalTables * 100, 1)
+                : 0.0,
+            'reservations_today' => $reservationsToday,
+            'as_of'              => now()->toIso8601String(),
         ]);
-
-        return response()->json($stats);
     }
 }
