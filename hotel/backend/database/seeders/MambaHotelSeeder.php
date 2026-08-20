@@ -144,7 +144,7 @@ class MambaHotelSeeder extends Seeder
             ['label' => 'T5', 'capacity' => 8],
         ];
 
-        foreach ($groundTables as $i => $t) {
+        foreach ($groundTables as $t) {
             $tables[] = Table::updateOrCreate(
                 ['tenant_id' => $tenant->id, 'floor_id' => $groundFloor->id, 'label' => $t['label']],
                 [
