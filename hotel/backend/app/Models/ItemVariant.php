@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * A size / variant of a menu item (e.g. Small / Large, 250ml / 500ml).
  *
- * @property int    $id
- * @property int    $menu_item_id
+ * @property string $id
+ * @property string $menu_item_id
  * @property string $name           e.g. "Small", "Large", "Extra Shot"
  * @property float  $price          Absolute price for this variant (overrides base_price)
  * @property bool   $is_available
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ItemVariant extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'menu_item_id',
