@@ -1,0 +1,211 @@
+# Mamba Hotel — Midjourney Image Prompts
+# 50 prompts, one per menu item
+# ─────────────────────────────────────────────────────────────
+#
+# STYLE SYSTEM (use on ALL images for consistency):
+#   - Angle:      45° overhead (food photography hero angle)
+#   - Plate:      matte black ceramic plate, round
+#   - Surface:    dark slate or dark grey textured stone
+#   - Lighting:   soft diffused natural light from top-left
+#   - Style:      editorial restaurant food photography
+#   - Ratio:      --ar 4:3
+#   - Quality:    --q 2  --style raw
+#   - NO text, NO watermarks, NO hands, NO people
+#
+# HOW TO USE:
+#   1. Go to midjourney.com (or Discord bot)
+#   2. Type /imagine and paste the prompt
+#   3. Upscale the best result (U1-U4)
+#   4. Download and upload to your image host
+#   5. Paste the URL into the seed script (replacing PLACEHOLDER_xxx)
+#
+# ─────────────────────────────────────────────────────────────
+
+
+## ─── STARTERS & SOUPS ───────────────────────────────────────
+
+# s01 — Crispy Calamari
+/imagine prompt: crispy golden calamari rings, lemon aioli dipping sauce in small bowl, scattered chilli flakes, served on matte black ceramic plate, dark slate surface, 45 degree overhead food photography angle, soft diffused studio lighting, editorial restaurant photography, shallow depth of field --ar 4:3 --q 2 --style raw
+
+# s02 — Beef Broth Soup
+/imagine prompt: steaming rich dark beef broth soup in wide matte black ceramic bowl, shredded beef, carrot rounds, celery, fresh herb garnish, dark slate surface, 45 degree overhead angle, soft natural light from top left, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+# s03 — Bruschetta al Pomodoro
+/imagine prompt: rustic bruschetta on toasted sourdough slices, diced ripe red tomatoes, fresh basil leaves, drizzle of olive oil, served on matte black ceramic plate, dark textured stone surface, 45 degree overhead angle, soft studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# s04 — Pumpkin Cream Soup
+/imagine prompt: velvety orange pumpkin cream soup in matte black ceramic bowl, cream swirl on top, toasted pumpkin seeds garnish, dark slate surface, 45 degree overhead food photography angle, warm soft studio lighting, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# s05 — Garlic Prawn Skewers
+/imagine prompt: three grilled tiger prawn skewers, charred marks, glistening garlic butter, fresh lemon wedge, small salad of dressed greens, matte black ceramic plate, dark stone surface, 45 degree overhead angle, soft diffused natural light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# s06 — Chicken Liver Pâté
+/imagine prompt: smooth chicken liver pate in small ramekin, caramelised onion on top, fresh thyme sprig, toasted ciabatta slices alongside, matte black ceramic plate, dark slate surface, 45 degree overhead angle, soft warm studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# s07 — Tomato Basil Soup
+/imagine prompt: vibrant deep red tomato basil soup in matte black ceramic bowl, grilled cheese crouton floating on top, fresh basil leaf, cream swirl, dark stone surface, 45 degree overhead food photography angle, soft natural light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# s08 — Loaded Potato Skins
+/imagine prompt: crispy baked potato skin halves filled with melted cheddar cheese, dollop of sour cream, fresh chives, served on matte black ceramic plate, dark slate surface, 45 degree overhead angle, soft warm studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+
+## ─── MAINS ──────────────────────────────────────────────────
+
+# m01 — Grilled Sirloin Steak
+/imagine prompt: perfectly grilled beef sirloin steak, medium rare pink center, herb butter melting on top, roasted garlic clove, red wine jus pooled on matte black ceramic plate, dark slate surface, 45 degree overhead angle, dramatic soft studio lighting, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+# m02 — Herb Roasted Chicken
+/imagine prompt: golden crispy half roasted chicken, rosemary and thyme sprigs, roasted garlic, pan jus drizzled, on matte black ceramic plate, dark stone surface, 45 degree overhead angle, warm soft natural light from top left, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# m03 — Pan-Seared Tilapia
+/imagine prompt: pan seared tilapia fillet, golden crispy skin, caper brown butter sauce, fresh dill garnish, lemon slice, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, soft diffused studio light, editorial food photography --ar 4:3 --q 2 --style raw
+
+# m04 — Slow-Braised Beef Short Ribs
+/imagine prompt: fall-off-the-bone braised beef short rib, deep mahogany red wine glaze, creamy mashed potato quenelle alongside, micro herbs garnish, matte black ceramic plate, dark stone surface, 45 degree overhead angle, moody soft lighting, editorial restaurant photography, premium --ar 4:3 --q 2 --style raw
+
+# m05 — Chicken Tikka Masala
+/imagine prompt: vibrant orange chicken tikka masala curry in matte black ceramic bowl, tender chicken chunks, cream swirl, fresh coriander leaves, small steamed basmati rice portion alongside, dark slate surface, 45 degree overhead angle, warm soft lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# m06 — Grilled Salmon Fillet
+/imagine prompt: grilled Atlantic salmon fillet with charred grill marks, lemon dill butter melting on top, sauteed dark spinach alongside, lemon wedge, matte black ceramic plate, dark stone surface, 45 degree overhead angle, soft natural light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# m07 — Lamb Chops with Mint Jus
+/imagine prompt: three grilled lamb loin chops, charred crust, pink inside, fresh mint jus pooled on plate, roasted garlic, micro herbs, matte black ceramic plate, dark slate surface, 45 degree overhead angle, dramatic soft studio lighting, editorial food photography, premium --ar 4:3 --q 2 --style raw
+
+# m08 — Beef Burger Classic
+/imagine prompt: tall stacked beef burger on toasted brioche bun, melted cheddar cheese, fresh lettuce, tomato slice, pickles, house sauce dripping, served on matte black ceramic plate, dark stone surface, 45 degree overhead angle, soft warm studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# m09 — Butter Chicken
+/imagine prompt: rich creamy butter chicken curry in matte black ceramic bowl, orange-red sauce, tender chicken pieces, cream swirl, fresh coriander, small naan bread alongside, dark slate surface, 45 degree overhead angle, warm soft lighting, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+# m10 — Whole Grilled Snapper
+/imagine prompt: whole grilled red snapper fish, charred scored skin, fresh mango salsa on top, lime wedges, chilli slices, matte black ceramic plate, dark textured stone surface, 45 degree overhead angle, soft natural light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# m11 — Vegetable Coconut Curry
+/imagine prompt: golden yellow vegetable coconut curry in matte black ceramic bowl, chickpeas, sweet potato cubes, spinach, lemongrass, fresh coriander garnish, dark stone surface, 45 degree overhead angle, warm soft natural light, editorial food photography, vegan --ar 4:3 --q 2 --style raw
+
+# m12 — Chicken Schnitzel
+/imagine prompt: golden crispy panko chicken schnitzel, creamy mushroom sauce poured over, fresh parsley garnish, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, warm soft studio lighting, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+
+## ─── PASTA & RICE ───────────────────────────────────────────
+
+# p01 — Spaghetti Carbonara
+/imagine prompt: classic spaghetti carbonara, glossy egg yolk sauce, crispy golden pancetta pieces, freshly cracked black pepper, pecorino shavings, twirled elegantly in matte black ceramic bowl, dark slate surface, 45 degree overhead angle, soft diffused light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# p02 — Penne Arrabbiata
+/imagine prompt: penne arrabbiata pasta in spicy tomato sauce, glossy vibrant red sauce, fresh red chilli slices, torn basil leaves, in matte black ceramic bowl, dark stone surface, 45 degree overhead angle, soft natural light, editorial food photography --ar 4:3 --q 2 --style raw
+
+# p03 — Fettuccine Alfredo
+/imagine prompt: fettuccine alfredo pasta, wide ribbon noodles in creamy parmesan sauce, grilled chicken strips on top, fresh parsley, in matte black ceramic bowl, dark slate surface, 45 degree overhead angle, soft warm studio lighting, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# p04 — Steamed Basmati Rice
+/imagine prompt: perfectly cooked fluffy white basmati rice, individual grains visible, bay leaf and cardamom pod garnish, served in matte black ceramic bowl, dark stone surface, 45 degree overhead angle, clean soft natural light, minimal editorial food photography --ar 4:3 --q 2 --style raw
+
+# p05 — Chicken Fried Rice
+/imagine prompt: wok fried rice with diced chicken, scrambled egg pieces, spring onions, light soy glaze, slight charred wok hei texture, in matte black ceramic bowl, dark slate surface, 45 degree overhead angle, warm soft lighting, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+# p06 — Mushroom Risotto
+/imagine prompt: creamy mushroom risotto, wild mushroom varieties on top, truffle oil droplets glistening, fresh thyme, parmesan shavings, in matte black ceramic bowl, dark stone surface, 45 degree overhead angle, soft moody studio lighting, editorial fine dining photography --ar 4:3 --q 2 --style raw
+
+
+## ─── SIDES ──────────────────────────────────────────────────
+
+# si01 — Hand-Cut Chips
+/imagine prompt: thick hand-cut potato chips, golden crispy exterior, fluffy inside, scattered sea salt flakes, small house ketchup dipping cup, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, warm soft studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# si02 — Creamy Mashed Potato
+/imagine prompt: silky smooth creamy mashed potato in matte black ceramic bowl, butter pool melting in center, light cream swirl, pinch of nutmeg, dark stone surface, 45 degree overhead angle, soft warm natural light, editorial restaurant photography, comfort food --ar 4:3 --q 2 --style raw
+
+# si03 — Sautéed Garlic Spinach
+/imagine prompt: vibrant bright green sauteed baby spinach with golden garlic slices, lemon zest, sea salt, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, fresh soft natural light, clean editorial food photography, healthy --ar 4:3 --q 2 --style raw
+
+# si04 — Roasted Root Vegetables
+/imagine prompt: caramelised honey roasted root vegetables, orange carrots, purple beetroot, parsnips, fresh thyme sprigs, on matte black ceramic plate, dark stone surface, 45 degree overhead angle, warm soft studio lighting, editorial restaurant food photography --ar 4:3 --q 2 --style raw
+
+# si05 — Steamed Broccoli & Tenderstem
+/imagine prompt: bright green tenderstem broccoli and florets, steamed perfectly, lemon butter drizzle, toasted almond slivers, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, clean natural soft light, editorial food photography, fresh --ar 4:3 --q 2 --style raw
+
+# si06 — Grilled Corn on the Cob
+/imagine prompt: charred grilled corn on the cob, herb butter melting over charred kernels, chilli powder dusting, on matte black ceramic plate, dark stone surface, 45 degree overhead angle, warm soft natural light, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+
+## ─── DESSERTS ───────────────────────────────────────────────
+
+# de01 — Chocolate Fondant
+/imagine prompt: warm dark chocolate fondant cake, cut open showing molten flowing center, scoop of vanilla bean ice cream alongside, icing sugar dusting, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, dramatic soft moody studio lighting, premium editorial food photography --ar 4:3 --q 2 --style raw
+
+# de02 — Classic Crème Brûlée
+/imagine prompt: classic creme brulee in white ramekin on matte black ceramic plate, perfectly caramelised golden sugar crust, crack visible, fresh vanilla bean, dark stone surface, 45 degree overhead angle, soft natural light, elegant editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# de03 — New York Cheesecake
+/imagine prompt: slice of New York baked cheesecake on matte black ceramic plate, dense creamy filling, buttery biscuit base, glossy fresh strawberry compote poured over top, mint leaf, dark slate surface, 45 degree overhead angle, soft warm studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# de04 — Mango Panna Cotta
+/imagine prompt: silky mango panna cotta set in clear glass, bright orange mango coulis layer on top, fresh mint leaf, on dark slate surface, 45 degree overhead angle, clean soft natural light, elegant minimal editorial food photography --ar 4:3 --q 2 --style raw
+
+# de05 — Banana Foster Pancakes
+/imagine prompt: stack of fluffy golden buttermilk pancakes, caramelised banana slices draped on top, warm brown sugar rum sauce drizzling down, drizzle of cream, on matte black ceramic plate, dark stone surface, 45 degree overhead angle, warm soft studio lighting, editorial food photography --ar 4:3 --q 2 --style raw
+
+# de06 — Tiramisu
+/imagine prompt: classic tiramisu in matte black ceramic rectangle dish, dark cocoa powder dusting on top, mascarpone cream layer visible at edge, coffee soaked savoiardi layer, dark slate surface, 45 degree overhead angle, soft warm moody lighting, editorial Italian restaurant photography --ar 4:3 --q 2 --style raw
+
+# de07 — Fruit Salad with Cream
+/imagine prompt: colourful tropical fruit salad in matte black ceramic bowl, watermelon cubes, pineapple, pawpaw, kiwi, passion fruit seeds, honey lime dressing glistening, whipped cream dollop, dark stone surface, 45 degree overhead angle, fresh bright natural light, editorial food photography --ar 4:3 --q 2 --style raw
+
+# de08 — Warm Malva Pudding
+/imagine prompt: warm sticky malva pudding, golden brown sponge soaked in cream sauce, vanilla custard poured alongside, on matte black ceramic plate, dark slate surface, 45 degree overhead angle, warm moody soft studio lighting, editorial South African restaurant food photography --ar 4:3 --q 2 --style raw
+
+
+## ─── DRINKS ─────────────────────────────────────────────────
+
+# d01 — Still Water
+/imagine prompt: chilled still mineral water glass, condensation on exterior, lemon wedge on rim, ice cubes inside, on dark slate surface, 45 degree overhead angle, clean minimal soft light, editorial beverage photography --ar 4:3 --q 2 --style raw
+
+# d02 — Coca-Cola
+/imagine prompt: ice cold Coca-Cola in tall clear glass, dark bubbling liquid, ice cubes, condensation on glass exterior, on dark stone surface, 45 degree overhead angle, clean soft studio lighting, editorial drinks photography --ar 4:3 --q 2 --style raw
+
+# d03 — Fresh Orange Juice
+/imagine prompt: freshly squeezed orange juice in clear glass, vibrant orange colour, small bubbles on surface, orange slice on rim, on dark slate surface, 45 degree overhead angle, bright fresh natural light, editorial beverage food photography --ar 4:3 --q 2 --style raw
+
+# d04 — Mango Passion Smoothie
+/imagine prompt: thick tropical mango passion fruit smoothie in clear glass, vibrant golden orange colour, mango slice on rim, passion fruit seeds visible, on dark stone surface, 45 degree overhead angle, bright fresh soft lighting, editorial drinks photography --ar 4:3 --q 2 --style raw
+
+# d05 — Sparkling Water
+/imagine prompt: sparkling mineral water in tall clear glass, active bubbles rising, lemon wedge on rim, ice cubes, on dark slate surface, 45 degree overhead angle, clean minimal soft lighting, editorial beverage photography --ar 4:3 --q 2 --style raw
+
+# d06 — Ginger Lemonade
+/imagine prompt: housemade ginger lemonade in tall clear glass, pale yellow with mint leaves and ginger slices, crushed ice, lemon slice, on dark stone surface, 45 degree overhead angle, fresh bright natural light, editorial restaurant drinks photography --ar 4:3 --q 2 --style raw
+
+# d07 — Hot Coffee
+/imagine prompt: flat white coffee in white ceramic cup on matte black saucer, perfect latte art leaf on surface, dark espresso colour, on dark slate surface, 45 degree overhead angle, warm soft morning light, editorial coffee shop photography --ar 4:3 --q 2 --style raw
+
+# d08 — Dessert Wine Glass
+/imagine prompt: chilled dessert wine in elegant wine glass, golden amber colour, on dark stone surface, 45 degree overhead angle, soft moody evening light, elegant editorial fine dining beverage photography --ar 4:3 --q 2 --style raw
+
+# d09 — Masala Chai
+/imagine prompt: masala chai in small glass cup, warm amber brown colour, steam rising, cinnamon stick, cardamom pod alongside, on dark slate surface, 45 degree overhead angle, warm cosy soft lighting, editorial Indian tea photography --ar 4:3 --q 2 --style raw
+
+# d10 — Virgin Mojito
+/imagine prompt: virgin mojito cocktail in tall clear glass, fresh mint leaves muddled inside, lime slices, crushed ice, clear sparkling water, vibrant green colour, on dark stone surface, 45 degree overhead angle, bright fresh soft lighting, editorial mocktail photography --ar 4:3 --q 2 --style raw
+
+
+## ─── CATEGORY HEADER IMAGES (6 extra) ──────────────────────
+
+# category: Starters & Soups
+/imagine prompt: elegant spread of starters, calamari, soup bowl, bruschetta arrangement, matte black ceramic plates, dark slate surface, 45 degree overhead angle, soft studio lighting, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# category: Mains
+/imagine prompt: perfectly plated grilled sirloin steak centre, roasted chicken beside it, elegant restaurant arrangement, matte black ceramic plates, dark stone surface, 45 degree overhead angle, dramatic soft studio lighting, editorial fine dining photography --ar 4:3 --q 2 --style raw
+
+# category: Pasta & Rice
+/imagine prompt: elegant bowl of mushroom risotto and spaghetti carbonara side by side, steam rising, matte black ceramic bowls, dark slate surface, 45 degree overhead angle, warm soft lighting, editorial Italian restaurant photography --ar 4:3 --q 2 --style raw
+
+# category: Sides
+/imagine prompt: arrangement of elegant side dishes, crispy chips, mashed potato, garlic spinach, matte black ceramic plates, dark stone surface, 45 degree overhead angle, warm soft studio lighting, editorial restaurant photography --ar 4:3 --q 2 --style raw
+
+# category: Desserts
+/imagine prompt: elegant dessert spread, chocolate fondant with molten center, creme brulee, cheesecake slice, matte black ceramic plates, dark slate surface, 45 degree overhead angle, moody dramatic soft studio lighting, editorial fine dining photography --ar 4:3 --q 2 --style raw
+
+# category: Drinks
+/imagine prompt: elegant drinks arrangement, fresh juice, coffee, mocktail, mineral water, tall clear glasses and ceramic cups, dark stone surface, 45 degree overhead angle, clean fresh soft lighting, editorial beverage photography --ar 4:3 --q 2 --style raw
