@@ -2,71 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Overridden at runtime from hotel.primary_color once the session loads */
-  --color-primary: #d9642e;
-  --color-primary-dark: #b84f22;
-  --color-primary-light: #f3ddce;
-}
+@layer base {
+  * { -webkit-tap-highlight-color: transparent; }
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  @apply bg-cream text-ink font-sans antialiased;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: contain;
-}
-
-/* Keep the app pinned to a phone-width column even on wider viewports */
-.app-shell {
-  max-width: 480px;
-  margin-inline: auto;
-  min-height: 100dvh;
-  position: relative;
-  background: theme('colors.cream.DEFAULT');
-}
-
-::-webkit-scrollbar {
-  display: none;
-}
-* {
-  scrollbar-width: none;
-}
-
-/* Tactile tap feedback used across buttons and cards */
-.tap-shrink {
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.tap-shrink:active {
-  transform: scale(0.95);
-}
-
-.skeleton {
-  @apply relative overflow-hidden bg-line/70;
-}
-.skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-  animation: shimmer 1.4s infinite;
-}
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
+  body {
+    background: #0a0a0a;
+    color: #f5f5f0;
+    font-family: 'Inter', sans-serif;
+    overscroll-behavior: none;
   }
+
+  ::-webkit-scrollbar { display: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
+@layer utilities {
+  .font-display { font-family: 'Playfair Display', serif; }
+
+  /* Hero plate crossfade */
+  .plate-img {
+    transition: opacity 0.45s ease, transform 0.45s ease;
   }
+  .plate-img.fading {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  /* Tap shrink */
+  .tap {
+    transition: transform 0.12s ease;
+    cursor: pointer;
+  }
+  .tap:active { transform: scale(0.93); }
+
+  /* Card selected ring */
+  .card-selected {
+    box-shadow: 0 0 0 2px #f5c842;
+  }
+
+  /* Glow on selected */
+  .glow {
+    box-shadow: 0 8px 32px rgba(245, 200, 66, 0.25);
+  }
+
+  /* Scroll row — no scrollbar */
+  .scroll-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .scroll-row::-webkit-scrollbar { display: none; }
 }
+
+/* Slide up animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.slide-up { animation: slideUp 0.35s ease forwards; }
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+/* Cart badge bounce */
+@keyframes badgePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.badge-pop { animation: badgePop 0.25s ease; }

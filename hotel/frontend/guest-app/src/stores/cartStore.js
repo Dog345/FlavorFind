@@ -1,47 +1,73 @@
 import { create } from 'zustand';
 
-const VAT_RATE = 0.16;
-
-function lineTotal(item) {
-  return item.unitPrice * item.quantity;
-}
-
 export const useCartStore = create((set, get) => ({
-  items: [], // [{ menuItem, variantId, modifierIds, quantity, notes, unitPrice }]
-  note: '',
+  // Main selected dish (the hero plate)
+  hero: null,
 
-  addItem: (menuItem, variantId, modifierIds, quantity, notes, unitPrice) =>
-    set((state) => ({
-      items: [
-        ...state.items,
-        { menuItem, variantId, modifierIds, quantity, notes, unitPrice },
-      ],
-    })),
+  // Add-ons: { [item.id]: { item, qty } }
+  addons: {},
 
-  removeItem: (index) =>
-    set((state) => ({ items: state.items.filter((_, i) => i !== index) })),
+  // Placed orders
+  orders: [],
 
-  updateQuantity: (index, quantity) =>
-    set((state) => ({
-      items: state.items.map((item, i) =>
-        i === index ? { ...item, quantity: Math.max(1, quantity) } : item
-      ),
-    })),
+  setHero: (item) => set({ hero: item }),
 
-  setNote: (note) => set({ note }),
-
-  clearCart: () => set({ items: [], note: '' }),
-
-  get totalItems() {
-    return get().items.reduce((sum, item) => sum + item.quantity, 0);
+  addAddon: (item) => {
+    const addons = { ...get().addons };
+    if (addons[item.id]) {
+      addons[item.id] = { item, qty: addons[item.id].qty + 1 };
+    } else {
+      addons[item.id] = { item, qty: 1 };
+    }
+    set({ addons });
   },
-  get subtotal() {
-    return get().items.reduce((sum, item) => sum + lineTotal(item), 0);
+
+  removeAddon: (itemId) => {
+    const addons = { ...get().addons };
+    if (addons[itemId]?.qty > 1) {
+      addons[itemId] = { ...addons[itemId], qty: addons[itemId].qty - 1 };
+    } else {
+      delete addons[itemId];
+    }
+    set({ addons });
   },
-  get tax() {
-    return Math.round(get().subtotal * VAT_RATE);
+
+  clearAddon: (itemId) => {
+    const addons = { ...get().addons };
+    delete addons[itemId];
+    set({ addons });
   },
-  get total() {
-    return get().subtotal + get().tax;
+
+  clearAll: () => set({ hero: null, addons: {} }),
+
+  addOrder: (order) => set((s) => ({ orders: [...s.orders, order] })),
+
+  // Build the order payload for the API
+  buildPayload: () => {
+    const { hero, addons } = get();
+    const items = [];
+    if (hero) items.push({ menu_item_id: hero.id, quantity: 1 });
+    Object.values(addons).forEach(({ item, qty }) => {
+      items.push({ menu_item_id: item.id, quantity: qty });
+    });
+    return { items };
+  },
+
+  // Total price
+  total: () => {
+    const { hero, addons } = get();
+    let t = hero ? Number(hero.base_price) : 0;
+    Object.values(addons).forEach(({ item, qty }) => {
+      t += Number(item.base_price) * qty;
+    });
+    return t;
+  },
+
+  // Count of items in cart
+  count: () => {
+    const { hero, addons } = get();
+    let c = hero ? 1 : 0;
+    Object.values(addons).forEach(({ qty }) => { c += qty; });
+    return c;
   },
 }));
