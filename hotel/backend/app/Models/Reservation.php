@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null      $guest_email
  * @property int              $covers          Number of guests
  * @property \Carbon\Carbon   $reserved_at     Scheduled arrival date-time
- * @property int              $duration_min    Expected stay in minutes (default 90)
+ * @property int              $duration_mins   Expected stay in minutes (default 90)
  * @property string           $status          One of the STATUS_* constants
  * @property string|null      $notes
  * @property string|null      $source          'walk_in'|'phone'|'online'|'app'
@@ -60,7 +60,7 @@ class Reservation extends Model
         'guest_email',
         'covers',
         'reserved_at',
-        'duration_min',
+        'duration_mins',
         'status',
         'notes',
         'source',
@@ -72,7 +72,7 @@ class Reservation extends Model
 
     protected $casts = [
         'covers'       => 'integer',
-        'duration_min' => 'integer',
+        'duration_mins' => 'integer',
         'reserved_at'  => 'datetime',
         'confirmed_at' => 'datetime',
         'arrived_at'   => 'datetime',
@@ -137,7 +137,7 @@ class Reservation extends Model
         return $query->where('table_id', $tableId)
             ->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW])
             ->where('reserved_at', '<', $end)
-            ->whereRaw("(reserved_at + (duration_min * INTERVAL '1 minute')) > ?", [$start]);
+            ->whereRaw("(reserved_at + (duration_mins * INTERVAL '1 minute')) > ?", [$start]);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

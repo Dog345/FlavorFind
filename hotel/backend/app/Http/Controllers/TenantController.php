@@ -110,7 +110,7 @@ class TenantController extends Controller
 
         return response()->json([
             'orders_today'       => $ordersToday,
-            'revenue_today'      => round((float) $revenueToday, 2),
+            'revenue_today'      => (float) round($revenueToday ?? 0, 2),
             'active_orders'      => $activeOrders,
             'occupied_tables'    => $occupiedTables,
             'total_tables'       => $totalTables,
@@ -119,6 +119,6 @@ class TenantController extends Controller
                 : 0.0,
             'reservations_today' => $reservationsToday,
             'as_of'              => now()->toIso8601String(),
-        ]);
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 }

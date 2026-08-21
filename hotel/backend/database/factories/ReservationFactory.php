@@ -24,7 +24,7 @@ class ReservationFactory extends Factory
             'guest_email'  => $this->faker->optional()->safeEmail(),
             'covers'       => $this->faker->numberBetween(1, 8),
             'reserved_at'  => now()->addDays($this->faker->numberBetween(1, 30)),
-            'duration_min' => 90,
+            'duration_mins' => 90,
             'status'       => Reservation::STATUS_TENTATIVE,
             'notes'        => null,
             'source'       => 'phone',
