@@ -60,7 +60,7 @@ class ReservationController extends Controller
      *   date         Y-m-d         (required)
      *   time         H:i           (required)
      *   covers       int >= 1      (required)
-     *   duration_min int >= 15     (optional, default 90)
+     *   duration_mins int >= 15     (optional, default 90)
      *   exclude_id   UUID          (optional, exclude this reservation from conflict check)
      */
     public function availability(Request $request): JsonResponse
@@ -71,12 +71,12 @@ class ReservationController extends Controller
             'date'         => 'required|date_format:Y-m-d',
             'time'         => 'required|date_format:H:i',
             'covers'       => 'required|integer|min:1|max:50',
-            'duration_min' => 'sometimes|integer|min:15|max:480',
+            'duration_mins' => 'sometimes|integer|min:15|max:480',
             'exclude_id'   => 'sometimes|string|uuid',
         ]);
 
         $start       = \Carbon\Carbon::createFromFormat('Y-m-d H:i', "{$data['date']} {$data['time']}");
-        $durationMin = $data['duration_min'] ?? 90;
+        $durationMin = $data['duration_mins'] ?? 90;
         $excludeId   = $data['exclude_id'] ?? null;
 
         if ($start->isPast()) {
@@ -102,7 +102,7 @@ class ReservationController extends Controller
                 'date'         => $data['date'],
                 'time'         => $data['time'],
                 'covers'       => $data['covers'],
-                'duration_min' => $durationMin,
+                'duration_mins' => $durationMin,
                 'available'    => $tables->count(),
             ],
         ]);
@@ -124,14 +124,14 @@ class ReservationController extends Controller
             'guest_email'  => 'sometimes|nullable|email|max:150',
             'covers'       => 'required|integer|min:1|max:50',
             'reserved_at'  => 'required|date|after:now',
-            'duration_min' => 'sometimes|integer|min:15|max:480',
+            'duration_mins' => 'sometimes|integer|min:15|max:480',
             'table_id'     => 'sometimes|nullable|string|uuid',
             'notes'        => 'sometimes|nullable|string|max:500',
             'source'       => 'sometimes|in:walk_in,phone,online,app',
             'auto_assign'  => 'sometimes|boolean',
         ]);
 
-        $durationMin = $data['duration_min'] ?? 90;
+        $durationMin = $data['duration_mins'] ?? 90;
         $start       = \Carbon\Carbon::parse($data['reserved_at']);
 
         // Explicit table provided — validate ownership and check for conflict
@@ -161,7 +161,7 @@ class ReservationController extends Controller
             'guest_email'  => $data['guest_email'] ?? null,
             'covers'       => $data['covers'],
             'reserved_at'  => $data['reserved_at'],
-            'duration_min' => $durationMin,
+            'duration_mins' => $durationMin,
             'notes'        => $data['notes'] ?? null,
             'source'       => $data['source'] ?? 'phone',
             'status'       => Reservation::STATUS_TENTATIVE,
@@ -209,7 +209,7 @@ class ReservationController extends Controller
             'guest_email'  => 'sometimes|nullable|email|max:150',
             'covers'       => 'sometimes|integer|min:1|max:50',
             'reserved_at'  => 'sometimes|date|after:now',
-            'duration_min' => 'sometimes|integer|min:15|max:480',
+            'duration_mins' => 'sometimes|integer|min:15|max:480',
             'table_id'     => 'sometimes|nullable|string|uuid',
             'notes'        => 'sometimes|nullable|string|max:500',
         ]);
@@ -218,7 +218,7 @@ class ReservationController extends Controller
             $this->assertTableOwnership($tenant->id, $data['table_id']);
 
             $start       = \Carbon\Carbon::parse($data['reserved_at'] ?? $reservation->reserved_at);
-            $durationMin = $data['duration_min'] ?? $reservation->duration_min;
+            $durationMin = $data['duration_mins'] ?? $reservation->duration_mins;
 
             if ($this->reservationService->hasConflict(
                 $tenant->id, $data['table_id'], $start, $start->copy()->addMinutes($durationMin), $reservation->id

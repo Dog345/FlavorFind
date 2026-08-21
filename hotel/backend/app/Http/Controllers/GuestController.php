@@ -255,11 +255,11 @@ class GuestController extends Controller
 
         $data = $request->validate([
             'items'                     => 'required|array|min:1|max:50',
-            'items.*.menu_item_id'      => 'required|integer',
+            'items.*.menu_item_id'      => 'required|string|uuid',
             'items.*.quantity'          => 'required|integer|min:1|max:99',
-            'items.*.variant_id'        => 'nullable|integer',
+            'items.*.variant_id'        => 'nullable|string|uuid',
             'items.*.modifier_ids'      => 'nullable|array',
-            'items.*.modifier_ids.*'    => 'integer',
+            'items.*.modifier_ids.*'    => 'string|uuid',
             'items.*.notes'             => 'nullable|string|max:200',
             'notes'                     => 'nullable|string|max:500',
         ]);
@@ -283,12 +283,7 @@ class GuestController extends Controller
             }
 
             // Build order number
-            $orderNumber = '#' . str_pad(
-                Order::where('tenant_id', $tenantId)->count() + 1,
-                4,
-                '0',
-                STR_PAD_LEFT
-            );
+            $orderNumber = null; // DB trigger assigns this automatically
 
             // Calculate totals
             $subtotal = 0.0;
@@ -398,7 +393,7 @@ class GuestController extends Controller
      * Returns order status + per-item statuses.
      * Guest polls this every 15s to show live cooking progress.
      */
-    public function trackOrder(string $token, int $orderId): JsonResponse
+    public function trackOrder(string $token, string $orderId): JsonResponse
     {
         $session = $this->findSession($token);
 
@@ -476,7 +471,7 @@ class GuestController extends Controller
         $session = $this->findSession($token);
 
         $data = $request->validate([
-            'order_id' => 'required|integer',
+            'order_id' => 'required|string|uuid',
             'phone'    => ['required', 'string', 'regex:/^254[0-9]{9}$/'],
             'amount'   => 'nullable|numeric|min:1',
         ]);

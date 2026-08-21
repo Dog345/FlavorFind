@@ -75,12 +75,17 @@ class PaymentController extends Controller
                 'message'             => 'STK Push sent. Waiting for customer to confirm.',
                 'payment_id'          => $payment->id,
                 'checkout_request_id' => $response['CheckoutRequestID'] ?? null,
-                'amount'              => $amount,
-                'outstanding_after'   => round($outstanding - $amount, 2),
-            ], 202);
+                'amount'              => (float) $amount,
+                'outstanding_after'   => (float) round($outstanding - $amount, 2),
+            ], 202, [], JSON_PRESERVE_ZERO_FRACTION);
 
         } catch (\Exception $e) {
-            $payment->update(['status' => Payment::STATUS_FAILED]);
+            // Use a direct DB update to ensure the status change persists
+            // even if the Eloquent model's dirty-state tracking is confused
+            // by the partial state at throw time.
+            \Illuminate\Support\Facades\DB::table('payments')
+                ->where('id', $payment->id)
+                ->update(['status' => Payment::STATUS_FAILED]);
 
             Log::error('STK Push failed', [
                 'order_id' => $order->id,
@@ -199,12 +204,12 @@ class PaymentController extends Controller
         return response()->json([
             'message'           => 'Cash payment recorded.',
             'payment_id'        => $payment->id,
-            'amount_applied'    => $applied,
-            'amount_tendered'   => $tendered,
-            'change_due'        => $changeDue,
+            'amount_applied'    => (float) $applied,
+            'amount_tendered'   => (float) $tendered,
+            'change_due'        => (float) $changeDue,
             'order_status'      => $payment->order->status,
-            'outstanding_after' => max(0, round($outstanding - $applied, 2)),
-        ]);
+            'outstanding_after' => (float) max(0, round($outstanding - $applied, 2)),
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -262,12 +267,12 @@ class PaymentController extends Controller
         return response()->json([
             'message'           => 'External payment recorded.',
             'payment_id'        => $payment->id,
-            'amount'            => $payment->amount,
+            'amount'            => (float) $payment->amount,
             'external_reference'=> $payment->external_reference,
             'external_provider' => $payment->external_provider,
             'order_status'      => $payment->order->status,
-            'outstanding_after' => $this->outstandingBalance($payment->order->fresh()),
-        ], 201);
+            'outstanding_after' => (float) $this->outstandingBalance($payment->order->fresh()),
+        ], 201, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -413,13 +418,13 @@ class PaymentController extends Controller
 
         return response()->json([
             'date'        => $date,
-            'grand_total' => round($grandTotal, 2),
+            'grand_total' => (float) round($grandTotal, 2),
             'by_method'   => $totals->map(fn ($row) => [
                 'method' => $row->method,
                 'count'  => $row->count,
-                'total'  => round($row->total, 2),
+                'total'  => (float) round($row->total, 2),
             ])->values(),
-        ]);
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

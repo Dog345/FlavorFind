@@ -54,19 +54,29 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Trigger: auto-assign per-tenant order_number
+        // Trigger: auto-assign per-tenant order_number as "#0001" style string.
+        // Skips if order_number is already set (allows factory/controller to override).
+        // Strips the leading '#' before casting to integer for MAX().
         DB::statement("
             CREATE OR REPLACE FUNCTION assign_order_number()
             RETURNS TRIGGER AS \$\$
             DECLARE
                 next_num INTEGER;
             BEGIN
-                SELECT COALESCE(MAX(order_number), 0) + 1
+                -- Skip if the caller already provided an order_number
+                IF NEW.order_number IS NOT NULL AND NEW.order_number != '' THEN
+                    RETURN NEW;
+                END IF;
+
+                SELECT COALESCE(
+                    MAX(CAST(REGEXP_REPLACE(order_number, '[^0-9]', '', 'g') AS INTEGER)),
+                    0
+                ) + 1
                 INTO next_num
                 FROM orders
                 WHERE tenant_id = NEW.tenant_id;
 
-                NEW.order_number := next_num;
+                NEW.order_number := '#' || LPAD(next_num::TEXT, 4, '0');
                 RETURN NEW;
             END;
             \$\$ LANGUAGE plpgsql;

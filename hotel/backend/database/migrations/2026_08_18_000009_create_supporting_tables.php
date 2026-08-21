@@ -32,14 +32,21 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->uuid('table_id')->nullable();
             $table->foreign('table_id')->references('id')->on('tables')->onDelete('set null');
+            $table->uuid('session_id')->nullable();
+            $table->foreign('session_id')->references('id')->on('table_sessions')->onDelete('set null');
             $table->string('guest_name');
             $table->string('guest_phone', 20)->nullable();
             $table->string('guest_email')->nullable();
-            $table->smallInteger('party_size')->default(1);
+            $table->smallInteger('covers')->default(1);         // number of guests (was party_size)
             $table->timestamp('reserved_at');
             $table->smallInteger('duration_mins')->default(90);
-            $table->string('status', 20)->default('pending');   // pending|confirmed|seated|cancelled|no_show
+            $table->string('status', 20)->default('tentative'); // tentative|confirmed|arrived|completed|no_show|cancelled
             $table->text('notes')->nullable();
+            $table->string('source', 30)->nullable();           // walk_in|phone|online|app
+            $table->timestamp('confirmed_at')->nullable();
+            $table->timestamp('arrived_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->text('cancellation_reason')->nullable();
             $table->timestamps();
         });
 

@@ -79,9 +79,12 @@ class Table extends Model
 
     public function activeSession(): HasOne
     {
+        // latestOfMany() uses MAX(id) internally which fails on UUID PKs in PostgreSQL.
+        // Use a plain HasOne with ordering instead — works correctly for our use case
+        // since there should only ever be one open session per table at a time.
         return $this->hasOne(TableSession::class)
             ->whereNull('closed_at')
-            ->latestOfMany();
+            ->latest('opened_at');
     }
 
     public function orders(): HasMany

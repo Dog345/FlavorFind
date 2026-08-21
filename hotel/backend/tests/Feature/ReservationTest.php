@@ -193,7 +193,7 @@ class ReservationTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [['id', 'label', 'capacity', 'floor_id']],
-                'meta' => ['date', 'time', 'covers', 'duration_min', 'available'],
+                'meta' => ['date', 'time', 'covers', 'duration_mins', 'available'],
             ]);
 
         // Our available table should appear
@@ -213,7 +213,7 @@ class ReservationTest extends TestCase
             'table_id'    => $this->table->id,
             'covers'      => 2,
             'reserved_at' => now()->addDays(5)->setTimeFromTimeString('19:00'),
-            'duration_min'=> 90,
+            'duration_mins'=> 90,
             'status'      => Reservation::STATUS_CONFIRMED,
         ]);
 

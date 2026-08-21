@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\JsonFloatPrecision;
 use App\Http\Middleware\RequireRole;
 use App\Http\Middleware\ResolveTenant;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Apply tenant resolution to all API routes
         $middleware->prependToGroup('api', ResolveTenant::class);
+
+        // Preserve float precision (0.0 → "0.0", not "0") in all JSON responses
+        $middleware->appendToGroup('api', JsonFloatPrecision::class);
 
         // Named middleware aliases
         $middleware->alias([

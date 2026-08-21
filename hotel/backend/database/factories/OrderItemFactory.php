@@ -16,8 +16,9 @@ class OrderItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id'   => Order::factory(),
-            'name'       => $this->faker->randomElement([
+            'order_id'     => Order::factory(),
+            'menu_item_id' => \App\Models\MenuItem::factory(),
+            'name'         => $this->faker->randomElement([
                 'Grilled Chicken', 'Beef Burger', 'Chips', 'Caesar Salad',
                 'Nyama Choma', 'Pilau Rice', 'Tilapia', 'Chapati',
             ]),
