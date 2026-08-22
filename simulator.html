@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Suggestion Engine Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background: #0d0d0d; }
+    </style>
+</head>
+<body>
+      <style>
+        /* Scoped simulator styles — all prefixed with .sim- */
+        .sim-wrap { background: #0d0d0d; min-height: 100vh; font-family: 'Poppins', sans-serif; }
+        .sim-hero {
+          position: relative; width: 100%; aspect-ratio: 16/9; max-height: 340px;
+          overflow: hidden; border-radius: 16px; background: #1a1a1a;
+        }
+        .sim-hero img {
+          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+          border-radius: 16px;
+          transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+        .sim-hero img.slot-hidden { opacity: 0; transform: scale(0.97); }
+        .sim-hero img.slot-visible { opacity: 1; transform: scale(1); }
+        .sim-hero .overlay {
+          position: absolute; inset: 0; border-radius: 16px;
+          background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+        }
+        .sim-hero .info {
+          position: absolute; bottom: 0; left: 0; right: 0; padding: 16px;
+        }
+        .sim-card {
+          flex-shrink: 0; width: 130px; background: #1e1e1e;
+          border-radius: 12px; overflow: hidden; cursor: pointer;
+          border: 2px solid transparent;
+          transition: border-color 0.2s, transform 0.12s;
+        }
+        .sim-card:active { transform: scale(0.94); }
+        .sim-card.selected { border-color: #e87a3d; box-shadow: 0 0 0 1px #e87a3d; }
+        .sim-card img { width: 100%; height: 80px; object-fit: cover; }
+        .sim-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+        .sim-scroll::-webkit-scrollbar { display: none; }
+        .sim-tag {
+          font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+          padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.1);
+          color: #888; background: rgba(255,255,255,0.04);
+        }
+        .sim-suggest-card {
+          display: flex; align-items: center; gap: 10px;
+          background: #1e1e1e; border-radius: 10px; padding: 8px 10px;
+          border-left: 3px solid #e87a3d; animation: simSlideIn 0.3s ease forwards;
+        }
+        @keyframes simSlideIn {
+          from { opacity: 0; transform: translateX(-8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .sim-suggest-card img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+        .sim-log-entry { font-size: 12px; padding: 4px 0; border-bottom: 1px solid #1e1e1e; color: #aaa; }
+        .sim-log-entry span { color: #e87a3d; font-weight: 600; }
+        .sim-cart-item {
+          display: flex; align-items: center; gap: 8px;
+          background: #1a1a1a; border-radius: 8px; padding: 6px 10px;
+        }
+        .sim-badge {
+          display: inline-block; font-size: 10px; font-weight: 700;
+          padding: 1px 6px; border-radius: 99px; background: #e87a3d; color: #000;
+        }
+        .sim-add-btn {
+          width: 22px; height: 22px; border-radius: 50%; background: #e87a3d;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; flex-shrink: 0; transition: transform 0.1s;
+          border: none; font-size: 14px; font-weight: bold; color: #000;
+        }
+        .sim-add-btn:active { transform: scale(0.88); }
+        .sim-remove-btn {
+          width: 22px; height: 22px; border-radius: 50%; background: #2a2a2a;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; flex-shrink: 0; border: none; font-size: 14px; color: #aaa;
+          transition: transform 0.1s;
+        }
+        .sim-remove-btn:active { transform: scale(0.88); }
+        .sim-section-label {
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+          color: #555; margin-bottom: 8px; font-weight: 600;
+        }
+        .sim-rule-row {
+          display: flex; align-items: center; gap: 8px;
+          background: #1a1a1a; border-radius: 8px; padding: 6px 10px; margin-bottom: 6px;
+          font-size: 12px;
+        }
+        .sim-pill {
+          font-size: 10px; padding: 2px 8px; border-radius: 99px;
+          background: rgba(232,122,61,0.15); color: #e87a3d; border: 1px solid rgba(232,122,61,0.3);
+        }
+      </style>
+
+      <div class="sim-wrap px-4 py-6 max-w-2xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-orange-500 text-lg">⚗️</span>
+            <h1 class="text-white font-bold text-xl">Suggestion Engine Simulator</h1>
+          </div>
+          <p class="text-gray-500 text-xs">
+            Tests the food-swap and suggestion logic in isolation — no backend, no tenant needed.
+            Prove the logic here, then sync to the hotel system.
+          </p>
+        </div>
+
+        <!-- ── HERO PLATE ── -->
+        <div class="sim-hero mb-2" id="sim-hero-wrap">
+          <img id="sim-img-a" class="slot-visible" src="" alt="" />
+          <img id="sim-img-b" class="slot-hidden"  src="" alt="" />
+          <div class="overlay"></div>
+          <div class="info" id="sim-hero-info">
+            <h2 id="sim-hero-name" class="text-white font-bold text-lg leading-tight"></h2>
+            <p  id="sim-hero-desc" class="text-gray-400 text-xs mt-0.5 line-clamp-1"></p>
+            <div class="flex items-end justify-between mt-1">
+              <div id="sim-hero-tags" class="flex gap-1 flex-wrap"></div>
+              <span id="sim-hero-price" class="text-orange-400 font-bold text-base"></span>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-600 text-xs text-center mb-5">↓ Tap a main dish below to swap the plate</p>
+
+        <!-- ── MAINS SCROLL ── -->
+        <div class="mb-6">
+          <p class="sim-section-label">Mains — tap to select</p>
+          <div class="sim-scroll" id="sim-mains-row"></div>
+        </div>
+
+        <!-- ── SUGGESTION ENGINE OUTPUT ── -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <p class="sim-section-label" style="margin-bottom:0">Suggestions fired</p>
+            <span class="text-orange-500 text-xs font-semibold" id="sim-suggest-count">0 rules matched</span>
+          </div>
+          <div id="sim-suggestions" class="space-y-2">
+            <p class="text-gray-600 text-xs">Select a main dish above to see suggestions…</p>
+          </div>
+        </div>
+
+        <!-- ── ADD-ONS CATEGORY ROWS ── -->
+        <div id="sim-addon-rows" class="mb-6"></div>
+
+        <!-- ── CART (live order build) ── -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <p class="sim-section-label" style="margin-bottom:0">Current order build</p>
+            <span id="sim-cart-total" class="text-orange-400 font-bold text-sm">KES 0</span>
+          </div>
+          <div id="sim-cart" class="space-y-2">
+            <p class="text-gray-600 text-xs">Nothing added yet…</p>
+          </div>
+        </div>
+
+        <!-- ── ENGINE LOG ── -->
+        <div class="bg-black rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="sim-section-label" style="margin-bottom:0">Engine log</p>
+            <button onclick="document.getElementById('sim-log-body').innerHTML=''" class="text-gray-600 text-xs hover:text-gray-400">clear</button>
+          </div>
+          <div id="sim-log-body" class="space-y-0 max-h-52 overflow-y-auto"></div>
+        </div>
+
+        <!-- ── RULES INSPECTOR ── -->
+        <div class="mt-6 bg-black rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="sim-section-label" style="margin-bottom:0">Pairing rules (live — edit &amp; re-trigger)</p>
+            <button id="sim-toggle-rules" onclick="this.closest('.bg-black').querySelector('#sim-rules-list').classList.toggle('hidden'); this.textContent = this.textContent === 'hide' ? 'show' : 'hide'" class="text-orange-500 text-xs">show</button>
+          </div>
+          <div id="sim-rules-list" class="hidden">
+            <p class="text-gray-600 text-xs mb-3">These rules drive the suggestion output above. You can add or remove rules here to test different logic.</p>
+            <div id="sim-rules-body"></div>
+            <!-- Add rule form -->
+            <div class="mt-4 bg-[#1a1a1a] rounded-lg p-3 space-y-2">
+              <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Add a new rule</p>
+              <select id="sim-rule-trigger" class="w-full bg-[#2a2a2a] text-white text-xs rounded-lg p-2 border-0"></select>
+              <select id="sim-rule-suggest" class="w-full bg-[#2a2a2a] text-white text-xs rounded-lg p-2 border-0"></select>
+              <input id="sim-rule-prompt" type="text" placeholder='Prompt text e.g. "Add a Coke?"' class="w-full bg-[#2a2a2a] text-white text-xs rounded-lg p-2 border-0" />
+              <button onclick="simAddRule()" class="w-full bg-orange-500 text-black text-xs font-bold rounded-lg py-2 hover:bg-orange-400 transition">+ Add Rule</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sim-wrap -->
+
+      <script>
+      // ═══════════════════════════════════════════════════════
+      // SIMULATOR DATA — Our 50 hotel menu items (no backend)
+      // ═══════════════════════════════════════════════════════
+      const SIM_ITEMS = {
+        // MAINS
+        m01: { id:'m01', cat:'mains', name:'Grilled Sirloin Steak',       price:2800, prep:25, tags:['popular','premium'], desc:'250g prime sirloin grilled to order, herb butter, red wine jus.', img:'https://images.unsplash.com/photo-1558030006-450675393462?w=600&q=80' },
+        m02: { id:'m02', cat:'mains', name:'Herb Roasted Chicken',        price:1600, prep:35, tags:['popular'],           desc:'Half chicken, rosemary, thyme, garlic — roasted golden.', img:'https://images.unsplash.com/photo-1598103442097-8b74394b95c8?w=600&q=80' },
+        m03: { id:'m03', cat:'mains', name:'Pan-Seared Tilapia',          price:1450, prep:20, tags:['popular','seafood'], desc:'Brown butter, capers, dill — light and flaky.', img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&q=80' },
+        m04: { id:'m04', cat:'mains', name:'Beef Short Ribs',             price:2600, prep:15, tags:['popular','premium'], desc:'6-hour braised, red wine glaze, served with mash.', img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80' },
+        m05: { id:'m05', cat:'mains', name:'Chicken Tikka Masala',        price:1550, prep:25, tags:['popular','spicy'],   desc:'Rich tomato-cream curry with naan and rice.', img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&q=80' },
+        m06: { id:'m06', cat:'mains', name:'Grilled Salmon Fillet',       price:2100, prep:20, tags:['popular','seafood'], desc:'Charcoal grilled, lemon-dill butter, sautéed spinach.', img:'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80' },
+        m07: { id:'m07', cat:'mains', name:'Lamb Chops, Mint Jus',        price:2400, prep:25, tags:['premium'],           desc:'Three loin chops, cumin-coriander crust, mint jus.', img:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=80' },
+        m08: { id:'m08', cat:'mains', name:'Beef Burger Classic',         price:1350, prep:20, tags:['popular'],           desc:'180g patty, brioche bun, cheddar, house sauce.', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80' },
+        m09: { id:'m09', cat:'mains', name:'Butter Chicken',              price:1500, prep:25, tags:['popular'],           desc:'Silky tomato-butter-cream sauce. Mild and fragrant.', img:'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&q=80' },
+        m10: { id:'m10', cat:'mains', name:'Whole Grilled Snapper',       price:2200, prep:30, tags:['seafood','popular'], desc:'Whole red snapper, garlic, chilli, mango salsa.', img:'https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=600&q=80' },
+        m11: { id:'m11', cat:'mains', name:'Vegetable Coconut Curry',     price:1200, prep:25, tags:['vegan','popular'],   desc:'Chickpeas, sweet potato, spinach, lemongrass coconut.', img:'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=600&q=80' },
+        m12: { id:'m12', cat:'mains', name:'Chicken Schnitzel',           price:1450, prep:20, tags:['popular'],           desc:'Panko crust, pan-fried golden, mushroom sauce.', img:'https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?w=600&q=80' },
+        // STARTERS
+        s01: { id:'s01', cat:'starters', name:'Crispy Calamari',          price:750,  prep:15, tags:['popular','seafood'], desc:'Golden squid rings, lemon aioli, chilli flakes.', img:'https://images.unsplash.com/photo-1604909052743-94e838986d24?w=600&q=80' },
+        s02: { id:'s02', cat:'starters', name:'Beef Broth Soup',          price:600,  prep:10, tags:['popular'],           desc:'Rich bone broth, shredded tenderloin, fresh herbs.', img:'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&q=80' },
+        s03: { id:'s03', cat:'starters', name:'Bruschetta Pomodoro',      price:550,  prep:10, tags:['vegetarian'],        desc:'Sourdough, garlic, ripe tomatoes, basil, olive oil.', img:'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=600&q=80' },
+        s04: { id:'s04', cat:'starters', name:'Pumpkin Cream Soup',       price:580,  prep:15, tags:['vegetarian'],        desc:'Roasted pumpkin, coconut milk, ginger, cream.', img:'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&q=80' },
+        s05: { id:'s05', cat:'starters', name:'Garlic Prawn Skewers',     price:950,  prep:20, tags:['popular','seafood'], desc:'Tiger prawns, garlic butter, smoked paprika, greens.', img:'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&q=80' },
+        s06: { id:'s06', cat:'starters', name:'Chicken Liver Pâté',       price:680,  prep:10, tags:[],                   desc:'Smooth pâté, caramelised onions, brandy, ciabatta.', img:'https://images.unsplash.com/photo-1533622597524-a1215e26c0a2?w=600&q=80' },
+        s07: { id:'s07', cat:'starters', name:'Tomato Basil Soup',        price:520,  prep:10, tags:['vegetarian'],        desc:'Slow-roasted tomato, basil, cream, cheese crouton.', img:'https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=600&q=80' },
+        s08: { id:'s08', cat:'starters', name:'Loaded Potato Skins',      price:650,  prep:20, tags:['popular'],           desc:'Cheddar, sour cream, chives. Classic comfort snack.', img:'https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?w=600&q=80' },
+        // PASTA & RICE
+        p01: { id:'p01', cat:'pasta',    name:'Spaghetti Carbonara',      price:1100, prep:20, tags:['popular'],           desc:'Pancetta, egg yolk, Pecorino Romano, black pepper.', img:'https://images.unsplash.com/photo-1588013273468-315fd88ea34c?w=600&q=80' },
+        p02: { id:'p02', cat:'pasta',    name:'Penne Arrabbiata',         price:950,  prep:20, tags:['vegetarian','spicy'],desc:'Spicy tomato, garlic, fresh chilli, basil.', img:'https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=600&q=80' },
+        p03: { id:'p03', cat:'pasta',    name:'Fettuccine Alfredo',       price:1250, prep:20, tags:['popular'],           desc:'Parmesan cream, grilled chicken strips, parsley.', img:'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&q=80' },
+        p04: { id:'p04', cat:'pasta',    name:'Steamed Basmati Rice',     price:350,  prep:15, tags:['vegan'],             desc:'Fragrant basmati, bay leaf and cardamom.', img:'https://images.unsplash.com/photo-1536304993881-ff86e0c9b5d1?w=600&q=80' },
+        p05: { id:'p05', cat:'pasta',    name:'Chicken Fried Rice',       price:1050, prep:18, tags:['popular'],           desc:'Wok-tossed jasmine rice, chicken, egg, soy sauce.', img:'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&q=80' },
+        p06: { id:'p06', cat:'pasta',    name:'Mushroom Risotto',         price:1300, prep:30, tags:['vegetarian'],        desc:'Wild mushrooms, Arborio, Parmesan, truffle oil.', img:'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&q=80' },
+        // SIDES
+        si01:{ id:'si01',cat:'sides',    name:'Hand-Cut Chips',           price:350,  prep:15, tags:['popular','vegan'],   desc:'Double-fried, sea salt, house ketchup.', img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80' },
+        si02:{ id:'si02',cat:'sides',    name:'Creamy Mashed Potato',     price:380,  prep:15, tags:['vegetarian'],        desc:'Butter, cream, nutmeg — silky smooth.', img:'https://images.unsplash.com/photo-1574484284002-952d92456975?w=600&q=80' },
+        si03:{ id:'si03',cat:'sides',    name:'Sautéed Garlic Spinach',   price:320,  prep:10, tags:['vegan'],             desc:'Baby spinach, garlic, olive oil, lemon.', img:'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=600&q=80' },
+        si04:{ id:'si04',cat:'sides',    name:'Roasted Root Vegetables',  price:380,  prep:30, tags:['vegan'],             desc:'Carrots, parsnip, beetroot, honey thyme.', img:'https://images.unsplash.com/photo-1555243896-c709bfa0b564?w=600&q=80' },
+        si05:{ id:'si05',cat:'sides',    name:'Steamed Broccoli',         price:350,  prep:10, tags:['vegan'],             desc:'Tenderstem, lemon almond butter.', img:'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=600&q=80' },
+        si06:{ id:'si06',cat:'sides',    name:'Grilled Corn on the Cob',  price:280,  prep:10, tags:['vegetarian'],        desc:'Charred corn, herb butter, chilli powder.', img:'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=600&q=80' },
+        // DESSERTS
+        de01:{ id:'de01',cat:'desserts', name:'Chocolate Fondant',        price:750,  prep:15, tags:['popular','premium'], desc:'Molten dark chocolate centre, vanilla ice cream.', img:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80' },
+        de02:{ id:'de02',cat:'desserts', name:'Crème Brûlée',             price:680,  prep:10, tags:['popular'],           desc:'Vanilla custard, caramelised sugar crust.', img:'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=600&q=80' },
+        de03:{ id:'de03',cat:'desserts', name:'NY Cheesecake',            price:650,  prep:5,  tags:['popular'],           desc:'Baked, biscuit base, strawberry compote.', img:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&q=80' },
+        de04:{ id:'de04',cat:'desserts', name:'Mango Panna Cotta',        price:600,  prep:5,  tags:['popular'],           desc:'Italian panna cotta, Kenyan mango coulis.', img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80' },
+        de05:{ id:'de05',cat:'desserts', name:'Banana Foster Pancakes',   price:700,  prep:15, tags:['popular'],           desc:'Fluffy pancakes, caramelised banana, rum sauce.', img:'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80' },
+        de06:{ id:'de06',cat:'desserts', name:'Tiramisu',                 price:720,  prep:5,  tags:['popular'],           desc:'Espresso savoiardi, mascarpone, cocoa.', img:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&q=80' },
+        de07:{ id:'de07',cat:'desserts', name:'Fruit Salad',              price:500,  prep:5,  tags:['vegan'],             desc:'Watermelon, pineapple, kiwi, passion fruit, cream.', img:'https://images.unsplash.com/photo-1568158879083-c42860933ed7?w=600&q=80' },
+        de08:{ id:'de08',cat:'desserts', name:'Malva Pudding',            price:620,  prep:15, tags:['popular'],           desc:'Sticky apricot sponge, warm cream sauce, custard.', img:'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=600&q=80' },
+        // DRINKS
+        d01: { id:'d01', cat:'drinks',   name:'Still Water',              price:150,  prep:2,  tags:[],                   desc:'Chilled still mineral water, 500ml or 1L.', img:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=600&q=80' },
+        d02: { id:'d02', cat:'drinks',   name:'Coca-Cola',                price:200,  prep:2,  tags:['popular'],           desc:'Ice-cold Coke over ice.', img:'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?w=600&q=80' },
+        d03: { id:'d03', cat:'drinks',   name:'Fresh Orange Juice',       price:380,  prep:5,  tags:['popular'],           desc:'Freshly squeezed Kenyan oranges.', img:'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=600&q=80' },
+        d04: { id:'d04', cat:'drinks',   name:'Mango Passion Smoothie',   price:450,  prep:5,  tags:['popular'],           desc:'Mango, passion fruit, yoghurt, honey.', img:'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&q=80' },
+        d05: { id:'d05', cat:'drinks',   name:'Sparkling Water',          price:200,  prep:2,  tags:[],                   desc:'Carbonated mineral water, lemon wedge.', img:'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?w=600&q=80' },
+        d06: { id:'d06', cat:'drinks',   name:'Ginger Lemonade',          price:420,  prep:5,  tags:['popular'],           desc:'Housemade lemon, ginger, mint, cayenne.', img:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80' },
+        d07: { id:'d07', cat:'drinks',   name:'Hot Coffee',               price:350,  prep:5,  tags:['popular'],           desc:'Kenyan AA. Espresso, Americano, cappuccino.', img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80' },
+        d08: { id:'d08', cat:'drinks',   name:'Dessert Wine',             price:900,  prep:2,  tags:['premium'],           desc:'Chilled sweet dessert wine, ask your waiter.', img:'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=80' },
+        d09: { id:'d09', cat:'drinks',   name:'Masala Chai',              price:280,  prep:8,  tags:['popular'],           desc:'Kenyan tea, cardamom, ginger, cinnamon.', img:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80' },
+        d10: { id:'d10', cat:'drinks',   name:'Virgin Mojito',            price:480,  prep:5,  tags:['popular'],           desc:'Mint, lime, sugar syrup, sparkling water, ice.', img:'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&q=80' },
+      };
+
+      // ═══════════════════════════════════════════════════════
+      // SUGGESTION RULES (editable at runtime via the inspector)
+      // Format: { trigger: itemId, suggest: itemId, prompt: string, priority: number }
+      // ═══════════════════════════════════════════════════════
+      let SIM_RULES = [
+        // Steak
+        {trigger:'m01', suggest:'si01', prompt:'Add hand-cut chips?',         priority:3},
+        {trigger:'m01', suggest:'si02', prompt:'Upgrade with mashed potato?', priority:2},
+        {trigger:'m01', suggest:'d08',  prompt:'Pair with a dessert wine?',   priority:1},
+        {trigger:'m01', suggest:'d05',  prompt:'Still water with your meal?', priority:4},
+        // Roast Chicken
+        {trigger:'m02', suggest:'si04', prompt:'Add roasted vegetables?',     priority:1},
+        {trigger:'m02', suggest:'si02', prompt:'Add creamy mash?',            priority:2},
+        {trigger:'m02', suggest:'d07',  prompt:'Finish with a coffee?',       priority:3},
+        // Tilapia
+        {trigger:'m03', suggest:'si03', prompt:'Add garlic spinach?',         priority:1},
+        {trigger:'m03', suggest:'d10',  prompt:'Try our virgin mojito?',      priority:2},
+        // Short Ribs
+        {trigger:'m04', suggest:'si02', prompt:'Add creamy mash?',            priority:1},
+        {trigger:'m04', suggest:'d08',  prompt:'Pair with a dessert wine?',   priority:2},
+        // Tikka Masala
+        {trigger:'m05', suggest:'p04',  prompt:'Add basmati rice?',           priority:1},
+        {trigger:'m05', suggest:'d09',  prompt:'Finish with masala chai?',    priority:2},
+        {trigger:'m05', suggest:'d06',  prompt:'Cool down with lemonade?',    priority:3},
+        // Salmon
+        {trigger:'m06', suggest:'si03', prompt:'Add garlic spinach?',         priority:1},
+        {trigger:'m06', suggest:'d10',  prompt:'Try our virgin mojito?',      priority:2},
+        // Lamb
+        {trigger:'m07', suggest:'si02', prompt:'Add creamy mash?',            priority:1},
+        {trigger:'m07', suggest:'si04', prompt:'Add roasted vegetables?',     priority:2},
+        // Burger
+        {trigger:'m08', suggest:'si01', prompt:'Add hand-cut chips?',         priority:1},
+        {trigger:'m08', suggest:'d02',  prompt:'Add a Coca-Cola?',            priority:2},
+        // Butter Chicken
+        {trigger:'m09', suggest:'p04',  prompt:'Add basmati rice?',           priority:1},
+        {trigger:'m09', suggest:'d09',  prompt:'Finish with masala chai?',    priority:2},
+        // Snapper
+        {trigger:'m10', suggest:'p04',  prompt:'Add basmati rice?',           priority:1},
+        {trigger:'m10', suggest:'d10',  prompt:'Pair with a mojito?',         priority:2},
+        // Veg Curry
+        {trigger:'m11', suggest:'p04',  prompt:'Add basmati rice?',           priority:1},
+        {trigger:'m11', suggest:'d09',  prompt:'Finish with masala chai?',    priority:2},
+        // Schnitzel
+        {trigger:'m12', suggest:'si01', prompt:'Add hand-cut chips?',         priority:1},
+        {trigger:'m12', suggest:'d03',  prompt:'Add fresh orange juice?',     priority:2},
+      ];
+
+      // ═══════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════
+      let simState = {
+        hero:   null,      // currently selected main item id
+        addons: {},        // { [itemId]: qty }
+        imgActive: 'a',    // which crossfade slot is showing
+        fading:    false,
+      };
+
+      // ═══════════════════════════════════════════════════════
+      // BOOT — runs when the simulator page is first viewed
+      // ═══════════════════════════════════════════════════════
+      function simBoot() {
+        simLog('🟢 Simulator booted — ' + Object.keys(SIM_ITEMS).length + ' items loaded');
+        simRenderMainsRow();
+        simRenderAddonRows();
+        simRenderRulesInspector();
+        simPopulateRuleSelects();
+        // Auto-select first main
+        simSelectHero('m01');
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // HERO PLATE — crossfade swap
+      // ═══════════════════════════════════════════════════════
+      function simSelectHero(itemId) {
+        const item = SIM_ITEMS[itemId];
+        if (!item) return;
+
+        const prev = simState.hero;
+        simState.hero = itemId;
+
+        simLog(`🔄 Hero swapped: <span>${prev ? SIM_ITEMS[prev].name : 'none'}</span> → <span>${item.name}</span>`);
+
+        // Crossfade
+        const imgA = document.getElementById('sim-img-a');
+        const imgB = document.getElementById('sim-img-b');
+
+        if (simState.imgActive === 'a') {
+          imgB.src = item.img;
+          imgB.classList.remove('slot-hidden'); imgB.classList.add('slot-visible');
+          imgA.classList.remove('slot-visible'); imgA.classList.add('slot-hidden');
+          simState.imgActive = 'b';
+        } else {
+          imgA.src = item.img;
+          imgA.classList.remove('slot-hidden'); imgA.classList.add('slot-visible');
+          imgB.classList.remove('slot-visible'); imgB.classList.add('slot-hidden');
+          simState.imgActive = 'a';
+        }
+
+        // Update overlay info
+        document.getElementById('sim-hero-name').textContent  = item.name;
+        document.getElementById('sim-hero-desc').textContent  = item.desc;
+        document.getElementById('sim-hero-price').textContent = 'KES ' + item.price.toLocaleString();
+
+        const tagsEl = document.getElementById('sim-hero-tags');
+        tagsEl.innerHTML = item.tags.map(t => `<span class="sim-tag">${t}</span>`).join('');
+
+        // Highlight selected card in mains row
+        document.querySelectorAll('.sim-main-card').forEach(c => {
+          c.classList.toggle('selected', c.dataset.id === itemId);
+        });
+
+        // Fire suggestion engine
+        simFireSuggestions(itemId);
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // SUGGESTION ENGINE — the core logic being tested
+      // ═══════════════════════════════════════════════════════
+      function simFireSuggestions(heroId) {
+        // Find all active rules that fire for this hero
+        const matched = SIM_RULES
+          .filter(r => r.trigger === heroId)
+          .sort((a, b) => a.priority - b.priority);
+
+        simLog(`🧠 Engine fired for <span>${SIM_ITEMS[heroId].name}</span> — ${matched.length} rule(s) matched`);
+
+        const container = document.getElementById('sim-suggestions');
+        const countEl   = document.getElementById('sim-suggest-count');
+        countEl.textContent = matched.length + ' rule' + (matched.length !== 1 ? 's' : '') + ' matched';
+
+        if (matched.length === 0) {
+          container.innerHTML = '<p class="text-gray-600 text-xs">No rules defined for this dish yet.</p>';
+          return;
+        }
+
+        container.innerHTML = matched.map(r => {
+          const item = SIM_ITEMS[r.suggest];
+          if (!item) return '';
+          const inCart = simState.addons[item.id] ? simState.addons[item.id] : 0;
+          return `
+            <div class="sim-suggest-card">
+              <img src="${item.img}" alt="${item.name}" />
+              <div style="flex:1;min-width:0">
+                <p style="color:#f5f5f5;font-size:12px;font-weight:600;line-height:1.2">${item.name}</p>
+                <p style="color:#888;font-size:11px;margin-top:1px">${r.prompt}</p>
+                <p style="color:#e87a3d;font-size:11px;font-weight:700;margin-top:2px">KES ${item.price.toLocaleString()}</p>
+              </div>
+              <button class="sim-add-btn" onclick="simQuickAdd('${item.id}')" title="Add to order">+</button>
+            </div>
+          `;
+        }).join('');
+
+        matched.forEach(r => {
+          simLog(`  ↳ rule p${r.priority}: suggest <span>${SIM_ITEMS[r.suggest]?.name}</span> — "${r.prompt}"`);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // ADD-ON ROWS — all non-main categories
+      // ═══════════════════════════════════════════════════════
+      function simRenderAddonRows() {
+        const cats = [
+          { key:'starters', label:'Starters & Soups' },
+          { key:'pasta',    label:'Pasta & Rice' },
+          { key:'sides',    label:'Sides' },
+          { key:'desserts', label:'Desserts' },
+          { key:'drinks',   label:'Drinks' },
+        ];
+        const wrap = document.getElementById('sim-addon-rows');
+        wrap.innerHTML = cats.map(cat => {
+          const items = Object.values(SIM_ITEMS).filter(i => i.cat === cat.key);
+          return `
+            <div class="mb-5">
+              <p class="sim-section-label">${cat.label}</p>
+              <div class="sim-scroll">
+                ${items.map(item => `
+                  <div class="sim-card" data-addon="${item.id}" onclick="simToggleAddon('${item.id}')">
+                    <img src="${item.img}" alt="${item.name}" />
+                    <div style="padding:6px 8px">
+                      <p style="color:#f5f5f5;font-size:11px;font-weight:600;line-height:1.3" class="line-clamp-2">${item.name}</p>
+                      <p style="color:#e87a3d;font-size:11px;font-weight:700;margin-top:2px">KES ${item.price.toLocaleString()}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function simToggleAddon(itemId) {
+        if (simState.addons[itemId]) {
+          delete simState.addons[itemId];
+          simLog(`➖ Removed addon: <span>${SIM_ITEMS[itemId].name}</span>`);
+        } else {
+          simState.addons[itemId] = 1;
+          simLog(`➕ Added addon: <span>${SIM_ITEMS[itemId].name}</span>`);
+        }
+        // Update card highlight
+        const card = document.querySelector(`[data-addon="${itemId}"]`);
+        if (card) card.classList.toggle('selected', !!simState.addons[itemId]);
+        simRenderCart();
+      }
+
+      function simQuickAdd(itemId) {
+        simState.addons[itemId] = (simState.addons[itemId] || 0) + 1;
+        simLog(`➕ Quick-added from suggestion: <span>${SIM_ITEMS[itemId].name}</span>`);
+        const card = document.querySelector(`[data-addon="${itemId}"]`);
+        if (card) card.classList.add('selected');
+        simRenderCart();
+        // Re-render suggestions to reflect cart state
+        if (simState.hero) simFireSuggestions(simState.hero);
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // MAINS ROW
+      // ═══════════════════════════════════════════════════════
+      function simRenderMainsRow() {
+        const mains = Object.values(SIM_ITEMS).filter(i => i.cat === 'mains');
+        const row = document.getElementById('sim-mains-row');
+        row.innerHTML = mains.map(item => `
+          <div class="sim-card sim-main-card" data-id="${item.id}" onclick="simSelectHero('${item.id}')">
+            <img src="${item.img}" alt="${item.name}" />
+            <div style="padding:6px 8px">
+              <p style="color:#f5f5f5;font-size:11px;font-weight:600;line-height:1.3" class="line-clamp-2">${item.name}</p>
+              <p style="color:#e87a3d;font-size:11px;font-weight:700;margin-top:2px">KES ${item.price.toLocaleString()}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // CART
+      // ═══════════════════════════════════════════════════════
+      function simRenderCart() {
+        const container = document.getElementById('sim-cart');
+        const totalEl   = document.getElementById('sim-cart-total');
+
+        const heroItem  = simState.hero ? SIM_ITEMS[simState.hero] : null;
+        const addons    = Object.entries(simState.addons);
+
+        if (!heroItem && addons.length === 0) {
+          container.innerHTML = '<p class="text-gray-600 text-xs">Nothing added yet…</p>';
+          totalEl.textContent = 'KES 0';
+          return;
+        }
+
+        let total = 0;
+        let html  = '';
+
+        if (heroItem) {
+          total += heroItem.price;
+          html += `
+            <div class="sim-cart-item">
+              <img src="${heroItem.img}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0" />
+              <div style="flex:1;min-width:0">
+                <p style="color:#f5f5f5;font-size:12px;font-weight:600">${heroItem.name}</p>
+                <p style="color:#888;font-size:10px">Main dish</p>
+              </div>
+              <span style="color:#e87a3d;font-size:12px;font-weight:700">KES ${heroItem.price.toLocaleString()}</span>
+            </div>
+          `;
+        }
+
+        addons.forEach(([id, qty]) => {
+          const item = SIM_ITEMS[id];
+          if (!item) return;
+          total += item.price * qty;
+          html += `
+            <div class="sim-cart-item">
+              <img src="${item.img}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0" />
+              <div style="flex:1;min-width:0">
+                <p style="color:#f5f5f5;font-size:12px;font-weight:600">${item.name}</p>
+                <p style="color:#888;font-size:10px">Add-on</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <button class="sim-remove-btn" onclick="simRemoveAddon('${id}')">−</button>
+                <span style="color:#f5f5f5;font-size:12px;min-width:12px;text-align:center">${qty}</span>
+                <button class="sim-add-btn" onclick="simIncAddon('${id}')" style="width:20px;height:20px;font-size:12px">+</button>
+              </div>
+              <span style="color:#e87a3d;font-size:12px;font-weight:700;min-width:70px;text-align:right">KES ${(item.price*qty).toLocaleString()}</span>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        totalEl.textContent = 'KES ' + total.toLocaleString();
+      }
+
+      function simRemoveAddon(id) {
+        if (simState.addons[id] > 1) {
+          simState.addons[id]--;
+        } else {
+          delete simState.addons[id];
+          const card = document.querySelector(`[data-addon="${id}"]`);
+          if (card) card.classList.remove('selected');
+        }
+        simLog(`➖ Qty changed: <span>${SIM_ITEMS[id]?.name}</span>`);
+        simRenderCart();
+      }
+
+      function simIncAddon(id) {
+        simState.addons[id] = (simState.addons[id] || 0) + 1;
+        simLog(`➕ Qty increased: <span>${SIM_ITEMS[id]?.name}</span>`);
+        simRenderCart();
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // RULES INSPECTOR
+      // ═══════════════════════════════════════════════════════
+      function simRenderRulesInspector() {
+        const body = document.getElementById('sim-rules-body');
+        if (!body) return;
+        body.innerHTML = SIM_RULES.map((r, i) => {
+          const trig = SIM_ITEMS[r.trigger];
+          const sug  = SIM_ITEMS[r.suggest];
+          return `
+            <div class="sim-rule-row">
+              <span class="sim-pill">p${r.priority}</span>
+              <span style="color:#f5f5f5;font-size:11px;flex:1">${trig?.name || r.trigger}</span>
+              <span style="color:#555;font-size:10px">→</span>
+              <span style="color:#e87a3d;font-size:11px;flex:1">${sug?.name || r.suggest}</span>
+              <span style="color:#888;font-size:10px;flex:1">"${r.prompt}"</span>
+              <button onclick="simRemoveRule(${i})" style="background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:0 2px" title="Remove rule">✕</button>
+            </div>
+          `;
+        }).join('') || '<p style="color:#555;font-size:12px">No rules defined.</p>';
+      }
+
+      function simRemoveRule(index) {
+        const removed = SIM_RULES.splice(index, 1)[0];
+        simLog(`🗑️ Rule removed: <span>${SIM_ITEMS[removed.trigger]?.name}</span> → <span>${SIM_ITEMS[removed.suggest]?.name}</span>`);
+        simRenderRulesInspector();
+        if (simState.hero) simFireSuggestions(simState.hero);
+      }
+
+      function simAddRule() {
+        const trigger = document.getElementById('sim-rule-trigger').value;
+        const suggest = document.getElementById('sim-rule-suggest').value;
+        const prompt  = document.getElementById('sim-rule-prompt').value.trim() || 'Add this?';
+        if (!trigger || !suggest || trigger === suggest) {
+          alert('Choose a trigger and a different suggestion item.');
+          return;
+        }
+        SIM_RULES.push({ trigger, suggest, prompt, priority: SIM_RULES.filter(r => r.trigger === trigger).length + 1 });
+        simLog(`✅ Rule added: <span>${SIM_ITEMS[trigger]?.name}</span> → <span>${SIM_ITEMS[suggest]?.name}</span>`);
+        simRenderRulesInspector();
+        if (simState.hero) simFireSuggestions(simState.hero);
+        document.getElementById('sim-rule-prompt').value = '';
+      }
+
+      function simPopulateRuleSelects() {
+        const items = Object.values(SIM_ITEMS).sort((a,b) => a.name.localeCompare(b.name));
+        const opts  = items.map(i => `<option value="${i.id}">${i.name} (${i.cat})</option>`).join('');
+        document.getElementById('sim-rule-trigger').innerHTML = opts;
+        document.getElementById('sim-rule-suggest').innerHTML = opts;
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // LOG
+      // ═══════════════════════════════════════════════════════
+      function simLog(msg) {
+        const body = document.getElementById('sim-log-body');
+        if (!body) return;
+        const ts   = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        const row  = document.createElement('div');
+        row.className = 'sim-log-entry';
+        row.innerHTML = `<span style="color:#555;margin-right:6px">${ts}</span>${msg}`;
+        body.prepend(row);
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // BOOT when simulator page becomes active
+      // ═══════════════════════════════════════════════════════
+      document.addEventListener('DOMContentLoaded', simBoot);
+      </script>
+
+
+</body>
+</html>
