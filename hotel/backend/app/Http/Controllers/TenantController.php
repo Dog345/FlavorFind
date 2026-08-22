@@ -29,23 +29,26 @@ class TenantController extends Controller
     /**
      * PUT /api/v1/tenant
      * Admin only — update branding and M-Pesa config.
+     * Slug is immutable after registration.
      */
     public function update(Request $request): JsonResponse
     {
         $request->validate([
             'name'                  => 'sometimes|string|max:255',
-            'logo_url'              => 'nullable|url',
+            'logo_url'              => 'nullable|url|max:500',
             'primary_color'         => 'nullable|string|regex:/^#[0-9a-fA-F]{6}$/',
             'mpesa_paybill'         => 'nullable|string|max:20',
             'mpesa_till'            => 'nullable|string|max:20',
-            'mpesa_consumer_key'    => 'nullable|string',
-            'mpesa_consumer_secret' => 'nullable|string',
-            'mpesa_passkey'         => 'nullable|string',
+            'mpesa_consumer_key'    => 'nullable|string|max:255',
+            'mpesa_consumer_secret' => 'nullable|string|max:255',
+            'mpesa_passkey'         => 'nullable|string|max:255',
             'mpesa_shortcode'       => 'nullable|string|max:20',
             'mpesa_env'             => 'nullable|in:sandbox,production',
         ]);
 
         $tenant = $request->user()->tenant;
+
+        // Only update explicitly allowed fields — slug is intentionally excluded
         $tenant->update($request->only([
             'name', 'logo_url', 'primary_color',
             'mpesa_paybill', 'mpesa_till', 'mpesa_consumer_key',

@@ -43,7 +43,7 @@ Route::prefix('v1')->group(function () {
     Route::post('payments/mpesa/callback', [PaymentController::class, 'mpesaCallback']);
 
     // ── Auth (no tenant required for register/login) ──────────────────────────
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->middleware('throttle:auth')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login',    [AuthController::class, 'login']);
 
@@ -56,7 +56,7 @@ Route::prefix('v1')->group(function () {
 
     // ── Guest QR ordering — NO auth, secured by session token in URL ─────────
     // Tenant is resolved from the TableSession token (no X-Tenant-Slug header needed).
-    Route::prefix('guest/{token}')->withoutMiddleware(\App\Http\Middleware\ResolveTenant::class)->group(function () {
+    Route::prefix('guest/{token}')->middleware('throttle:api')->withoutMiddleware(\App\Http\Middleware\ResolveTenant::class)->group(function () {
         Route::get('/',                           [GuestController::class, 'resolveSession']);
         Route::get('/menu',                       [GuestController::class, 'menu']);
         Route::get('/menu/search',                [GuestController::class, 'searchMenu']);
@@ -69,7 +69,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // ── All routes below require auth + active tenant ─────────────────────────
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
         // ── Tenant ────────────────────────────────────────────────────────────
         Route::prefix('tenant')->group(function () {

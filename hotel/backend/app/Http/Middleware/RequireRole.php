@@ -21,6 +21,11 @@ class RequireRole
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
 
+        // Deactivated accounts lose access immediately — even with a valid token
+        if (! $user->is_active) {
+            return response()->json(['error' => 'Account is deactivated.'], 403);
+        }
+
         if (empty($roles) || $user->hasRole(...$roles)) {
             return $next($request);
         }

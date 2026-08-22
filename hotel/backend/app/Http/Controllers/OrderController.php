@@ -209,6 +209,24 @@ class OrderController extends Controller
             return response()->json(['error' => 'Cannot change status of a cancelled order.'], 422);
         }
 
+        // Enforce strict forward-only transitions — no skipping steps
+        $transitions = [
+            Order::STATUS_PENDING   => [Order::STATUS_CONFIRMED, Order::STATUS_CANCELLED],
+            Order::STATUS_CONFIRMED => [Order::STATUS_PREPARING, Order::STATUS_CANCELLED],
+            Order::STATUS_PREPARING => [Order::STATUS_READY,     Order::STATUS_CANCELLED],
+            Order::STATUS_READY     => [Order::STATUS_SERVED,    Order::STATUS_CANCELLED],
+            Order::STATUS_SERVED    => [Order::STATUS_PAID,      Order::STATUS_CANCELLED],
+        ];
+
+        $allowed = $transitions[$order->status] ?? [];
+
+        if (! in_array($newStatus, $allowed, true)) {
+            return response()->json([
+                'error' => "Cannot transition order from '{$order->status}' to '{$newStatus}'. "
+                    . 'Allowed: ' . implode(', ', $allowed) . '.',
+            ], 422);
+        }
+
         $timestamps = [];
 
         if ($newStatus === Order::STATUS_CONFIRMED) {
