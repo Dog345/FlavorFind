@@ -45,7 +45,7 @@ Broadcast::channel('{slug}.kitchen', function ($user, string $slug) {
  *
  * Channel: {slug}.orders.{orderId}
  */
-Broadcast::channel('{slug}.orders.{orderId}', function ($user, string $slug, int $orderId) {
+Broadcast::channel('{slug}.orders.{orderId}', function ($user, string $slug, string $orderId) {
     if (! $user || $user->tenant->slug !== $slug) {
         return false;
     }
@@ -59,7 +59,7 @@ Broadcast::channel('{slug}.orders.{orderId}', function ($user, string $slug, int
         return true;
     }
 
-    $order = Order::find($orderId);
+    $order = Order::where('tenant_id', $user->tenant_id)->find($orderId);
 
     return $order && $order->waiter_id === $user->id;
 });
@@ -69,7 +69,7 @@ Broadcast::channel('{slug}.orders.{orderId}', function ($user, string $slug, int
  *
  * Channel: {slug}.table.{tableId}
  */
-Broadcast::channel('{slug}.table.{tableId}', function ($user, string $slug, int $tableId) {
+Broadcast::channel('{slug}.table.{tableId}', function ($user, string $slug, string $tableId) {
     if (! $user || $user->tenant->slug !== $slug) {
         return false;
     }
@@ -132,14 +132,14 @@ Broadcast::channel('{slug}.payments', function ($user, string $slug) {
  *
  * Channel: {slug}.session.{sessionId}
  */
-Broadcast::channel('{slug}.session.{sessionId}', function ($user, string $slug, int $sessionId) {
+Broadcast::channel('{slug}.session.{sessionId}', function ($user, string $slug, string $sessionId) {
     if (! $user || $user->tenant->slug !== $slug || ! $user->is_active) {
         return false;
     }
 
-    $session = TableSession::find($sessionId);
+    $session = TableSession::where('tenant_id', $user->tenant_id)->find($sessionId);
 
-    if (! $session || $session->tenant_id !== $user->tenant_id) {
+    if (! $session) {
         return false;
     }
 

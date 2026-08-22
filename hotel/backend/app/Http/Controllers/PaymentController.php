@@ -121,7 +121,9 @@ class PaymentController extends Controller
             return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted'], 200);
         }
 
-        $payment = Payment::where('checkout_request_id', $parsed['checkout_request_id'])->first();
+        $payment = Payment::where('checkout_request_id', $parsed['checkout_request_id'])
+            ->whereNotNull('tenant_id') // must belong to a real tenant
+            ->first();
 
         if (! $payment) {
             Log::warning('M-Pesa callback: no matching payment', [
@@ -455,12 +457,25 @@ class PaymentController extends Controller
 
     /**
      * If the sum of completed payments covers the order total, mark order paid.
-     * The $payment model must already be saved and completed before calling this.
+     * Uses a pessimistic lock to prevent race conditions on concurrent payments.
      */
     private function markOrderPaidIfFullyCovered(Payment $payment): void
     {
-        if ($payment->orderIsFullyPaid()) {
-            $payment->order()->update(['status' => Order::STATUS_PAID]);
+        // Lock the order row so concurrent payments don't both mark it paid
+        $order = Order::where('id', $payment->order_id)
+            ->lockForUpdate()
+            ->first();
+
+        if (! $order || $order->isPaid()) {
+            return;
+        }
+
+        $totalPaid = Payment::where('order_id', $order->id)
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
+
+        if ($totalPaid >= $order->total_amount) {
+            $order->update(['status' => Order::STATUS_PAID]);
         }
     }
 
