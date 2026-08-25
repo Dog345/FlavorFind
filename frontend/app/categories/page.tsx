@@ -1,71 +1,42 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { getCategories } from '@/src/lib/api'
+import { getCategories, searchRecipes } from '@/src/lib/api'
 import Navbar from '@/components/Navbar'
 import { StarBurst } from '@/components/Icons'
 import Footer from '@/components/Footer'
 
-// Emoji + color per category
-const CAT_META: Record<string, { emoji: string; color: string }> = {
-  'Dessert':          { emoji: '🍰', color: 'from-pink-400/20 to-pink-100/10' },
-  'Lunch/Snacks':     { emoji: '🥙', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'One Dish Meal':    { emoji: '🥘', color: 'from-orange-400/20 to-orange-100/10' },
-  'Vegetable':        { emoji: '🥦', color: 'from-green-400/20 to-green-100/10' },
-  'Breakfast':        { emoji: '🥞', color: 'from-amber-400/20 to-amber-100/10' },
-  'Beverages':        { emoji: '🥤', color: 'from-blue-400/20 to-blue-100/10' },
-  'Chicken':          { emoji: '🍗', color: 'from-yellow-500/20 to-yellow-100/10' },
-  'Meat':             { emoji: '🥩', color: 'from-red-400/20 to-red-100/10' },
-  'Breads':           { emoji: '🍞', color: 'from-amber-600/20 to-amber-100/10' },
-  'Pork':             { emoji: '🥓', color: 'from-pink-500/20 to-pink-100/10' },
-  'Sauces':           { emoji: '🫙', color: 'from-red-300/20 to-red-100/10' },
-  'Chicken Breast':   { emoji: '🍖', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'Pasta':            { emoji: '🍝', color: 'from-yellow-300/20 to-yellow-100/10' },
-  'Seafood':          { emoji: '🦞', color: 'from-blue-500/20 to-blue-100/10' },
-  'Soups':            { emoji: '🍲', color: 'from-orange-300/20 to-orange-100/10' },
-  'Salads':           { emoji: '🥗', color: 'from-green-500/20 to-green-100/10' },
-  'Fruit':            { emoji: '🍎', color: 'from-red-400/20 to-red-100/10' },
-  'Pizza':            { emoji: '🍕', color: 'from-orange-500/20 to-orange-100/10' },
-  'Fish':             { emoji: '🐟', color: 'from-cyan-400/20 to-cyan-100/10' },
-  'Appetizers':       { emoji: '🫙', color: 'from-purple-400/20 to-purple-100/10' },
-  'Lamb':             { emoji: '🍖', color: 'from-red-500/20 to-red-100/10' },
-  'Beef':             { emoji: '🥩', color: 'from-red-600/20 to-red-100/10' },
-  'Casseroles':       { emoji: '🥗', color: 'from-amber-400/20 to-amber-100/10' },
-  'Stew':             { emoji: '🫕', color: 'from-brown-400/20 to-orange-100/10' },
-  'Side Dish':        { emoji: '🍜', color: 'from-teal-400/20 to-teal-100/10' },
-  'Cheese':           { emoji: '🧀', color: 'from-yellow-400/20 to-yellow-100/10' },
-  'Eggs':             { emoji: '🥚', color: 'from-yellow-200/20 to-yellow-100/10' },
-  'Beans':            { emoji: '🫘', color: 'from-green-600/20 to-green-100/10' },
-  'Veal':             { emoji: '🍖', color: 'from-pink-300/20 to-pink-100/10' },
-  'Potatoes':         { emoji: '🥔', color: 'from-amber-300/20 to-amber-100/10' },
-  default:            { emoji: '🍽', color: 'from-gray-400/20 to-gray-100/10' },
+// Fetch one recipe image for a category
+async function getCategoryImage(category: string): Promise<string | null> {
+  try {
+    const res = await searchRecipes(
+      [
+        '8bd94446-b88a-492f-95bc-74a44c2204b4', // salt — broadest coverage
+        '13ba49f1-6fd7-45b4-989d-f02456efdad5', // sugar
+      ],
+      { limit: 5, category }
+    )
+    const withImage = res.results.find(r => r.image_url)
+    return withImage?.image_url ?? res.results[0]?.image_url ?? null
+  } catch {
+    return null
+  }
 }
 
-function getMeta(category: string) {
-  return CAT_META[category] ?? CAT_META.default
+// Fallback per category if no image found
+const FALLBACKS: Record<string, string> = {
+  'Curries':     'https://images.unsplash.com/photo-1574484284002-952d92456975?w=500&q=80',
+  'Stew':        'https://images.unsplash.com/photo-1547592180-85f173990554?w=500&q=80',
+  'Beverages':   'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&q=80',
+  'Breads':      'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80',
+  'Dessert':     'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=500&q=80',
+  'Breakfast':   'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=500&q=80',
+  'Vegetable':   'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80',
+  'default':     'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&q=80',
 }
 
-// Group categories into cuisine, meal type, ingredient-based
-const GROUPS: { label: string; emoji: string; cats: string[] }[] = [
-  {
-    label: 'By Meal Type',
-    emoji: '🍽',
-    cats: ['Breakfast', 'Lunch/Snacks', 'One Dish Meal', 'Side Dish', 'Appetizers', 'Dessert', 'Beverages'],
-  },
-  {
-    label: 'By Protein',
-    emoji: '🥩',
-    cats: ['Chicken', 'Chicken Breast', 'Meat', 'Beef', 'Pork', 'Seafood', 'Fish', 'Lamb', 'Veal'],
-  },
-  {
-    label: 'By Dish',
-    emoji: '🍳',
-    cats: ['Pasta', 'Pizza', 'Soups', 'Stew', 'Casseroles', 'Salads', 'Breads', 'Sauces'],
-  },
-  {
-    label: 'By Ingredient',
-    emoji: '🥦',
-    cats: ['Vegetable', 'Fruit', 'Beans', 'Eggs', 'Cheese', 'Potatoes'],
-  },
-]
+function getFallback(category: string): string {
+  return FALLBACKS[category] ?? FALLBACKS.default
+}
 
 export default async function CategoriesPage() {
   let allCategories: { category: string; recipe_count: number }[] = []
@@ -74,105 +45,85 @@ export default async function CategoriesPage() {
     allCategories = data.categories
   } catch { /* silently fail */ }
 
-  const countMap = Object.fromEntries(allCategories.map(c => [c.category, c.recipe_count]))
+  const total = allCategories.reduce((s, c) => s + c.recipe_count, 0)
+
+  // Fetch images for all categories in parallel
+  const images = await Promise.all(
+    allCategories.map(c => getCategoryImage(c.category))
+  )
 
   return (
     <div className="min-h-screen bg-cream">
 
       <Navbar />
 
-      {/* ── Page Hero ── */}
+      {/* Hero */}
       <div className="bg-gradient-to-b from-green-deep to-green-deeper px-6 py-14 text-center">
         <div className="mx-auto max-w-[1240px]">
-          <div className="eyebrow justify-center !text-gold-light mb-3">
-            Browse
-          </div>
+          <div className="eyebrow justify-center !text-gold-light mb-3">Browse</div>
           <h1 className="font-display text-[32px] text-white md:text-[46px]">
             Explore Recipe Categories
           </h1>
           <p className="mx-auto mt-3 max-w-[480px] text-[14px] leading-[1.7] text-white/60">
             From quick breakfasts to hearty dinners — find exactly what you&apos;re craving.
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3 text-[13px] text-white/50">
+          <div className="mt-6 flex flex-wrap justify-center gap-4 text-[13px] text-white/50">
             <span>🍽 {allCategories.length} categories</span>
             <span>·</span>
-            <span>📖 {allCategories.reduce((s, c) => s + c.recipe_count, 0).toLocaleString()} recipes</span>
+            <span>📖 {total.toLocaleString()} recipes</span>
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-[1240px] px-6 py-12 md:px-8">
 
-        {/* ── Grouped sections ── */}
-        {GROUPS.map(group => {
-          const cats = group.cats
-            .map(name => ({ name, count: countMap[name] ?? 0 }))
-            .filter(c => c.count > 0)
-          if (cats.length === 0) return null
-          return (
-            <div key={group.label} className="mb-14">
-              <div className="mb-6 flex items-center gap-3">
-                <span className="text-[24px]">{group.emoji}</span>
-                <h2 className="font-display text-[22px] text-green-deep">{group.label}</h2>
-                <div className="flex-1 h-px bg-cream-2" />
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {cats.map(({ name, count }) => {
-                  const meta = getMeta(name)
-                  return (
-                    <Link
-                      key={name}
-                      href={`/recipes?category=${encodeURIComponent(name)}`}
-                      className={`group relative overflow-hidden rounded-lg2 bg-gradient-to-br ${meta.color} border border-white bg-white p-5 shadow-[0_4px_16px_-6px_rgba(18,51,38,0.15)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(18,51,38,0.25)]`}
-                    >
-                      <div className="mb-3 text-[36px]">{meta.emoji}</div>
-                      <h3 className="font-display text-[15px] leading-tight text-green-deep">{name}</h3>
-                      <p className="mt-1 text-[12px] text-ink-soft">{count.toLocaleString()} recipes</p>
-                      <div className="mt-3 inline-flex items-center gap-1 text-[11.5px] font-semibold text-terracotta opacity-0 transition-opacity group-hover:opacity-100">
-                        Browse →
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
+        {/* Categories grid */}
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          {allCategories.map(({ category, recipe_count }, i) => {
+            const imgSrc = images[i] ?? getFallback(category)
+            const unoptimized = imgSrc.includes('sndimg.com')
 
-        {/* ── All other categories ── */}
-        {(() => {
-          const grouped = GROUPS.flatMap(g => g.cats)
-          const others = allCategories.filter(c => !grouped.includes(c.category))
-          if (others.length === 0) return null
-          return (
-            <div className="mb-14">
-              <div className="mb-6 flex items-center gap-3">
-                <span className="text-[24px]">🗂</span>
-                <h2 className="font-display text-[22px] text-green-deep">All Other Categories</h2>
-                <div className="flex-1 h-px bg-cream-2" />
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {others.map(({ category, recipe_count }) => {
-                  const meta = getMeta(category)
-                  return (
-                    <Link
-                      key={category}
-                      href={`/recipes?category=${encodeURIComponent(category)}`}
-                      className="group flex flex-col items-center rounded-md2 bg-white py-5 px-3 text-center shadow-[0_4px_16px_-6px_rgba(18,51,38,0.12)] border border-cream-2 transition-all hover:-translate-y-1 hover:border-green-deep/20"
-                    >
-                      <span className="mb-2 text-[28px]">{meta.emoji}</span>
-                      <span className="font-display text-[13px] text-green-deep leading-tight line-clamp-1">{category}</span>
-                      <span className="mt-1 text-[11px] text-ink-soft">{recipe_count.toLocaleString()}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })()}
+            return (
+              <Link
+                key={category}
+                href={`/recipes?category=${encodeURIComponent(category)}`}
+                className="group relative overflow-hidden rounded-xl shadow-[0_6px_20px_-8px_rgba(18,51,38,0.25)] transition-all hover:-translate-y-1 hover:shadow-[0_14px_32px_-10px_rgba(18,51,38,0.35)]"
+                style={{ aspectRatio: '4/3' }}
+              >
+                {/* Recipe image */}
+                <Image
+                  src={imgSrc}
+                  alt={category}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  unoptimized={unoptimized}
+                />
 
-        {/* ── CTA strip ── */}
-        <div className="rounded-lg2 bg-gradient-to-br from-green-deep to-green-deeper px-8 py-10 text-center text-white">
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                {/* Text */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="font-display text-[16px] font-semibold leading-tight text-white">
+                    {category}
+                  </h3>
+                  <p className="mt-0.5 text-[12px] text-white/70">
+                    {recipe_count.toLocaleString()} {recipe_count === 1 ? 'recipe' : 'recipes'}
+                  </p>
+                </div>
+
+                {/* Hover arrow */}
+                <div className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/0 text-white opacity-0 transition-all group-hover:bg-white/20 group-hover:opacity-100">
+                  →
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* CTA strip */}
+        <div className="mt-14 rounded-2xl bg-gradient-to-br from-green-deep to-green-deeper px-8 py-10 text-center text-white">
           <div className="eyebrow justify-center !text-gold-light mb-3">
             <StarBurst className="h-4 w-4 fill-gold-light" />
             Can&apos;t find what you&apos;re looking for?

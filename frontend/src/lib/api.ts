@@ -115,16 +115,14 @@ export async function getCategories(): Promise<CategoriesResult> {
   return get<CategoriesResult>('/recipes/categories')
 }
 
-// Fetch a varied featured set using popular ingredients (chicken + pasta + beef + salmon)
+// Fetch a varied featured set by searching across the two broadest ingredients in the DB
+// (salt matches 47 recipes, sugar matches 11 — together they cover 57 of the 85 seeded recipes)
 export async function getFeaturedRecipes(limit = 8): Promise<Recipe[]> {
-  const POPULAR_IDS = [
-    '7bb3db1c-27bf-499e-9945-7ed92bdc16f5', // chicken
-    '0f8783a7-f075-4e52-819f-80e73cb154a2', // pasta
-    'c9ccce82-f99e-4673-9d28-2082f5bb9153', // beef
-    'ed1ddb4f-ecfd-4300-8e88-e682d26a80cc', // salmon
-  ]
   const res = await get<RecipeSearchResult>('/recipes/search', {
-    ingredient_ids: POPULAR_IDS,
+    ingredient_ids: [
+      '8bd94446-b88a-492f-95bc-74a44c2204b4', // salt  — matches 47 seeded recipes
+      '13ba49f1-6fd7-45b4-989d-f02456efdad5', // sugar — matches 11 seeded recipes
+    ],
     limit,
   })
   return res.results
@@ -132,4 +130,38 @@ export async function getFeaturedRecipes(limit = 8): Promise<Recipe[]> {
 
 export async function getRecipe(id: string): Promise<RecipeDetail> {
   return get<RecipeDetail>(`/recipes/${id}`)
+}
+
+// ─── Time helpers ─────────────────────────────────────────────────────────────
+
+/** Parse ISO 8601 duration (e.g. "PT1H20M") into total minutes. Returns null if unparseable. */
+export function parseIsoMinutes(iso: string | null | undefined): number | null {
+  if (!iso) return null
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/)
+  if (!m) return null
+  return (parseInt(m[1] ?? '0') * 60) + parseInt(m[2] ?? '0')
+}
+
+/** Fetch recipes with a total_time under 60 minutes. Fetches across pages then filters client-side. */
+export async function getQuickRecipes(limit = 8): Promise<Recipe[]> {
+  const BROAD_IDS = [
+    '8bd94446-b88a-492f-95bc-74a44c2204b4', // salt  — matches 47 seeded recipes
+    '13ba49f1-6fd7-45b4-989d-f02456efdad5', // sugar — matches 11 seeded recipes
+  ]
+  // API max per page is 50 — fetch page 1 and 2 to cover all 57 matches
+  const [page1, page2] = await Promise.all([
+    get<RecipeSearchResult>('/recipes/search', { ingredient_ids: BROAD_IDS, limit: 50, page: 1 }),
+    get<RecipeSearchResult>('/recipes/search', { ingredient_ids: BROAD_IDS, limit: 50, page: 2 }),
+  ])
+  const all = [...page1.results, ...page2.results]
+  // Deduplicate by id
+  const seen = new Set<string>()
+  const unique = all.filter(r => seen.has(r.id) ? false : (seen.add(r.id), true))
+
+  return unique
+    .filter(r => {
+      const mins = parseIsoMinutes(r.total_time)
+      return mins !== null && mins < 60
+    })
+    .slice(0, limit)
 }

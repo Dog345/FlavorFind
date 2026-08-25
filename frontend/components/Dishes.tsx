@@ -5,7 +5,7 @@ import { getFeaturedRecipes, type Recipe } from '@/src/lib/api'
 export default async function Dishes() {
   let featured: Recipe[] = []
   try {
-    featured = await getFeaturedRecipes(4)
+    featured = await getFeaturedRecipes(8)
   } catch {
     // fall back to empty
   }

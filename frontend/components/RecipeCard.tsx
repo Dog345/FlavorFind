@@ -48,14 +48,14 @@ function getImageUrl(recipe: Recipe): string {
   return CATEGORY_FALLBACK.default
 }
 
-export default function RecipeCard({ recipe }: { recipe: Recipe }) {
+export default function RecipeCard({ recipe, imageHeight = 170 }: { recipe: Recipe; imageHeight?: number }) {
   const imgSrc = getImageUrl(recipe)
 
   return (
     <div className="overflow-hidden rounded-md2 bg-white shadow-[0_14px_30px_-18px_rgba(18,51,38,0.25)] transition-transform duration-[250ms] hover:-translate-y-[6px] flex flex-col">
 
-      {/* Food photo — same proportions as .dish-card img (170px height) */}
-      <div className="relative h-[170px] w-full flex-shrink-0 overflow-hidden">
+      {/* Food photo */}
+      <div className="relative w-full flex-shrink-0 overflow-hidden" style={{ height: imageHeight }}>
         <Image
           src={imgSrc}
           alt={recipe.name}
