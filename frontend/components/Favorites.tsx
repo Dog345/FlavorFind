@@ -7,8 +7,8 @@ export default async function Favorites() {
   try {
     const res = await searchRecipes(
       [
-        '534a9433-12e5-4c11-97aa-9c07d43d02d8', // egg
-        'fe46a694-59fc-41e2-bb62-9642c346e896', // tomato
+        '8bd94446-b88a-492f-95bc-74a44c2204b4', // salt  — matches 47 seeded recipes
+        '13ba49f1-6fd7-45b4-989d-f02456efdad5', // sugar — matches 11 seeded recipes
       ],
       { limit: 4 }
     )

@@ -7,8 +7,9 @@ import { searchIngredients, searchRecipes, getCategories, type IngredientResult,
 import { SearchIcon } from '@/components/Icons'
 import RecipeCard from '@/components/RecipeCard'
 import Navbar from '@/components/Navbar'
+import CategoryScroller from '@/components/CategoryScroller'
 
-const QUICK_TAGS = ['Chicken', 'Pasta', 'Beef', 'Salmon', 'Eggs', 'Rice', 'Mushrooms', 'Tomato', 'Broccoli', 'Shrimp']
+const QUICK_TAGS: string[] = [] // replaced by dynamic category tags below
 
 function RecipesContent() {
   const searchParams = useSearchParams()
@@ -31,7 +32,7 @@ function RecipesContent() {
 
   // Load categories on mount
   useEffect(() => {
-    getCategories().then(d => setCategories(d.categories.slice(0, 20))).catch(() => {})
+    getCategories().then(d => setCategories(d.categories)).catch(() => {})
   }, [])
 
   // Resolve any ?ing= names passed from the hero search bar into real ingredient objects
@@ -78,19 +79,16 @@ function RecipesContent() {
   ) => {
     // Need at least one ingredient to search
     if (ingredients.length === 0) {
-      // If category set, use a broad ingredient set
-      const ids = cat
-        ? ['7bb3db1c-27bf-499e-9945-7ed92bdc16f5',
-           '0f8783a7-f075-4e52-819f-80e73cb154a2',
-           'c9ccce82-f99e-4673-9d28-2082f5bb9153',
-           'ed1ddb4f-ecfd-4300-8e88-e682d26a80cc']
-        : ['7bb3db1c-27bf-499e-9945-7ed92bdc16f5',
-           '0f8783a7-f075-4e52-819f-80e73cb154a2',
-           'c9ccce82-f99e-4673-9d28-2082f5bb9153',
-           'ed1ddb4f-ecfd-4300-8e88-e682d26a80cc']
+      // No ingredients selected — use broadest ingredients to show full catalogue
       setLoadingRecipes(true)
       try {
-        const res = await searchRecipes(ids, { limit: 12, page: pg, category: cat || undefined })
+        const res = await searchRecipes(
+          [
+            '8bd94446-b88a-492f-95bc-74a44c2204b4', // salt  — matches 47 seeded recipes
+            '13ba49f1-6fd7-45b4-989d-f02456efdad5', // sugar — matches 11 seeded recipes
+          ],
+          { limit: 12, page: pg, category: cat || undefined }
+        )
         setRecipes(res.results)
         setTotal(res.pagination.total)
       } catch { setRecipes([]) }
@@ -126,14 +124,6 @@ function RecipesContent() {
     setSelected(next)
     setPage(1)
     fetchRecipes(next, category, 1)
-  }
-
-  const handleQuickTag = async (tag: string) => {
-    if (selected.find(s => s.name.toLowerCase() === tag.toLowerCase())) return
-    try {
-      const res = await searchIngredients(tag, 1)
-      if (res.results.length > 0) addIngredient(res.results[0])
-    } catch { /* ignore */ }
   }
 
   const handleCategory = (cat: string) => {
@@ -209,16 +199,19 @@ function RecipesContent() {
           </div>
         )}
 
-        {/* Quick tags */}
+        {/* Quick category chips */}
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {QUICK_TAGS.map(tag => (
+          {categories.slice(0, 10).map(cat => (
             <button
-              key={tag}
-              onClick={() => handleQuickTag(tag)}
-              disabled={!!selected.find(s => s.name.toLowerCase() === tag.toLowerCase())}
-              className="rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-[12.5px] text-white hover:bg-white/20 transition-colors disabled:opacity-40"
+              key={cat.category}
+              onClick={() => handleCategory(cat.category)}
+              className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors border ${
+                category === cat.category
+                  ? 'bg-white text-green-deep border-white'
+                  : 'border-white/25 bg-white/10 text-white hover:bg-white/20'
+              }`}
             >
-              {tag}
+              {cat.category}
             </button>
           ))}
         </div>
@@ -227,26 +220,15 @@ function RecipesContent() {
       {/* ── Main ── */}
       <div className="mx-auto max-w-[1240px] px-6 py-10 md:px-8">
 
-        {/* Category filter chips */}
+        {/* Category filter — auto-scrolling strip */}
         {categories.length > 0 && (
           <div className="mb-8">
             <p className="mb-3 text-[13px] font-semibold uppercase tracking-wider text-ink-soft">Filter by Category</p>
-            <div className="flex flex-wrap gap-2">
-              {categories.map(cat => (
-                <button
-                  key={cat.category}
-                  onClick={() => handleCategory(cat.category)}
-                  className={`rounded-full px-4 py-1.5 text-[13px] font-medium transition-colors border ${
-                    category === cat.category
-                      ? 'bg-green-deep text-white border-green-deep'
-                      : 'bg-white text-green-deep border-green-deep/20 hover:bg-green-deep hover:text-white'
-                  }`}
-                >
-                  {cat.category}
-                  <span className="ml-1.5 text-[11px] opacity-60">{cat.recipe_count.toLocaleString()}</span>
-                </button>
-              ))}
-            </div>
+            <CategoryScroller
+              categories={categories}
+              active={category}
+              onSelect={handleCategory}
+            />
           </div>
         )}
 
