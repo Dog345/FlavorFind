@@ -67,8 +67,8 @@ export default function CategoryScroller({ categories, active, onSelect }: Props
             onClick={() => onSelect(cat.category)}
             className={`flex-shrink-0 rounded-full px-4 py-1.5 text-[13px] font-medium transition-colors border whitespace-nowrap ${
               active === cat.category
-                ? 'bg-green-deep text-white border-green-deep'
-                : 'bg-white text-green-deep border-green-deep/20 hover:bg-green-deep hover:text-white'
+                ? 'bg-terracotta text-white border-terracotta'
+                : 'bg-dark-surface-2 text-dark-text border-dark-border hover:bg-dark-border hover:text-white'
             }`}
           >
             {cat.category}

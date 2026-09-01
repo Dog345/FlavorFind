@@ -52,7 +52,7 @@ export default function RecipeCard({ recipe, imageHeight = 170 }: { recipe: Reci
   const imgSrc = getImageUrl(recipe)
 
   return (
-    <div className="overflow-hidden rounded-md2 bg-white shadow-[0_14px_30px_-18px_rgba(18,51,38,0.25)] transition-transform duration-[250ms] hover:-translate-y-[6px] flex flex-col">
+    <div className="overflow-hidden rounded-md2 bg-dark-surface-2 border border-dark-border shadow-[0_14px_30px_-18px_rgba(0,0,0,0.5)] transition-transform duration-[250ms] hover:-translate-y-[6px] flex flex-col">
 
       {/* Food photo */}
       <div className="relative w-full flex-shrink-0 overflow-hidden" style={{ height: imageHeight }}>
@@ -70,12 +70,12 @@ export default function RecipeCard({ recipe, imageHeight = 170 }: { recipe: Reci
       <div className="flex flex-col p-4">
 
         {/* Name */}
-        <h3 className="mb-1.5 font-display text-[15px] leading-snug text-green-deep line-clamp-1">
+        <h3 className="mb-1.5 font-display text-[15px] leading-snug text-dark-text line-clamp-1">
           {recipe.name}
         </h3>
 
         {/* Description */}
-        <p className="mb-3 text-[12px] leading-[1.5] text-ink-soft line-clamp-1">
+        <p className="mb-3 text-[12px] leading-[1.5] text-dark-muted line-clamp-1">
           {recipe.description}
         </p>
 
@@ -83,7 +83,7 @@ export default function RecipeCard({ recipe, imageHeight = 170 }: { recipe: Reci
         {recipe.rating && (
           <div className="mb-3 text-[12px] text-gold font-medium tracking-tight">
             {starRating(recipe.rating)}
-            <span className="ml-1 text-[11px] text-ink-soft font-normal">
+            <span className="ml-1 text-[11px] text-dark-muted font-normal">
               ({recipe.review_count.toLocaleString()})
             </span>
           </div>

@@ -11,16 +11,16 @@ export default async function Dishes() {
   }
 
   return (
-    <section className="px-8 pt-[40px] pb-[70px] lg:pt-[110px] lg:pb-[90px] text-center" id="dishes">
+    <section className="px-8 pt-[40px] pb-[70px] lg:pt-[110px] lg:pb-[90px] text-center bg-dark-bg" id="dishes">
       <div className="mx-auto max-w-[1240px]">
         <div className="eyebrow">
           <StarBurst className="h-4 w-4 fill-terracotta" />
           Our Signature Recipes
         </div>
-        <h2 className="mb-3 font-display text-[34px] text-green-deep">
+        <h2 className="mb-3 font-display text-[34px] text-dark-text">
           Flavors You&apos;ll Remember
         </h2>
-        <p className="mb-[50px] text-[15px] text-ink-soft max-w-[520px] mx-auto leading-[1.7]">
+        <p className="mb-[50px] text-[15px] text-dark-muted max-w-[520px] mx-auto leading-[1.7]">
           Discover top-rated recipes from around the world, crafted with ingredients you already have.
         </p>
 

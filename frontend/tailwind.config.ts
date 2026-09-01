@@ -18,6 +18,13 @@ const config: Config = {
         "terracotta-dark": "#b7501f",
         ink: "#1c2420",
         "ink-soft": "#5c6660",
+        // ── Dark theme surface tokens ──────────────────────────────
+        "dark-bg":       "#0a1510",   // page background
+        "dark-surface":  "#0f1e16",   // card / section surface
+        "dark-surface-2":"#152a1e",   // slightly lighter surface (hover, raised)
+        "dark-border":   "#1e3328",   // subtle divider / border
+        "dark-text":     "#e8e2d4",   // primary text on dark
+        "dark-muted":    "#8a9e92",   // secondary / muted text on dark
       },
       fontFamily: {
         display: ["var(--font-playfair)", "serif"],

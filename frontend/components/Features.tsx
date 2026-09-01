@@ -32,15 +32,15 @@ export default function Features() {
           {features.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="flex-shrink-0 w-[58vw] max-w-[240px] lg:w-auto lg:max-w-none rounded-md2 bg-cream-2 px-[18px] py-[24px] text-center shadow-card"
+              className="flex-shrink-0 w-[58vw] max-w-[240px] lg:w-auto lg:max-w-none rounded-md2 bg-dark-surface-2 px-[18px] py-[24px] text-center shadow-[0_14px_30px_-12px_rgba(0,0,0,0.5)] border border-dark-border"
             >
               <div className="mx-auto mb-[18px] flex h-14 w-14 items-center justify-center rounded-full bg-green-deep">
                 <Icon className="h-[26px] w-[26px]" />
               </div>
-              <h3 className="mb-2 text-[16.5px] font-display text-green-deep">
+              <h3 className="mb-2 text-[16.5px] font-display text-dark-text">
                 {title}
               </h3>
-              <p className="text-[13.5px] leading-[1.6] text-ink-soft">{desc}</p>
+              <p className="text-[13.5px] leading-[1.6] text-dark-muted">{desc}</p>
             </div>
           ))}
         </div>

@@ -120,7 +120,7 @@ export default function Header() {
                   relative flex items-center
                   transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
                   ${expanded
-                    ? 'flex-1 min-w-0 rounded-2xl bg-white px-4 py-3 gap-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.35)]'
+                    ? 'flex-1 min-w-0 rounded-2xl bg-dark-surface-2 border border-dark-border px-4 py-3 gap-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.5)]'
                     : 'rounded-full bg-terracotta px-[28px] h-[52px] gap-2 shadow-[0_10px_24px_-8px_rgba(210,98,44,0.55)] cursor-pointer hover:-translate-y-0.5 hover:bg-terracotta-dark active:scale-95'
                   }
                 `}
@@ -131,7 +131,7 @@ export default function Header() {
                 {/* Search icon */}
                 <SearchIcon
                   className={`flex-shrink-0 transition-all duration-300 ${
-                    expanded ? 'h-4 w-4 stroke-ink-soft' : 'h-[15px] w-[15px] stroke-white'
+                    expanded ? 'h-4 w-4 stroke-dark-muted' : 'h-[15px] w-[15px] stroke-white'
                   }`}
                 />
 
@@ -154,13 +154,13 @@ export default function Header() {
                   {selected.map(ing => (
                     <span
                       key={ing.id}
-                      className="inline-flex items-center gap-1 rounded-full bg-green-deep/10 px-2.5 py-1 text-[12px] font-medium text-green-deep"
+                      className="inline-flex items-center gap-1 rounded-full bg-green-deep/40 px-2.5 py-1 text-[12px] font-medium text-gold-light"
                     >
                       {ing.name}
                       <button
                         type="button"
                         onClick={() => removeIngredient(ing.id)}
-                        className="ml-0.5 text-green-deep/50 hover:text-green-deep text-[14px] leading-none"
+                        className="ml-0.5 text-gold-light/50 hover:text-gold-light text-[14px] leading-none"
                       >
                         ×
                       </button>
@@ -176,7 +176,7 @@ export default function Header() {
                     onBlur={() => setTimeout(() => setShowDrop(false), 160)}
                     onKeyDown={handleKeyDown}
                     placeholder={selected.length === 0 ? 'Type an ingredient, e.g. chicken…' : 'Add another…'}
-                    className="flex-1 min-w-[120px] bg-transparent text-[14px] text-ink placeholder:text-ink-soft/60 outline-none"
+                    className="flex-1 min-w-[120px] bg-transparent text-[14px] text-dark-text placeholder:text-dark-muted/60 outline-none"
                   />
 
                   {loading && (
@@ -197,7 +197,7 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={() => { setExpanded(false); setQuery(''); setSelected([]); setSuggestions([]) }}
-                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full text-ink-soft hover:bg-cream-2 hover:text-ink transition-colors text-[18px]"
+                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full text-dark-muted hover:bg-dark-border hover:text-dark-text transition-colors text-[18px]"
                     aria-label="Close search"
                   >
                     ×
@@ -206,22 +206,22 @@ export default function Header() {
 
                 {/* Autocomplete dropdown */}
                 {expanded && showDrop && suggestions.length > 0 && (
-                  <ul className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-cream-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.2)] overflow-hidden z-50 text-left">
+                  <ul className="absolute top-full left-0 right-0 mt-2 bg-dark-surface-2 rounded-2xl border border-dark-border shadow-[0_16px_40px_-12px_rgba(0,0,0,0.4)] overflow-hidden z-50 text-left">
                     {suggestions.map((s, i) => (
                       <li key={s.id}>
                         <button
                           type="button"
                           onMouseDown={() => addIngredient(s)}
-                          className={`w-full flex items-center justify-between px-4 py-3 text-[13px] text-ink hover:bg-cream-2 transition-colors ${
-                            i !== 0 ? 'border-t border-cream-2' : ''
+                          className={`w-full flex items-center justify-between px-4 py-3 text-[13px] text-dark-text hover:bg-dark-border transition-colors ${
+                            i !== 0 ? 'border-t border-dark-border' : ''
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <SearchIcon className="h-3.5 w-3.5 stroke-ink-soft flex-shrink-0" />
+                            <SearchIcon className="h-3.5 w-3.5 stroke-dark-muted flex-shrink-0" />
                             <span className="font-medium">{s.name}</span>
-                            <span className="text-[11px] text-ink-soft capitalize">{s.category}</span>
+                            <span className="text-[11px] text-dark-muted capitalize">{s.category}</span>
                           </div>
-                          <span className="text-[11px] text-ink-soft ml-4 flex-shrink-0">
+                          <span className="text-[11px] text-dark-muted ml-4 flex-shrink-0">
                             {s.recipe_count.toLocaleString()} recipes
                           </span>
                         </button>
@@ -266,7 +266,7 @@ export default function Header() {
           preserveAspectRatio="none"
         >
           <path
-            fill="#f7f1e4"
+            fill="#0a1510"
             d="M0,60 C200,100 350,20 550,50 C750,80 900,10 1100,40 C1250,60 1350,30 1440,50 L1440,100 L0,100 Z"
           />
         </svg>
