@@ -1,20 +1,31 @@
-name: Deploy Backend to Render
+name: Deploy Backend to cPanel (Production)
 
 on:
   push:
-    branches: [main]
+    branches: [production]
     paths:
       - 'backend/**'
-      - 'render.yaml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render deploy
-        run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            --request POST \
-            --url "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
-          | grep -q "^2" && echo "✅ Render deploy triggered" || (echo "❌ Deploy hook failed" && exit 1)
+      - name: Deploy to cPanel via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USERNAME }}
+          password: ${{ secrets.CPANEL_PASSWORD }}
+          script: |
+            cd ~/public_html/api
+
+            git pull origin production
+
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+
+            echo "✅ Deployed to cPanel successfully"
