@@ -19,18 +19,43 @@ Tables populated:
 
 import csv, sys, os, uuid, json, time, re
 from datetime import datetime
+from pathlib import Path
 import psycopg2, psycopg2.extras
 
-# ─── CONFIG ───────────────────────────────────────────────────────────────────
-DB_HOST     = "REDACTED_HOST"
-DB_PORT     = 5432
-DB_NAME     = "flavorfind"
-DB_USER     = "flavorfind"
-DB_PASSWORD = "REDACTED_PASSWORD"
-DB_SSLMODE  = "prefer"
+# ─── CONFIG — reads from scripts/.env if present ──────────────────────────────
+def _load_env(path):
+    env = {}
+    if not Path(path).exists():
+        return env
+    for line in Path(path).read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        k, v = line.split('=', 1)
+        v = v.strip()
+        # Strip surrounding quotes (single or double)
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in ('"', "'"):
+            v = v[1:-1]
+        env[k.strip()] = v
+    return env
+
+_here = Path(__file__).parent
+_env  = _load_env(_here / '.env')
+
+DB_HOST     = _env.get('DB_HOST',     os.environ.get('DB_HOST',     'localhost'))
+DB_PORT     = int(_env.get('DB_PORT', os.environ.get('DB_PORT',     5432)))
+DB_NAME     = _env.get('DB_NAME',     os.environ.get('DB_NAME',     'postgres'))
+DB_USER     = _env.get('DB_USER',     os.environ.get('DB_USER',     'postgres'))
+DB_PASSWORD = _env.get('DB_PASSWORD', os.environ.get('DB_PASSWORD', ''))
+DB_SSLMODE  = _env.get('DB_SSLMODE',  os.environ.get('DB_SSLMODE',  'require'))
 
 BATCH_SIZE  = 200
-DATA_DIR    = "/home/m/Documents/GitHub/FlavorFind/data"
+
+# Default data dir — also checks Downloads location where the CSV currently lives
+SCRIPT_DIR  = Path(__file__).parent
+PROJECT_DIR = SCRIPT_DIR.parent
+DATA_DIR    = str(PROJECT_DIR / 'data')
+FALLBACK_CSV = Path.home() / 'Downloads/down1/east_african_recipes.csv'
 
 # African recipes get source_ids starting here to avoid collision with Food.com IDs
 AFRICAN_SOURCE_ID_START = 9_000_000
@@ -106,17 +131,24 @@ def parse_quantity(s):
         return None
 
 def find_csv_files():
-    """Find all African recipe CSV files in data/ dir."""
+    """Find all African recipe CSV files in data/ dir, or fall back to Downloads."""
     skip = {'african_recipes.csv', 'deepseek_african_recipes.csv'}  # already merged
     files = []
-    for f in os.listdir(DATA_DIR):
-        if f.endswith('_recipes.csv') and f not in skip:
-            files.append(os.path.join(DATA_DIR, f))
-    # Also include our existing files
-    for f in ['african_recipes.csv', 'deepseek_african_recipes.csv']:
-        path = os.path.join(DATA_DIR, f)
-        if os.path.exists(path):
-            files.append(path)
+
+    if os.path.isdir(DATA_DIR):
+        for f in os.listdir(DATA_DIR):
+            if f.endswith('_recipes.csv') and f not in skip:
+                files.append(os.path.join(DATA_DIR, f))
+        for f in ['african_recipes.csv', 'deepseek_african_recipes.csv']:
+            path = os.path.join(DATA_DIR, f)
+            if os.path.exists(path):
+                files.append(path)
+
+    # Fallback: use the CSV from Downloads if data/ is empty
+    if not files and FALLBACK_CSV.exists():
+        print(f"  (data/ is empty — using fallback: {FALLBACK_CSV})")
+        files.append(str(FALLBACK_CSV))
+
     return sorted(files)
 
 def main():
@@ -134,7 +166,7 @@ def main():
     for f in files:
         print(f"  {f}")
 
-    print(f"\n[{ts()}] Connecting to DigitalOcean DB...")
+    print(f"\n[{ts()}] Connecting to Supabase ({DB_HOST})...")
     conn = psycopg2.connect(
         host=DB_HOST, port=DB_PORT, dbname=DB_NAME,
         user=DB_USER, password=DB_PASSWORD, sslmode=DB_SSLMODE

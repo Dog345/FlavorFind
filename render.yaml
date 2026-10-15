@@ -16,24 +16,30 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        value: https://flavorfind-22iw.onrender.com
+        value: https://flavorfind-api.onrender.com
 
+      - key: APP_LOCALE
+        value: en
+      - key: APP_FALLBACK_LOCALE
+        value: en
+
+      # ── Database (Supabase — temporary until cPanel prod) ──────────────────
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        value: REDACTED_HOST
+        value: db.ldvnpycfvnstxancdslf.supabase.co
       - key: DB_PORT
         value: 5432
       - key: DB_DATABASE
-        value: flavorfind
+        value: postgres
       - key: DB_USERNAME
-        value: flavorfind
+        value: postgres
       - key: DB_PASSWORD
         sync: false          # Set manually in Render dashboard
-
       - key: DB_SSLMODE
-        value: prefer
+        value: require
 
+      # ── Cache / Session / Queue (no Redis on Render free tier) ────────────
       - key: CACHE_STORE
         value: database
       - key: SESSION_DRIVER
@@ -41,12 +47,21 @@ services:
       - key: QUEUE_CONNECTION
         value: database
 
+      # ── Logging ───────────────────────────────────────────────────────────
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
         value: error
 
+      # ── Unused services (set to log to suppress errors) ───────────────────
       - key: BROADCAST_CONNECTION
         value: log
       - key: MAIL_MAILER
         value: log
+      - key: MAIL_FROM_ADDRESS
+        value: hello@flavorfind.co
+      - key: MAIL_FROM_NAME
+        value: FlavorFind
+
+      - key: FILESYSTEM_DISK
+        value: local

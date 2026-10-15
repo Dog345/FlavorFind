@@ -1,39 +1,20 @@
-name: Deploy to DigitalOcean
+name: Deploy Backend to Render
 
 on:
   push:
     branches: [main]
     paths:
-      - 'laravel-backend/**'
-      - 'nextjs-frontend/**'
+      - 'backend/**'
+      - 'render.yaml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DO_HOST }}
-          username: ${{ secrets.DO_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          script: |
-            cd /var/www/flavorfind && git pull origin main
-
-            # --- Backend ---
-            cd /var/www/flavorfind/laravel-backend
-            COMPOSER_ALLOW_SUPERUSER=1 php8.4 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
-            php8.4 artisan migrate --force
-            php8.4 artisan config:cache
-            php8.4 artisan route:cache
-            chown -R www-data:www-data storage bootstrap/cache database/database.sqlite database/
-            chmod -R 775 storage bootstrap/cache
-
-            # --- Frontend ---
-            cd /var/www/flavorfind/nextjs-frontend
-            npm install
-            npm run build
-            pm2 restart flavorfind-web
-
-            echo "✅ Deployed successfully"
+      - name: Trigger Render deploy
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            --request POST \
+            --url "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+          | grep -q "^2" && echo "✅ Render deploy triggered" || (echo "❌ Deploy hook failed" && exit 1)
