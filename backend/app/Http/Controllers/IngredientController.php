@@ -42,7 +42,8 @@ class IngredientController extends Controller
         $cacheKey = 'ing_search_' . md5(strtolower($q) . '_' . $limit);
 
         $results = Cache::remember($cacheKey, 3600, function () use ($q, $limit) {
-            return DB::select("
+            // Cast stdClass → array so database cache serialization works correctly
+            return array_map(fn($r) => (array) $r, DB::select("
                 SELECT
                     id::text,
                     name,
@@ -62,7 +63,7 @@ class IngredientController extends Controller
                 'start'   => $q . '%',
                 'pattern' => '%' . $q . '%',
                 'limit'   => $limit,
-            ]);
+            ]));
         });
 
         return response()->json([
@@ -112,7 +113,8 @@ class IngredientController extends Controller
         }
 
         $suggestions = Cache::remember($cacheKey, 86400, function () use ($id, $limit) {
-            return DB::select("
+            // Cast stdClass → array so database cache serialization works correctly
+            return array_map(fn($r) => (array) $r, DB::select("
                 SELECT
                     cs.suggestion_id::text  AS id,
                     cs.suggestion_name      AS name,
@@ -125,7 +127,7 @@ class IngredientController extends Controller
                 WHERE cs.ingredient_id = ?::uuid
                 ORDER BY cs.rank ASC
                 LIMIT ?
-            ", [$id, $limit]);
+            ", [$id, $limit]));
         });
 
         return response()->json([
@@ -192,7 +194,8 @@ class IngredientController extends Controller
             // Aggregate: average score + breadth bonus
             // breadth_bonus = (appearances_across_anchors / anchor_count) * 0.1
             // This rewards ingredients that pair with MULTIPLE anchors
-            return DB::select("
+            // Cast stdClass → array so database cache serialization works correctly
+            return array_map(fn($r) => (array) $r, DB::select("
                 SELECT
                     cs.suggestion_id::text AS id,
                     cs.suggestion_name     AS name,
@@ -214,7 +217,7 @@ class IngredientController extends Controller
                 $foundIds,  // anchor IN clause
                 $foundIds,  // NOT IN clause (exclude input ingredients)
                 [$limit]
-            ));
+            )));
         });
 
         return response()->json([

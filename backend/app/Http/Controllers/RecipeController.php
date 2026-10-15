@@ -207,7 +207,8 @@ class RecipeController extends Controller
                 $args = array_merge($ingredientIds, $filterArgs, [$limit, $offset]);
             }
 
-            $recipes = DB::select($sql, $args);
+            // Cast stdClass objects → plain arrays so database cache serialization works correctly
+            $recipes = array_map(fn($r) => (array) $r, DB::select($sql, $args));
 
             // Count total for pagination (same filters, no LIMIT/OFFSET)
             if ($mode === 'all') {
@@ -279,7 +280,8 @@ class RecipeController extends Controller
     public function categories(): JsonResponse
     {
         $categories = Cache::remember('recipe_categories', 3600, function () {
-            return DB::select("
+            // Cast stdClass → array so database cache serialization works correctly
+            return array_map(fn($r) => (array) $r, DB::select("
                 SELECT
                     category,
                     COUNT(*)::int AS recipe_count
@@ -287,7 +289,7 @@ class RecipeController extends Controller
                 WHERE category IS NOT NULL
                 GROUP BY category
                 ORDER BY recipe_count DESC
-            ");
+            "));
         });
 
         return response()->json([
@@ -358,7 +360,8 @@ class RecipeController extends Controller
             $row->keywords     = json_decode($row->keywords, true) ?? [];
 
             // Fetch ingredients with quantities
-            $ingredients = DB::select("
+            // Cast stdClass → array so database cache serialization works correctly
+            $ingredients = array_map(fn($r) => (array) $r, DB::select("
                 SELECT
                     mi.id::text,
                     mi.name,
@@ -371,22 +374,26 @@ class RecipeController extends Controller
                 JOIN master_ingredients mi ON mi.id = ri.ingredient_id
                 WHERE ri.recipe_id = ?::uuid
                 ORDER BY ri.sort_order ASC
-            ", [$id]);
+            ", [$id]));
 
             $row->ingredients = $ingredients;
 
             // Fetch images ordered by sort_order
-            $images = DB::select("
+            $images = array_map(fn($r) => (array) $r, DB::select("
                 SELECT url, sort_order
                 FROM recipe_images
                 WHERE recipe_id = ?::uuid
                 ORDER BY sort_order ASC
-            ", [$id]);
+            ", [$id]));
 
             $row->images    = $images;
-            $row->image_url = count($images) > 0 ? $images[0]->url : null;
+            $row->image_url = count($images) > 0 ? $images[0]['url'] : null;
 
-            return $row;
+            // Cast the main stdClass row to array so database cache serialization works correctly
+            $result = (array) $row;
+            $result['ingredients'] = $ingredients;
+            $result['images']      = $images;
+            return $result;
         });
 
         if (! $recipe) {
